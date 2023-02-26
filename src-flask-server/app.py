@@ -277,7 +277,9 @@ class SnakeGameClass:
     self.foodPoint = 0, 0
 
     # socketio.emit('foodEat', {'foodEat': True})
-    # self.randomFoodLocation(True)
+
+    # FOR TEST ISOLOATION
+    self.randomFoodLocation()
 
     self.score = 0
     self.gameOver = False
@@ -318,16 +320,18 @@ class SnakeGameClass:
     return False
 
   # ---collision function---end
-
-  def randomFoodLocation(self, foodEat):
-    global food_data
-
-    if food_data:
-      self.foodPoint = food_data
-    else:
-      if foodEat:
-        self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
-
+  # FOR TEST ISOLOATION
+  # def randomFoodLocation(self, foodEat):
+  def randomFoodLocation(self):
+########################################################################################################################
+    # global food_data
+    # if food_data:
+    #   self.foodPoint = food_data
+    # else:
+    #   if foodEat:
+    #     self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
+########################################################################################################################
+    self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
   def draw_snakes(self, imgMain, points, score, isMe):
 
     bodercolor = cyan
@@ -434,11 +438,16 @@ class SnakeGameClass:
       foodEat = True
       self.allowedLength += 50
       self.score += 1
+      # FOR TEST ISOLOATION
+      self.randomFoodLocation()
 
     # print(foodEat)
-    socketio.emit('foodEat', {'foodEat': foodEat})
+########################################################################################################################
+    # socketio.emit('foodEat', {'foodEat': foodEat})
+########################################################################################################################
     # print(self.foodPoint)
-    self.randomFoodLocation(foodEat)
+    # FOR TEST ISOLATION
+    # self.randomFoodLocation(foodEat)
 
     if use_udp:
       self.send_data(cx, cy)
