@@ -1,0 +1,111 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Hello</title>
+
+    {% include 'partials/cdn-scripts.html' %}
+
+    <style>
+        #electron-index-vue .accordion .content {
+          padding-left: 1em;
+          padding-right: 1em;
+        }
+        .info {
+          padding-left: 1em;
+        }
+    </style>
+
+</head>
+
+<body style="padding: 0.5em">
+    <h1>💖 Hello Vue - from flask</h1>
+    <p>Welcome to your Electron application.
+
+    <!-- this entire page is rendered by flask templating -->
+
+    <p>This page has been rendered by flask, the 'msg' variable is: {{msg}}</p>
+
+    <div class="ui accordion" id="hello-vue">
+
+        <div class="title"> <i class="dropdown icon"></i> Talk to the flask server</div>
+        <div class="content">
+            <div class="inline field">
+                <button class="ui button green" v-on:click="getInfo">
+                    GET
+                </button>
+                JSON response from Flask Server: <code>${ message }</code>
+            </div>
+        </div>
+
+        <div class="title"> <i class="dropdown icon"></i> Talk to Render Process</div>
+        <div class="content">
+            <p>Test of communication from this flask page in render process's iframe to parent render process HTML.</p>
+            <ul>
+                <li><a href="javascript:window.parent.document.dispatchEvent(new CustomEvent('eventFromIframePage', { detail: { foo: 'bar' } }));">Send event to electron render process</a></li>
+            </ul>
+            <p><b>Tip:</b> Look for the message in the electron app's Developer Tools console.</p>
+        </div>
+
+        <div class="title"> <i class="dropdown icon"></i> Talk to Main Process</div>
+        <div class="content">
+            <p>Test of communication from this flask page in render process iframe -> render process -> main process.</p>
+            <ul>
+                <li><a href="javascript:window.top.document.dispatchEvent(new CustomEvent('eventFromIframePageToMain', { detail: { foo: 'bar4' } }));">Send event to electron main process</a></li>
+            </ul>
+            <p><b>Tip:</b> Look in the terminal console for proof that the main process got the event and its payload.</p>
+        </div>
+                
+        <div class="title"> <i class="dropdown icon"></i> Receive from Main Process </div>
+        <div class="content">
+            <p>This is a test of communication from the electron main process to this flask page.
+            It is accomplished in two steps, using two events:</p>
+            <img src="{{ url_for('static', filename='images/events-main-process-to-flask.svg')}}" style="padding-left: 1em; padding-bottom: 1.0em;">
+            <p>First send an event from the main process to the render process, then transfer the event payload to a second event, 
+                which you send from the render process to the iframe containing the flask HTML.</p>
+            <p><b>Demo:</b> Select 'Flask Stuff / Send Event to Flask Page' from the native app menu
+             Shortcut: <i>CmdOrCtrl+Shift+E</i>.
+             The same event payload object is carried on both events, and
+             is visible in the result, below.
+            </p>
+            <p>Result: <code>${ messageFromMainProcess }</code>
+            </p>
+        </div>
+
+    </div>
+
+    <br>
+    <p>Navigate to another flask rendered page.</p>
+    <a href="/hello">/hello</a>
+
+    <script type="module">
+        import { blah, xx, HelloVueApp } from '/static/js/hello-vue.js'
+        console.log('blah', blah(), 'xx', xx)
+        let app = Vue.createApp(HelloVueApp).mount('#hello-vue')
+        let rootComponent = app  // same thing
+
+        // Example of listening for events from render process html
+        window.document.addEventListener('eventFromRenderProcess', handleEvent, false)
+        function handleEvent(e) {
+            let arg = e.detail
+            console.log(arg)
+
+            // stop the event bubbling up to the iframe script, if you don't want it to.
+            e.stopImmediatePropagation();  // e.stopPropagation() doesn't work
+
+            // let's do something interesting on the flask page, like change the displayed message, via vue
+            rootComponent.messageFromMainProcess = JSON.stringify(arg)  // OK
+        }
+    </script>
+
+    <script>
+        // fomantic bootstrap
+        $('.ui.accordion:first').accordion('close', 0)  // actually don't need to close since no 'active' attr
+    </script>
+
+</body>
+
+</html>

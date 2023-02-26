@@ -1,0 +1,2 @@
+set APPNAME=BiamIO
+out\%APPNAME%-win32-x64\%APPNAME%

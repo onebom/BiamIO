@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>BiamIO</title>
+
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/bootstrap/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/snake.css') }}">
+
+  <!-- 소켓 통신 관련 부분은 영상을 gen하는 것보다 빨라야 하기 때문에 위쪽에 위치 -->
+  <script>
+    var client_socket = io.connect(
+      "http://" + document.domain + ":" + location.port
+    );
+    var server_socket = io.connect("http://krafton604.iptime.org");
+    // var server_socket = io.connect("http://dlsrks99.site:8080");
+
+    let room_id = "{{room_id}}";
+    let sid = "{{sid}}";
+
+    console.log(room_id);
+    console.log(sid);
+
+    // 서버와 통신개시 후 포트를 요청
+    server_socket.on("connect", function() {
+      server_socket.emit("my_port", { "room_id": room_id });
+    });
+    // 서버에서 받은 나의 포트를 로컬 flask 서버로 전송
+    server_socket.on("my_port", function(data) {
+      console.log(data["my_port"]);
+      client_socket.emit("my_port", { "my_port": data["my_port"] });
+    });
+    // 서버에서 받은 상대의 주소를 로컬 flask 서버로 전송
+    server_socket.on("opponent_address", function(data) {
+      console.log(data["ip_addr"], data["port"]);
+      client_socket.emit("opponent_address", { "ip_addr": data["ip_addr"], "port": data["port"] });
+    });
+    // 로컬 falsk 서버에서 상대와 통신이 수립된 이후 영상 로딩
+    client_socket.on("connection_result", function() {
+      $("#snake_video").attr("src", " {{ url_for('snake') }}");
+    });
+  </script>
+</head>
+
+<body>
+<main class="main-container">
+  <section class="right-container">
+    <div class="gamesection-container">
+      <div class="hud-top">
+        <div class="myscore">
+          <p id="score">점수 :&nbsp;</p>
+        </div>
+        <div class="opponentscore">
+          <p id="opp_score">상대 점수 :&nbsp;</p>
+        </div>
+        <div class="timer">
+          <p>남은 시간 :&nbsp;</p>
+        </div>
+      </div>
+      <div id="ambient" class="ambient"></div>
+      <div class="cam-conatiner">
+        {#where OpenCV Cam Feed from python will come#}
+        <img class="camfeed" id="snake_video" src="">
+      </div>
+    </div>
+  </section>
+  <div class="accordion" role="tablist" id="accordion-1">
+    <div class="accordion-item">
+      <h2 class="accordion-header" role="tab"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-1 .item-1" aria-expanded="true" aria-controls="accordion-1 .item-1">디버그 콘솔</button></h2>
+      <div class="accordion-collapse collapse show item-1" role="tabpanel" data-bs-parent="#accordion-1">
+        <div class="accordion-body">
+          <p class="mb-0">
+          <div><a>Server Time : </a><a id="time"></a></div>
+
+          <div><a>room_id : </a><a id="opp_room_id"></a></div>
+          <div><a>상대 sid : </a><a id="opp_sid"></a></div>
+
+          <div><a>CAM fps : </a><a id="fps"></a></div>
+          <div><a>head_x 좌표 : </a><a id="head_x"></a></div>
+          <div><a>head_y 좌표 : </a><a id="head_y"></a></div>
+          <div><a>몸통 리스트 : </a><a id="body_node"></a></div>
+          <div><a>상대 head_x 좌표 : </a><a id="opp_head_x"></a></div>
+          <div><a>상대 head_y 좌표 : </a><a id="opp_head_y"></a></div>
+          <div><a>상대 몸통 리스트 : </a><a id="opp_body_node"></a></div>
+          <div><a>상대 스코어 : </a><a id="opp_score"></a></div>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  server_socket.emit("get_time");
+  server_socket.on("time", function(data) {
+    $("#time").html(data["time"]);
+  });
+  client_socket.on("game_data", function(data) {
+    $("#head_x").text(data["head_x"]);
+    $("#head_y").text(data["head_y"]);
+    $("#body_node").text(data["body_node"]);
+    $("#score").text(data["score"]);
+    $("#fps").text(data["fps"]);
+    // console.log(data)
+    console.log("send data before emit");
+    server_socket.emit("send_data", {
+      head_x: data["head_x"],
+      head_y: data["head_y"],
+      body_node: data["body_node"],
+      score: data["score"],
+      room_id: room_id,
+      sid: sid
+    });
+    console.log("send data after emit");
+  });
+  server_socket.on("opp_data", function(data) {
+    console.log(sid + "  :  " + data["opp_sid"]);
+
+    if (sid != data["opp_sid"]) {
+      $("#opp_head_x").text(data["opp_head_x"]);
+      $("#opp_head_y").text(data["opp_head_y"]);
+      $("#opp_body_node").text(data["opp_body_node"]);
+      $("#opp_score").text(data["opp_score"]);
+      $("#opp_room_id").text(data["opp_room_id"]);
+      $("#opp_sid").text(data["opp_sid"]);
+
+      if (client_socket.connected) {
+        // console.log('Sending opp_data_transfer event to server');
+        client_socket.emit("opp_data_transfer", { data: data });
+        // console.log('Sent opp_data_transfer event to server');
+      } else {
+        console.log("socket not connected");
+      }
+    }
+  });
+  client_socket.on("server_disconnect", function(data) {
+    server_socket.emit("server_disconnect", {
+      room_id: data["room_id"],
+      sid: data["sid"]
+    });
+  });
+
+  client_socket.on("foodEat", function(data) {
+    server_socket.emit("foodEat_to_server", { foodEat: data["foodEat"] });
+  });
+  server_socket.on("foodPoint_from_server", function(data) {
+    if (client_socket.connected) {
+      // print(data); 한봄이는 브라우져한테 출력을 시켜요
+      console.log("foodPoint_from_server !!!!");
+      console.log(data);
+      client_socket.emit("foodPoint_to_flask", { foodPoint: data["foodPoint"] });
+    } else {
+      console.log("socket not connected");
+    }
+  });
+
+  client_socket.on("gameover", function(data) {
+    server_socket.emit("gameover_to_server", { sid: data["sid"] });
+  });
+  server_socket.on("gameover_to_clients", function(data) {
+    // TODO : 승패 판정 로직 다시 짤것
+    if (sid != data["sid"]) {
+      Swal.fire({
+        title: "게임 끝!",
+        text: "로비로 돌아갑니다",
+        icon: "success",
+        confirmButtonText: "OK"
+      }).then((result) => {
+        window.location.href = "/";
+      });
+    } else {
+      Swal.fire({
+        title: "게임 끝!",
+        text: "로비로 돌아갑니다",
+        icon: "error",
+        confirmButtonText: "OK"
+      }).then((result) => {
+        window.location.href = "/";
+      });
+    }
+  });
+</script>
+<script src="{{ url_for ('static', filename = 'assets/bootstrap/js/bootstrap.min.js') }}"></script>
+</body>
+</html>
