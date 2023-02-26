@@ -367,33 +367,30 @@ class SnakeGameClass:
   def my_snake_update(self, HandPoints, o_bodys):
     px, py = self.previousHead
     # ----HandsPoint moving ----
-    s_speed = 20
     if HandPoints:
       m_x, m_y = HandPoints
       dx = m_x - px  # -1~1
       dy = m_y - py
 
-      # speed 범위: 0~1460
-      if math.hypot(dx, dy) > math.hypot(1280, 720) / 10:
-        self.speed = math.hypot(1280, 720) / 10  # 146
-      elif math.hypot(dx, dy) < s_speed:
-        self.speed = s_speed
+      # head로부터 handpoint가 근접하면 이전 direction을 따름
+      if math.hypot(dx, dy) < 20: 
+        self.speed=20 # 최소 속도
       else:
-        self.speed = math.hypot(dx, dy)
-
-      if dx != 0:
-        self.velocityX = dx / 1280
-      if dy != 0:
-        self.velocityY = dy / 720
-
-      # print(self.velocityX)
-      # print(self.velocityY)
-
+          if math.hypot(dx, dy) > 40:
+            self.speed=40 #최대속도
+          else:
+            self.speed = math.hypot(dx, dy)
+          
+          # 크기가 1인 방향 벡터
+          self.velocityX = dx/math.sqrt(dx**2+dy**2)
+          self.velocityY = dy/math.sqrt(dx**2+dy**2)
     else:
-      self.speed = s_speed
-
+        # hand detection이 안될때, 기본 속도
+        self.speed = 20
+        
     cx = round(px + self.velocityX * self.speed)
     cy = round(py + self.velocityY * self.speed)
+    
     # ----HandsPoint moving ----end
     if cx < 0 or cx > 1280 or cy < 0 or cy > 720:
       if cx < 0: cx = 0
