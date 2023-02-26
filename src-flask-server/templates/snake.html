@@ -75,7 +75,7 @@
     <div class="accordion-item">
       <h2 class="accordion-header" role="tab"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-1 .item-1" aria-expanded="true" aria-controls="accordion-1 .item-1">디버그 콘솔</button></h2>
       <div class="accordion-collapse collapse show item-1" role="tabpanel" data-bs-parent="#accordion-1">
-        <div class="accordion-body">
+        <div class="accordion-body" >
           <p class="mb-0">
           <div><a>Server Time : </a><a id="time"></a></div>
 
@@ -89,7 +89,7 @@
           <div><a>상대 head_x 좌표 : </a><a id="opp_head_x"></a></div>
           <div><a>상대 head_y 좌표 : </a><a id="opp_head_y"></a></div>
           <div><a>상대 몸통 리스트 : </a><a id="opp_body_node"></a></div>
-          <div><a>상대 스코어 : </a><a id="opp_score"></a></div>
+          <div><a>상대 스코어 : </a><a id="opp_score_console"></a></div>
           </p>
         </div>
       </div>
@@ -129,6 +129,7 @@
       $("#opp_score").text(data["opp_score"]);
       $("#opp_room_id").text(data["opp_room_id"]);
       $("#opp_sid").text(data["opp_sid"]);
+      $("#opp_score_console").text(data["opp_sid"]);
 
       if (client_socket.connected) {
         // console.log('Sending opp_data_transfer event to server');
