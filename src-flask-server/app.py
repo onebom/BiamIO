@@ -59,7 +59,8 @@ CORS(app, origins='http://localhost:5000')
 api = Api(app)
 
 # True -> udp 통신, False -> 서버 통신
-use_udp = True
+# use_udp = True
+use_udp = False
 
 # Setting Path to food.png
 pathFood = './src-flask-server/static/food.png'
@@ -530,7 +531,8 @@ class SnakeGameClass:
 
   def __del__(self):
     global use_udp
-    use_udp = True
+    # use_udp = True
+    use_udp = False
     self.sock.close()
 
 
