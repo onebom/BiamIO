@@ -312,7 +312,7 @@ class SnakeGameClass:
     for u2_pt in u2_pts:
       p2_a, p2_b = u2_pt[0], u2_pt[1]
       if self.segmentIntersects(p1_a, p1_b, p2_a, p2_b):
-        print(u2_pt)
+        # print(u2_pt)
         return True
     return False
 
@@ -425,7 +425,7 @@ class SnakeGameClass:
 
     # Check if snake ate the Food
     rx, ry = self.foodPoint
-    print(f'foodPoint in my_snake_update func = {rx, ry}')
+    # print(f'foodPoint in my_snake_update func = {rx, ry}')
     foodEat = False
     # print(f'먹이 위치 : {self.foodPoint}')
     if rx - self.wFood // 2 < cx < rx + self.wFood // 2 and \
@@ -434,9 +434,9 @@ class SnakeGameClass:
       self.allowedLength += 50
       self.score += 1
 
-    print(foodEat)
+    # print(foodEat)
     socketio.emit('foodEat', {'foodEat': foodEat})
-    print(self.foodPoint)
+    # print(self.foodPoint)
     self.randomFoodLocation(foodEat)
 
     if use_udp:
@@ -484,7 +484,7 @@ class SnakeGameClass:
       imgMain = self.draw_snakes(imgMain, body_node, score, 0)
 
       # update and draw own snake
-      print(f'trying to call my_snake_update function : self.foodPoint-> {self.foodPoint}')
+      # print(f'trying to call my_snake_update function : self.foodPoint-> {self.foodPoint}')
       self.my_snake_update(HandPoints, body_node)
       imgMain = self.draw_Food(imgMain)
       # 1 이면 내 뱀
@@ -504,7 +504,7 @@ class SnakeGameClass:
         pass
       else:
         decode_data_list = decode_data.split('/')
-        print(f'recieved opp node data = {decode_data_list}')
+        # print(f'recieved opp node data = {decode_data_list}')
 
         opponent_data['opp_head_x'] = int(decode_data_list[0])
         opponent_data['opp_head_y'] = int(decode_data_list[1])
@@ -624,7 +624,7 @@ def opp_data_transfer(data):
 def foodPoint_to_flask(data):
   global food_data
   food_data = data['foodPoint']
-  print(f'food_data get from server : {food_data}')
+  # print(f'food_data get from server : {food_data}')
 
 
 ########################################################################################################################
@@ -642,7 +642,7 @@ def snake():
     socketio.emit('foodEat', {'foodEat': True})
     game.randomFoodLocation(True)
 
-    print(f'inside generator before while loop')
+    # print(f'inside generator before while loop')
 
     while True:
       success, img = cap.read()
@@ -760,7 +760,7 @@ def test_bed():
         pointIndex = lmList[8][0:2]
 
       bot_data_update()
-      print(pointIndex)
+      # print(pointIndex)
       img = game.update(img, bot_data, pointIndex, True)
 
       # encode the image as a JPEG string
