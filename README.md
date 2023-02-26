@@ -1,4 +1,4 @@
-# BiamIO
+# BiamIO flask electron wrapped
 ## Launch Electron with flask server
 ```
 bin/runelectron
