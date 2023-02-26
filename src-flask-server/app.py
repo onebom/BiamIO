@@ -649,10 +649,11 @@ def snake():
     global sid
 
     # time.sleep(1)
-
-    socketio.emit('foodEat', {'foodEat': True})
-    game.randomFoodLocation(True)
-
+########################################################################################################################
+    # FOR TEST ISOLOATION
+    # socketio.emit('foodEat', {'foodEat': True})
+    # game.randomFoodLocation(True)
+########################################################################################################################
     # print(f'inside generator before while loop')
 
     while True:
