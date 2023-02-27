@@ -455,20 +455,25 @@ class SnakeGameClass:
     self.previousHead = 0, 0  # previous head point
 
   # 송출될 프레임 업데이트
-  def update(self, imgMain, HandPoints):
-    global gameover_flag, opponent_data
+  def update(self, imgMain, receive_Data, HandPoints=[]):
+    global gameover_flag
 
     if self.gameOver:
       gameover_flag = False
     else:
       # draw others snake
+      o_body_node = []
+      o_score = 0
+
+      if receive_Data:
+        o_body_node = receive_Data["opp_body_node"]
+        o_score = 0 # ^^ 상대 몸길이 받는 로직 추가할 것
 
       # 0 이면 상대 뱀
-      imgMain = self.draw_snakes(imgMain, opponent_data, self.opp_score, 0)
+      imgMain = self.draw_snakes(imgMain, o_body_node, o_score, 0)
 
       # update and draw own snake
-      self.my_snake_update(HandPoints)
-
+      self.my_snake_update(HandPoints, o_body_node)
       imgMain = self.draw_Food(imgMain)
       # 1 이면 내 뱀
       imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
