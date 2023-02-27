@@ -509,7 +509,7 @@ class SnakeGameClass:
             socketio.emit('opponent_escaped')
 
   # udp로 통신할지 말지
-  def test_connect(self):
+  def test_connect(self, sid):
     a = 0
     b = 0
     test_code = str(sid)
