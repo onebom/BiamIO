@@ -350,8 +350,11 @@ class SnakeGameClass:
     return imgMain
 
   def draw_Food(self, imgMain):
+    print(f'self.foodPoint : {self.foodPoint}')
     rx, ry = self.foodPoint
+    print(f'draw_Food Function - Food Location : {rx},{ry}')
     socketio.emit('foodPoint', {'food_x': rx, 'food_y': ry})
+    print(f'food image info : {self.wFood},{self.hFood}')
     imgMain = cvzone.overlayPNG(imgMain, self.imgFood, (rx - self.wFood // 2, ry - self.hFood // 2))
 
     return imgMain
@@ -525,7 +528,7 @@ class SnakeGameClass:
 
       # update and draw own snake
       self.my_snake_update(HandPoints)
-      # imgMain = self.draw_Food(imgMain)
+      imgMain = self.draw_Food(imgMain)
       # 1 이면 내 뱀
       imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
@@ -630,6 +633,9 @@ def index():
 
 @app.route('/testbed')
 def testbed():
+
+
+
   return render_template("testbed.html")
 
 
@@ -815,6 +821,8 @@ def test():
   def generate():
     global bot_data, game, gameover_flag, sid
     global opponent_data
+    global isBlack
+    isBlack = False
 
     game.multi = False
     while True:
@@ -831,6 +839,7 @@ def test():
       bot_data_update()
       opponent_data['opp_body_node'] = bot_data["bot_body_node"]
       # print(pointIndex)
+
       img = game.update(img, pointIndex)
 
       # encode the image as a JPEG string
@@ -849,10 +858,11 @@ def test():
   return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+menu_game = SnakeGameClass(pathFood)
 # Main Menu Selection
 @app.route('/menu_snake')
 def menu_snake():
-  menu_game = SnakeGameClass(pathFood)
+
   global isBlack
 
   isBlack = True
