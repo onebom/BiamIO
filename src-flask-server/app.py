@@ -441,7 +441,7 @@ class SnakeGameClass:
         # if self.isCollision(self.points[-1], o_bodys):
         #     self.execute()
 
-    ################################## VECTORING SPEED METHOD ############################################################
+    ################################## VECTORING SPEED METHOD ##########################################################
     # def set_snake_speed(self, HandPoints, s_speed):
     #   px, py = self.previousHead
     #   # ----HandsPoint moving ----
@@ -483,7 +483,7 @@ class SnakeGameClass:
     #     self.velocityY = -self.velocityY
     #
     #   return cx, cy
-    ######################################################################################################################
+    ####################################################################################################################
 
     def set_snake_speed(self, HandPoints, s_speed):
         px, py = self.previousHead
