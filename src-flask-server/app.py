@@ -26,6 +26,8 @@ from flask_socketio import SocketIO, emit, join_room
 import socket
 from engineio.payload import Payload
 
+from src.maze_manager import MazeManager
+
 # import pprint
 
 ########################################################################################################################
@@ -75,6 +77,8 @@ MY_PORT = 0  # socket_bind를 위한 내 포트 번호
 
 # 배경 검정색
 isBlack = False
+isMaze = False
+
 
 
 ########################################################################################################################
@@ -115,7 +119,7 @@ class HandDetector:
     :param draw: Flag to draw the output on the image.
     :return: Image with or without drawings
     """
-    global isBlack
+    global isBlack,isMaze
 
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     self.results = self.hands.process(imgRGB)
@@ -165,6 +169,9 @@ class HandDetector:
         ## draw
         if draw:
           if isBlack:
+            # [TODO]maze_map 화면에 적용시키기
+            if isMaze:
+              menuimg[np.where(game.maze_map==1)]=(0,0,255)
             self.mpDraw.draw_landmarks(menuimg, handLms, self.mpHands.HAND_CONNECTIONS)
           else:
             self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
@@ -177,10 +184,12 @@ class HandDetector:
       sigma = 10
       img = (cv2.GaussianBlur(img, (0, 0), sigma))
     if draw:
-      if isBlack:
-        return allHands, menuimg
-      else:
-        return allHands, img
+        if isBlack:
+          if isMaze:
+            menuimg[np.where(game.maze_map==1)]=(0,0,255)
+          return allHands, menuimg
+        else:
+          return allHands, img
     else:
       return allHands
 
@@ -291,6 +300,10 @@ class SnakeGameClass:
     self.foodOnOff = True
     self.multi = True
 
+    self.maze_start=0,0
+    self.maze_end=0,0
+    self.maze_map=np.array([])
+
   def ccw(self, p, a, b):
     # print("확인3")
     vect_sub_ap = [a[0] - p[0], a[1] - p[1]]
@@ -324,6 +337,20 @@ class SnakeGameClass:
         return True
     return False
 
+  def maze_collision(self):
+    x,y=self.previousHead
+    if self.maze_map[y,x]==1:
+      return False
+    return True
+
+  # maze 초기화
+  def maze_initialize(self):
+    self.maze_start,self.maze_end,self.maze_map=create_maze(1280,720,9,16)
+    self.previousHead=self.maze_start
+    self.velocityX=0
+    self.velocityY=0
+    self.points=[]
+
   def draw_snakes(self, imgMain, points, score, isMe):
 
     bodercolor = cyan
@@ -350,16 +377,37 @@ class SnakeGameClass:
     return imgMain
 
   def draw_Food(self, imgMain):
-    print(f'self.foodPoint : {self.foodPoint}')
     rx, ry = self.foodPoint
-    print(f'draw_Food Function - Food Location : {rx},{ry}')
     socketio.emit('foodPoint', {'food_x': rx, 'food_y': ry})
-    print(f'food image info : {self.wFood},{self.hFood}')
     imgMain = cvzone.overlayPNG(imgMain, self.imgFood, (rx - self.wFood // 2, ry - self.hFood // 2))
 
     return imgMain
 
   ############################################################
+  # 내 뱀 상황 업데이트 - maze play에서
+  def my_snake_update_mazeVer(self, HandPoints):
+    px, py = self.previousHead
+    s_speed = 30
+    cx, cy = self.set_snake_speed(HandPoints, s_speed)
+
+    self.points.append([[px, py], [cx, cy]])
+    distance = math.hypot(cx - px, cy - py)
+    self.lengths.append(distance)
+    self.currentLength += distance
+    self.previousHead = cx, cy
+
+    self.length_reduction()
+    if self.maze_collision():
+      self.execute()
+
+    # end point 도달
+    end_pt1,end_pt2=self.maze_end
+    if end_pt1[0]<=cx<=end_pt2[0] and end_pt1[0]<=cy<=end_pt2[1]:
+      self.maze_initialize()
+      # 시간 제한 넣는다면 그것도 다시 돌리기
+      time.sleep(3)
+
+
   # 내 뱀 상황 업데이트
   def my_snake_update(self, HandPoints):
     global opponent_data
@@ -433,6 +481,7 @@ class SnakeGameClass:
   #     self.velocityY = -self.velocityY
   #
   #   return cx, cy
+  ######################################################################################################################
 
   def set_snake_speed(self, HandPoints, s_speed):
     px, py = self.previousHead
@@ -512,6 +561,17 @@ class SnakeGameClass:
     self.currentLength = 0  # total length of the snake
     self.allowedLength = 150  # total allowed Length
     self.previousHead = 0, 0  # previous head point
+
+  def update_mazeVer(self, imgMain, HandPoints):
+    global gameover_flag
+
+    if self.gameOver:
+      gameover_flag = False
+    else:
+      self.my_snake_update_mazeVer(HandPoints)
+      imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
+
+    return imgMain
 
   # 송출될 프레임 업데이트
   def update(self, imgMain, HandPoints):
@@ -633,9 +693,6 @@ def index():
 
 @app.route('/testbed')
 def testbed():
-
-
-
   return render_template("testbed.html")
 
 
@@ -890,6 +947,79 @@ def menu_snake():
 
   return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+def create_maze(image_w, image_h, block_rows, block_cols):
+  manager = MazeManager()
+  maze = manager.add_maze(9,16)
+
+  wall_map = np.zeros((image_h,image_w)) # (h,w)
+  block_h = image_h//block_rows
+  block_w = image_w//block_cols
+
+  start = []
+  end = [[],[]]
+  r = 5
+
+  for i in range(block_rows):
+    for j in range(block_cols):
+      if maze.initial_grid[i][j].is_entry_exit == "entry":
+        end=[[j-r,i-r],[j+r,i+r]]
+      elif maze.initial_grid[i][j].is_entry_exit == "exit":
+        start=[j,i]
+
+      if maze.initial_grid[i][j].walls["top"]:
+          if i==0:
+              wall_map[i*block_h:i*block_h+r,j*block_w:(j+1)*block_w]=1
+          else:
+              wall_map[i*block_h-r:i*block_h+r,j*block_w:(j+1)*block_w]=1
+      if maze.initial_grid[i][j].walls["right"]:
+          wall_map[i*block_h:(i+1)*block_h,(j+1)*block_w-r:(j+1)*block_w+r]=1
+      if maze.initial_grid[i][j].walls["bottom"]:
+          wall_map[(i+1)*block_h-r:(i+1)*block_h+r,j*block_w:(j+1)*block_w]=1
+      if maze.initial_grid[i][j].walls["left"]:
+          if j==0:
+              wall_map[i*block_h:(i+1)*block_h,j*block_w:j*block_w+r]=1
+          else:
+              wall_map[i*block_h:(i+1)*block_h,j*block_w-r:j*block_w+r]=1
+
+  return start, end, wall_map
+
+@app.route('/maze_play')
+def maze_play():
+  def generate():
+    global isBlack, isMaze, game
+
+    isBlack = True
+    isMaze = True
+    game.multi = False
+    game.maze_initialize()
+
+    while True:
+      success, img = cap.read()
+      img = cv2.flip(img, 1)
+      hands, img = detector.findHands(img, flipType=False)
+
+      pointIndex = []
+
+      if hands:
+        lmList = hands[0]['lmList']
+        pointIndex = lmList[8][0:2]
+
+      img = game.update_mazeVer(img, pointIndex)
+
+      # encode the image as a JPEG string
+      _, img_encoded = cv2.imencode('.jpg', img)
+      yield (b'--frame\r\n'
+             b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
+
+      if gameover_flag:
+        print("game ended")
+        gameover_flag = False
+        time.sleep(1)
+        socketio.emit('gameover', {'sid': sid})
+        time.sleep(2)
+        break
+
+  return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 ########################################################################################################################
 ########################## Legacy Electron Template Routing ############################################################
