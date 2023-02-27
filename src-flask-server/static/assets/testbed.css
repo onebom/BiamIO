@@ -1,0 +1,303 @@
+html {
+  /*height: 100%;*/
+  overflow: hidden;
+}
+canvas {
+  z-index: -1;
+  display: flex;
+  position: absolute;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  background-color: #0d1323;
+  color: white;
+}
+
+main {
+  width: 1850px;
+  height: 1000px;
+  display: flex;
+  gap: 30px;
+}
+
+.accordion-item {
+  width: 400px;
+}
+
+.left-container {
+  width: 20%;
+  height: 100%;
+  border-radius: 16px;
+  background-color: #1D204B;
+  margin: auto;
+}
+
+.left-top-section {
+  height: 70%;
+  /*padding-left: 30px;*/
+  border-radius: 16px;
+  background-color: #5746EA;
+}
+
+.left-bottom-section {
+}
+
+.right-container {
+  width: 80%;
+  height: 100%;
+  /*background-color: #5746EA;*/
+  border-radius: 16px;
+  margin: auto;
+}
+
+.gamesection-container {
+  min-width: 1280px;
+  width: 1280px;
+  margin: auto;
+  margin-top: 20px;
+}
+
+.cam-conatiner {
+}
+
+.hud-top {
+  font-size: xx-large;
+}
+
+.myscore {
+  width: 33%;
+  display: inline-block;
+  float: left;
+}
+
+.opponentscore {
+  width: 33%;
+  display: inline-block;
+  float: left;
+}
+
+.timer {
+  width: 33%;
+  display: inline-block;
+}
+
+.camfeed {
+  border-radius: 16px;
+  width: 1280px;
+  height: 720px;
+}
+
+/* ambient */
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.ambient {
+  width: 1280px;
+  height: 720px;
+  position: absolute;
+  --size: 1000px;
+  --speed: 50s;
+  --easing: cubic-bezier(0.8, 0.2, 0.2, 0.8);
+  filter: blur(calc(var(--size) / 5));
+  /*background-image: linear-gradient(rgba(55, 235, 169, 0.85), #5b37eb);*/
+  /*animation: rotate var(--speed) var(--easing) alternate infinite;*/
+  /*background-image: linear-gradient(rgba(55, 235, 169, 0.85), #5b37eb);*/
+  /*background-color: rgb(255,0,0);*/
+  background-color: rgb(0, 255, 0);
+  z-index: -1;
+  transition: all 0.5s ease-out;
+}
+
+/* audio wave */
+
+.container-audio {
+  width: 100%;
+  height: auto;
+  padding: 20px;
+  border-radius: 16px;
+  /*background-color: #eee;*/
+  /*color: #444;*/
+  margin: 20px auto;
+  overflow: hidden;
+  text-align: center;
+}
+
+audio {
+  /*width: 100%;*/
+}
+
+audio:nth-child(2), audio:nth-child(4), audio:nth-child(6) {
+  margin: 0;
+}
+
+.container-audio .colum1 {
+  width: 23px;
+  height: 5em;
+  border-radius: 5px;
+  margin: 0 10px 0 0;
+  display: inline-block;
+  position: relative;
+}
+
+.container-audio .colum1:last-child {
+  margin: 0;
+}
+
+.container-audio .colum1 .row {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(to up, #7700AA, #8800FF);
+  background-color: #5b37eb;
+  position: absolute;
+  animation: Rofa 10s infinite ease-in-out;
+  bottom: 0;
+}
+
+.container-audio .colum1:nth-of-type(1) .row {
+  animation-delay: 3.99s;
+}
+
+.container-audio .colum1:nth-of-type(2) .row {
+  animation-delay: 3.80s;
+}
+
+.container-audio .colum1:nth-of-type(3) .row {
+  animation-delay: 3.70s;
+}
+
+.container-audio .colum1:nth-of-type(4) .row {
+  animation-delay: 3.60s;
+}
+
+.container-audio .colum1:nth-of-type(5) .row {
+  animation-delay: 3.50s;
+}
+
+.container-audio .colum1:nth-of-type(6) .row {
+  animation-delay: 3.40s;
+}
+
+.container-audio .colum1:nth-of-type(7) .row {
+  animation-delay: 3.30s;
+}
+
+.container-audio .colum1:nth-of-type(8) .row {
+  animation-delay: 3.20s;
+}
+
+.container-audio .colum1:nth-of-type(9) .row {
+  animation-delay: 3.10s;
+}
+
+.container-audio .colum1:nth-of-type(10) .row {
+  animation-delay: 2.1s;
+}
+
+.container-audio .colum1:nth-of-type(11) .row {
+  animation-delay: 2.1s;
+}
+
+.container-audio .colum1:nth-of-type(12) .row {
+  animation-delay: 2.10s;
+}
+
+.container-audio .colum1:nth-of-type(13) .row {
+  animation-delay: 2.20s;
+}
+
+.container-audio .colum1:nth-of-type(14) .row {
+  animation-delay: 1.30s;
+}
+
+.container-audio .colum1:nth-of-type(15) .row {
+  animation-delay: 1.40s;
+}
+
+.container-audio .colum1:nth-of-type(16) .row {
+  animation-delay: 1.50s;
+}
+
+.container-audio .colum1:nth-of-type(17) .row {
+  animation-delay: 1.60s;
+}
+
+.container-audio .colum1:nth-of-type(18) .row {
+  animation-delay: 1.70s;
+}
+
+.container-audio .colum1:nth-of-type(19) .row {
+  animation-delay: 1.80s;
+}
+
+.container-audio .colum1:nth-of-type(20) .row {
+  animation-delay: 2s;
+}
+
+.container-audio .colum1:nth-of-type(21) .row {
+  animation-delay: 3.99s;
+}
+
+.container-audio .colum1:nth-of-type(22) .row {
+  animation-delay: 3.80s;
+}
+
+.container-audio .colum1:nth-of-type(23) .row {
+  animation-delay: 3.70s;
+}
+
+.container-audio .colum1:nth-of-type(24) .row {
+  animation-delay: 3.60s;
+}
+
+.container-audio .colum1:nth-of-type(25) .row {
+  animation-delay: 3.50s;
+}
+
+.container-audio .colum1:nth-of-type(26) .row {
+  animation-delay: 3.40s;
+}
+
+.container-audio .colum1:nth-of-type(27) .row {
+  animation-delay: 3.30s;
+}
+
+.container-audio .colum1:nth-of-type(28) .row {
+  animation-delay: 3.20s;
+}
+
+.container-audio .colum1:nth-of-type(29) .row {
+  animation-delay: 3.10s;
+}
+
+.container-audio .colum1:nth-of-type(30) .row {
+  animation-delay: 2.1s;
+}
+
+.container-audio .colum1:nth-of-type(31) .row {
+  animation-delay: 2.1s;
+}
+
+.container-audio .colum1:nth-of-type(32) .row {
+  animation-delay: 2.10s;
+}
+
+.container-audio .colum1:nth-of-type(33) .row {
+  animation-delay: 2.20s;
+}
+
