@@ -135,28 +135,28 @@
   client_socket.on("gameover", function(data) {
     server_socket.emit("gameover_to_server", { sid: data["sid"] });
   });
-  {#server_socket.on("gameover_to_clients", function(data) {#}
-  {#  // TODO : 승패 판정 로직 다시 짤것#}
-  {#  if (sid != data["sid"]) {#}
-  {#    Swal.fire({#}
-  {#      title: "게임 끝!",#}
-  {#      text: "로비로 돌아갑니다",#}
-  {#      icon: "success",#}
-  {#      confirmButtonText: "OK"#}
-  {#    }).then((result) => {#}
-  {#      window.location.href = "/";#}
-  {#    });#}
-  {#  } else {#}
-  {#    Swal.fire({#}
-  {#      title: "게임 끝!",#}
-  {#      text: "로비로 돌아갑니다",#}
-  {#      icon: "error",#}
-  {#      confirmButtonText: "OK"#}
-  {#    }).then((result) => {#}
-  {#      window.location.href = "/";#}
-  {#    });#}
-  {#  }#}
-  {#});#}
+  server_socket.on("gameover_to_clients", function(data) {
+    // TODO : 승패 판정 로직 다시 짤것
+    if (sid != data["sid"]) {
+      Swal.fire({
+        title: "게임 끝!",
+        text: "로비로 돌아갑니다",
+        icon: "success",
+        confirmButtonText: "OK"
+      }).then((result) => {
+        window.location.href = "/";
+      });
+    } else {
+      Swal.fire({
+        title: "게임 끝!",
+        text: "로비로 돌아갑니다",
+        icon: "error",
+        confirmButtonText: "OK"
+      }).then((result) => {
+        window.location.href = "/";
+      });
+    }
+  });
 </script>
 <script src="{{ url_for ('static', filename = 'assets/bootstrap/js/bootstrap.min.js') }}"></script>
 </body>

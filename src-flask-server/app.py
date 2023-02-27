@@ -537,6 +537,11 @@ class HelloWorld(Resource):
 def index():
   return render_template("index.html")
 
+@app.route('/testbed', methods=["GET", "POST"])
+def testbed():
+  return render_template("testbed.html")
+
+
 
 # Game Screen
 @app.route("/enter_snake", methods=["GET", "POST"])
@@ -711,8 +716,8 @@ def bot_data_update():
 
 
 # TEST BED ROUTING
-@app.route('/test_bed')
-def test_bed():
+@app.route('/test')
+def test():
   def generate():
     global bot_data, game, gameover_flag, sid
     global opponent_data
@@ -747,7 +752,7 @@ def test_bed():
         time.sleep(2)
         break
 
-  return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 ########################################################################################################################
