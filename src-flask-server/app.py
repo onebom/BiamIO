@@ -986,6 +986,7 @@ def create_maze(image_w, image_h, block_rows, block_cols):
 def maze_play():
   def generate():
     global isBlack, isMaze, game
+    global gameover_flag
 
     isBlack = True
     isMaze = True
