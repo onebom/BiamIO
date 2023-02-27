@@ -258,9 +258,9 @@ class SnakeGameClass:
     self.allowedLength = 150  # total allowed Length
     self.previousHead = random.randint(100, 1000), random.randint(100, 600)
 
-    self.speed = 0.1
+    self.speed = 5
     self.velocityX = random.choice([-1, 0, 1])
-    self.velocityY = random.choice([-1, 0, 1])
+    self.velocityY = random.choice([-1, 1])
 
     self.imgFood = cv2.imread(pathFood, cv2.IMREAD_UNCHANGED)
     self.hFood, self.wFood, _ = self.imgFood.shape
@@ -272,6 +272,8 @@ class SnakeGameClass:
     self.opp_addr = ()
     self.is_udp = False
     self.gameOver = False
+    
+    self.multi=True
 
 
   def ccw(self, p, a, b):
@@ -337,10 +339,11 @@ class SnakeGameClass:
     imgMain = cvzone.overlayPNG(imgMain, self.imgFood, (rx - self.wFood // 2, ry - self.hFood // 2))
     return imgMain
 
-############################################################
+  ############################################################
   # 내 뱀 상황 업데이트
-  def my_snake_update(self, HandPoints, o_bodys):
+  def my_snake_update(self, HandPoints):
     global opponent_data
+
     px, py = self.previousHead
 
     s_speed = 30
@@ -369,44 +372,51 @@ class SnakeGameClass:
   def set_snake_speed(self, HandPoints, s_speed):
     px, py = self.previousHead
     # ----HandsPoint moving ----
-    s_speed = 20
     if HandPoints:
-      m_x, m_y = HandPoints
-      dx = m_x - px  # -1~1
-      dy = m_y - py
+        m_x, m_y = HandPoints
+        dx = m_x - px  # -1~1
+        dy = m_y - py
 
-      # speed 범위: 0~1460
-      if math.hypot(dx, dy) > math.hypot(1280, 720) / 10:
-        self.speed = math.hypot(1280, 720) / 10  # 146
-      elif math.hypot(dx, dy) < s_speed:
-        self.speed = s_speed
-      else:
-        self.speed = math.hypot(dx, dy)
-
-      if dx != 0:
-        self.velocityX = dx / 1280
-      if dy != 0:
-        self.velocityY = dy / 720
-
-      # print(self.velocityX)
-      # print(self.velocityY)
+        
+        # head로부터 handpoint가 근접하면 이전 direction을 따름
+        if math.hypot(dx, dy) < 1: 
+            self.speed=1 # 최소 속도
+        else:
+            if math.hypot(dx, dy) > 40:
+                self.speed=40 #최대속도
+            else:
+                self.speed = math.hypot(dx, dy)
+        
+        # 벡터 합 생성,크기가 1인 방향 벡터
+        if dx!=0:
+          a_vx=(self.velocityX*self.speed+dx/math.sqrt(dx**2+dy**2))
+          self.velocityX = dx/math.sqrt(dx**2+dy**2)
+        else:
+          a_vx=self.velocityX*self.speed
+          
+        if dy!=0:
+          a_vy=(self.velocityY*self.speed+dy/math.sqrt(dx**2+dy**2))
+          self.velocityY = dy/math.sqrt(dx**2+dy**2)
+        else:
+          a_vy=self.velocityY*self.speed
 
     else:
-      self.speed = s_speed
+        a_vx=self.velocityX*self.speed
+        a_vy=self.velocityY*self.speed
 
-    cx = round(px + self.velocityX * self.speed)
-    cy = round(py + self.velocityY * self.speed)
+    cx = round(px + a_vx)
+    cy = round(py + a_vy)
     # ----HandsPoint moving ----end
-    if cx < 0 or cx > 1280 or cy < 0 or cy > 720:
-      if cx < 0: cx = 0
-      if cx > 1280: cx = 1280
-      if cy < 0: cy = 0
-      if cy > 720: cy = 720
+    if cx<0 or cx>1280 or cy< 0 or cy>720:
+        if cx<0: cx=0
+        if cx>1280: cx=1280
+        if cy<0: cy=0
+        if cy>720: cy=720
 
-    if cx == 0 or cx == 1280:
-      self.velocityX = -self.velocityX
-    if cy == 0 or cy == 720:
-      self.velocityY = -self.velocityY
+    if cx==0 or cx==1280:
+        self.velocityX=-self.velocityX
+    if cy== 0 or cy==720:
+        self.velocityY=-self.velocityY
 
     return cx, cy
 
@@ -428,7 +438,11 @@ class SnakeGameClass:
       ry - (self.hFood // 2) < cy < ry + (self.hFood // 2)):
       self.allowedLength += 50
       self.score += 1
-      socketio.emit('user_ate_food', {'score': self.score})
+
+      if self.multi:
+        socketio.emit('user_ate_food', {'score': self.score})
+      else:
+        self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
 
   # 뱀이 충돌했을때
   def execute(self):
@@ -441,28 +455,20 @@ class SnakeGameClass:
     self.previousHead = 0, 0  # previous head point
 
   # 송출될 프레임 업데이트
-  def update(self, imgMain, receive_Data, HandPoints, isBot):
-    global gameover_flag
+  def update(self, imgMain, HandPoints):
+    global gameover_flag, opponent_data
 
     if self.gameOver:
       gameover_flag = False
     else:
       # draw others snake
-      o_body_node = []
-      o_score = 0
-
-      if receive_Data:
-        if isBot:
-          body_node = receive_Data["bot_body_node"]
-        else:
-          body_node = receive_Data["opp_body_node"]
-          score = receive_Data["opp_score"]
 
       # 0 이면 상대 뱀
-      imgMain = self.draw_snakes(imgMain, o_body_node, o_score, 0)
+      imgMain = self.draw_snakes(imgMain, opponent_data, self.opp_score, 0)
 
       # update and draw own snake
-      self.my_snake_update(HandPoints, o_body_node)
+      self.my_snake_update(HandPoints)
+
       imgMain = self.draw_Food(imgMain)
       # 1 이면 내 뱀
       imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
@@ -716,11 +722,10 @@ def bot_data_update():
 @app.route('/test_bed')
 def test_bed():
   def generate():
-    global bot_data
-    global game
-    global gameover_flag
-    global sid
+    global bot_data, game, gameover_flag,sid
+    global opponent_data
 
+    game.multi=False
     while True:
       success, img = cap.read()
       img = cv2.flip(img, 1)
@@ -733,8 +738,9 @@ def test_bed():
         pointIndex = lmList[8][0:2]
 
       bot_data_update()
+      opponent_data=bot_data["bot_body_node"]
       # print(pointIndex)
-      img = game.update(img, bot_data, pointIndex, True)
+      img = game.update(img,pointIndex)
 
       # encode the image as a JPEG string
       _, img_encoded = cv2.imencode('.jpg', img)
