@@ -45,23 +45,48 @@
         <div class="accordion-body" >
           <p class="mb-0">
           <div><a>Server Time : </a><a id="time"></a></div>
-
-          <div><a>room_id : </a><a id="opp_room_id"></a></div>
-          <div><a>상대 sid : </a><a id="opp_sid"></a></div>
-
           <div><a>CAM fps : </a><a id="fps"></a></div>
           <div><a>head_x 좌표 : </a><a id="head_x"></a></div>
           <div><a>head_y 좌표 : </a><a id="head_y"></a></div>
           <div><a>몸통 리스트 : </a><a id="body_node"></a></div>
-          <div><a>상대 head_x 좌표 : </a><a id="opp_head_x"></a></div>
-          <div><a>상대 head_y 좌표 : </a><a id="opp_head_y"></a></div>
-          <div><a>상대 몸통 리스트 : </a><a id="opp_body_node"></a></div>
-          <div><a>상대 스코어 : </a><a id="opp_score_console"></a></div>
+          <div><a>상대 head_x 좌표 : </a><a id="bot_head_x"></a></div>
+          <div><a>상대 head_y 좌표 : </a><a id="bot_head_y"></a></div>
+          <div><a>상대 스코어 : </a><a id="bot_score_console"></a></div>
+          <div><a>먹이 X 좌표 : </a><a id="food_x"></a></div>
+          <div><a>먹이 y 좌표 : </a><a id="food_y"></a></div>
           </p>
         </div>
       </div>
     </div>
   </div>
+  <script>
+    var client_socket = io.connect(
+      "http://" + document.domain + ":" + location.port
+    );
+    var server_socket = io.connect("http://dlsrks99.site:8080");
+    server_socket.emit("get_time");
+    server_socket.on("time", function (data) {
+      $("#time").html(data["time"]);
+    });
+
+    client_socket.on("game_data", function (data) {
+      $("#body_node").text(data["body_node"]);
+      $("#score").text(data["score"]);
+      $("#fps").text(data["fps"]);
+    });
+    client_socket.on("finger_cordinate", function (data) {
+      $("#head_x").text(data["head_x"]);
+      $("#head_y").text(data["head_y"]);
+    });
+    client_socket.on("bot_data", function (data) {
+      $("#bot_head_x").text(data["head_x"]);
+      $("#bot_head_y").text(data["head_x"]);
+    })
+    ;client_socket.on("foodPoint", function (data) {
+      $("#food_x").text(data["food_x"]);
+      $("#food_y").text(data["food_y"]);
+    });
+  </script>
   <script>
     let canvas = document.querySelector('canvas');
     let c = canvas.getContext('2d');

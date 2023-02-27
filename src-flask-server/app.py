@@ -338,7 +338,9 @@ class SnakeGameClass:
 
   def draw_Food(self, imgMain):
     rx, ry = self.foodPoint
+    socketio.emit('foodPoint', {'food_x':rx ,'food_y':ry})
     imgMain = cvzone.overlayPNG(imgMain, self.imgFood, (rx - self.wFood // 2, ry - self.hFood // 2))
+
     return imgMain
 
   ############################################################
@@ -350,6 +352,7 @@ class SnakeGameClass:
 
     s_speed = 30
     cx, cy = self.set_snake_speed(HandPoints, s_speed)
+    socketio.emit('finger_cordinate', {'head_x': cx, 'head_y': cy})
 
     self.points.append([[px, py], [cx, cy]])
 
@@ -364,6 +367,7 @@ class SnakeGameClass:
       self.check_snake_eating(cx, cy)
 
     self.send_data_to_opp()
+    self.send_data_to_html()
 
     if self.is_udp:
       self.receive_data_from_opp()
@@ -432,9 +436,9 @@ class SnakeGameClass:
       ry - (self.hFood // 2) < cy < ry + (self.hFood // 2)):
       self.allowedLength += 50
       self.score += 1
-      self.foodOnOff = False
 
       if self.multi:
+        self.foodOnOff = False
         socketio.emit('user_ate_food', {'score': self.score})
       else:
         self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
@@ -484,6 +488,9 @@ class SnakeGameClass:
     else:
       socketio.emit('game_data', {'body_node': self.points})
 
+  def send_data_to_html(self):
+    socketio.emit('game_data', {'body_node': self.points, 'score': self.score, 'fps' : fps})
+
   # 데이터 수신 (udp 통신 일때만 사용)
   def receive_data_from_opp(self):
     global opponent_data
@@ -513,7 +520,7 @@ class SnakeGameClass:
         self.sock.sendto(test_code.encode(), self.opp_addr)
         try:
             data, _ = self.sock.recvfrom(600)
-            test_code = data.decode() 
+            test_code = data.decode()
             if test_code == str(sid):
                 b += 1
         except socket.timeout:
@@ -521,8 +528,9 @@ class SnakeGameClass:
 
     if a != 50 and b != 0:
         self.is_udp = True
-    
+
     print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
+    socketio.emit('NetworkMode', {'UDP': self.is_udp})
 
   # 소멸자 소켓 bind 해제
   def __del__(self):
@@ -720,6 +728,8 @@ def bot_data_update():
   distance = math.hypot(cx - px, cy - py)
   bot_data['lengths'].append(distance)
   bot_data['currentLength'] += distance
+
+  socketio.emit('bot_data', {'head_x': cx, 'head_y': cy})
 
   if bot_data['currentLength'] > 250:
     for i, length in enumerate(bot_data['lengths']):
