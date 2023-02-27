@@ -506,7 +506,7 @@ class SnakeGameClass:
     except socket.timeout:
         self.udp_count += 1
         if self.udp_count > 25:
-            socketio.emit('opponent_escaped')
+            socketio.emit('opponent_escaped_udp')
 
   # udp로 통신할지 말지
   def test_connect(self, sid):

@@ -86,7 +86,7 @@ def send_data(data):
     room_id = data['room_id']
 
     if len(players_in_room[room_id]) == 1:
-        emit('opponent_escaped', to=request.sid)
+        emit('opponent_escaped_server', to=request.sid)
     else:
         emit('opp_data', {'opp_body_node' : body_node, 'opp_room_id' : room_id}, broadcast=True, include_self=False, room=room_id)
 
