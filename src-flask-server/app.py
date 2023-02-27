@@ -373,38 +373,30 @@ class SnakeGameClass:
     px, py = self.previousHead
     # ----HandsPoint moving ----
     if HandPoints:
-      m_x, m_y = HandPoints
-      dx = m_x - px  # -1~1
-      dy = m_y - py
+        m_x, m_y = HandPoints
+        dx = m_x - px  # -1~1
+        dy = m_y - py
 
-      # head로부터 handpoint가 근접하면 이전 direction을 따름
-      if math.hypot(dx, dy) < 1:
-        self.speed = 1  # 최소 속도
-      else:
-        if math.hypot(dx, dy) > 40:
-          self.speed = 40  # 최대속도
+
+        # head로부터 handpoint가 근접하면 이전 direction을 따름
+        if math.hypot(dx, dy) < 5:
+            self.speed=5 # 최소속도
         else:
-          self.speed = math.hypot(dx, dy)
+            if math.hypot(dx, dy) > 50:
+                self.speed=50 #최대속도
+            else:
+                self.speed = math.hypot(dx, dy)
 
-      # 벡터 합 생성,크기가 1인 방향 벡터
-      if dx != 0:
-        a_vx = (self.velocityX * self.speed + dx / math.sqrt(dx ** 2 + dy ** 2))
-        self.velocityX = dx / math.sqrt(dx ** 2 + dy ** 2)
-      else:
-        a_vx = self.velocityX * self.speed
-
-      if dy != 0:
-        a_vy = (self.velocityY * self.speed + dy / math.sqrt(dx ** 2 + dy ** 2))
-        self.velocityY = dy / math.sqrt(dx ** 2 + dy ** 2)
-      else:
-        a_vy = self.velocityY * self.speed
+        # 벡터 합 생성,크기가 1인 방향 벡터
+        if dx!=0 and dy!=0:
+          self.velocityX = dx/math.sqrt(dx**2+dy**2)
+          self.velocityY = dy/math.sqrt(dx**2+dy**2)
 
     else:
-      a_vx = self.velocityX * self.speed
-      a_vy = self.velocityY * self.speed
+        self.speed=5
 
-    cx = round(px + a_vx)
-    cy = round(py + a_vy)
+    cx = round(px + self.velocityX*self.speed)
+    cy = round(py + self.velocityY*self.speed)
     # ----HandsPoint moving ----end
     if cx < 0 or cx > 1280 or cy < 0 or cy > 720:
       if cx < 0: cx = 0
