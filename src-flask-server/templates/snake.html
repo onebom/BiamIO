@@ -29,23 +29,23 @@
     console.log(sid);
 
     // 서버와 통신개시 후 포트를 요청
-    server_socket.on("connect", function() {
-      server_socket.emit("my_port", { "room_id": room_id });
+    server_socket.on("connect", function () {
+      server_socket.emit('my_port', { 'room_id': room_id });
     });
     // 서버에서 받은 나의 포트를 로컬 flask 서버로 전송
-    server_socket.on("my_port", function(data) {
-      console.log(data["my_port"]);
-      client_socket.emit("my_port", { "my_port": data["my_port"] });
+    server_socket.on("my_port", function (data) {
+      console.log(data['my_port'])
+      client_socket.emit('my_port', { 'my_port': data['my_port'] })
     });
     // 서버에서 받은 상대의 주소를 로컬 flask 서버로 전송
-    server_socket.on("opponent_address", function(data) {
-      console.log(data["ip_addr"], data["port"]);
-      client_socket.emit("opponent_address", { "ip_addr": data["ip_addr"], "port": data["port"] });
+    server_socket.on('opponent_address', function (data) {
+      console.log(data['ip_addr'], data['port'])
+      client_socket.emit('opponent_address', { 'ip_addr': data['ip_addr'], 'port': data['port'] })
     });
     // 로컬 falsk 서버에서 상대와 통신이 수립된 이후 영상 로딩
-    client_socket.on("connection_result", function() {
-      $("#snake_video").attr("src", " {{ url_for('snake') }}");
-    });
+    client_socket.on('connection_result', function () {
+      $("#snake_video").attr("src", " {{ url_for('snake') }}")
+    })
   </script>
 </head>
 
@@ -55,13 +55,13 @@
     <div class="gamesection-container">
       <div class="hud-top">
         <div class="myscore">
-          <p id="score">점수 :&nbsp;</p>
+          <p>점수 :&nbsp;</p><p id="score"></p>
         </div>
         <div class="opponentscore">
-          <p id="opp_score">상대 점수 :&nbsp;</p>
+          <p>상대 점수 :&nbsp;</p><p id="opp_score"></p>
         </div>
         <div class="timer">
-          <p>남은 시간 :&nbsp;</p>
+          <p>남은 시간 :&nbsp;</p><p></p>
         </div>
       </div>
       <div id="ambient" class="ambient"></div>
@@ -97,95 +97,66 @@
   </div>
 </main>
 <script>
+  // 서버에서 시간 요청하기
   server_socket.emit("get_time");
-  server_socket.on("time", function(data) {
+  // 서버에서 받은 시간 페이지에 적용
+  server_socket.on("time", function (data) {
     $("#time").html(data["time"]);
   });
-  client_socket.on("game_data", function(data) {
-    $("#head_x").text(data["head_x"]);
-    $("#head_y").text(data["head_y"]);
+  // 로컬에서 보낸 내 위치 서버에게 보내기
+  client_socket.on("game_data", function (data) {
     $("#body_node").text(data["body_node"]);
-    $("#score").text(data["score"]);
-    $("#fps").text(data["fps"]);
-    // console.log(data)
-    console.log("send data before emit");
     server_socket.emit("send_data", {
-      head_x: data["head_x"],
-      head_y: data["head_y"],
       body_node: data["body_node"],
-      score: data["score"],
-      room_id: room_id,
-      sid: sid
-    });
-    console.log("send data after emit");
-  });
-  server_socket.on("opp_data", function(data) {
-    console.log(sid + "  :  " + data["opp_sid"]);
-
-    if (sid != data["opp_sid"]) {
-      $("#opp_head_x").text(data["opp_head_x"]);
-      $("#opp_head_y").text(data["opp_head_y"]);
-      $("#opp_body_node").text(data["opp_body_node"]);
-      $("#opp_score").text(data["opp_score"]);
-      $("#opp_room_id").text(data["opp_room_id"]);
-      $("#opp_sid").text(data["opp_sid"]);
-      $("#opp_score_console").text(data["opp_score"]);
-
-      if (client_socket.connected) {
-        // console.log('Sending opp_data_transfer event to server');
-        client_socket.emit("opp_data_transfer", { data: data });
-        // console.log('Sent opp_data_transfer event to server');
-      } else {
-        console.log("socket not connected");
-      }
-    }
-  });
-  client_socket.on("server_disconnect", function(data) {
-    server_socket.emit("server_disconnect", {
-      room_id: data["room_id"],
-      sid: data["sid"]
+      room_id: room_id
     });
   });
-
-  client_socket.on("foodEat", function(data) {
-    server_socket.emit("foodEat_to_server", { foodEat: data["foodEat"] });
+  // 서버에서 받은 상대 위치 내 로컬에 보내기
+  server_socket.on("opp_data", function (data) {
+    $("#opp_body_node").text(data["opp_body_node"]);
+    client_socket.emit("opp_data_transfer", { data: data });
   });
-  server_socket.on("foodPoint_from_server", function(data) {
-    if (client_socket.connected) {
-      // print(data); 한봄이는 브라우져한테 출력을 시켜요
-      console.log("foodPoint_from_server !!!!");
-      console.log(data);
-      client_socket.emit("foodPoint_to_flask", { foodPoint: data["foodPoint"] });
-    } else {
-      console.log("socket not connected");
-    }
-  });
+  // 내가 먹이를 먹은 경우, 서버에게 알리기
+  client_socket.on('user_ate_food', function (data) {
+    $("#my_score").text(data["score"]);
+    server_socket.emit('user_ate_food', {'score':data["score"], 'room_id':room_id});
+  })
+  // 내가 먹이를 먹은 경우, 서버에게 새로운 먹이 위치를 받은 것을 로컬에게 보냄
+  server_socket.on('ate_user', function (data) {
+    client_socket.emit('set_food_location', {'foodPoint':data['foodPoint']});
+  })
+  // 상대가 먹이를 먹은 경우, 서버에게 받은 새 먹이위치와 상대점수 로컬에게 보냄
+  server_socket.on('ate_user_opp', function (data) {
+    $("#opp_score").text(data["opp_score"]);
+    client_socket.emit('set_food_location_score', {'foodPoint':data['foodPoint'], 'opp_score':data['opp_score']});
+  })
 
+  // TODO
   client_socket.on("gameover", function(data) {
     server_socket.emit("gameover_to_server", { sid: data["sid"] });
   });
-  server_socket.on("gameover_to_clients", function(data) {
-    // TODO : 승패 판정 로직 다시 짤것
-    if (sid != data["sid"]) {
-      Swal.fire({
-        title: "게임 끝!",
-        text: "로비로 돌아갑니다",
-        icon: "success",
-        confirmButtonText: "OK"
-      }).then((result) => {
-        window.location.href = "/";
-      });
-    } else {
-      Swal.fire({
-        title: "게임 끝!",
-        text: "로비로 돌아갑니다",
-        icon: "error",
-        confirmButtonText: "OK"
-      }).then((result) => {
-        window.location.href = "/";
-      });
-    }
-  });
+  {#server_socket.on("gameover_to_clients", function(data) {#}
+  {#  // TODO : 승패 판정 로직 다시 짤것#}
+  {#  if (sid != data["sid"]) {#}
+  {#    Swal.fire({#}
+  {#      title: "게임 끝!",#}
+  {#      text: "로비로 돌아갑니다",#}
+  {#      icon: "success",#}
+  {#      confirmButtonText: "OK"#}
+  {#    }).then((result) => {#}
+  {#      window.location.href = "/";#}
+  {#    });#}
+  {#  } else {#}
+  {#    Swal.fire({#}
+  {#      title: "게임 끝!",#}
+  {#      text: "로비로 돌아갑니다",#}
+  {#      icon: "error",#}
+  {#      confirmButtonText: "OK"#}
+  {#    }).then((result) => {#}
+  {#      window.location.href = "/";#}
+  {#    });#}
+  {#  }#}
+  {#});#}
 </script>
 <script src="{{ url_for ('static', filename = 'assets/bootstrap/js/bootstrap.min.js') }}"></script>
 </body>
