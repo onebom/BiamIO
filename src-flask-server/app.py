@@ -537,7 +537,7 @@ class HelloWorld(Resource):
 def index():
   return render_template("index.html")
 
-@app.route('/testbed', methods=["GET", "POST"])
+@app.route('/testbed')
 def testbed():
   return render_template("testbed.html")
 
@@ -752,7 +752,7 @@ def test():
         time.sleep(2)
         break
 
-    return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+  return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 ########################################################################################################################
