@@ -389,35 +389,79 @@ class SnakeGameClass:
     # if self.isCollision(self.points[-1], o_bodys):
     #     self.execute()
 
-  # 내 뱀이 움직이는 속도 설정
+  ################################## VECTORING SPEED METHOD ############################################################
+  # def set_snake_speed(self, HandPoints, s_speed):
+  #   px, py = self.previousHead
+  #   # ----HandsPoint moving ----
+  #   if HandPoints:
+  #       m_x, m_y = HandPoints
+  #       dx = m_x - px  # -1~1
+  #       dy = m_y - py
+  #
+  #
+  #       # head로부터 handpoint가 근접하면 이전 direction을 따름
+  #       if math.hypot(dx, dy) < 5:
+  #           self.speed=5 # 최소속도
+  #       else:
+  #           if math.hypot(dx, dy) > 50:
+  #               self.speed=50 #최대속도
+  #           else:
+  #               self.speed = math.hypot(dx, dy)
+  #
+  #       # 벡터 합 생성,크기가 1인 방향 벡터
+  #       if dx!=0 and dy!=0:
+  #         self.velocityX = dx/math.sqrt(dx**2+dy**2)
+  #         self.velocityY = dy/math.sqrt(dx**2+dy**2)
+  #
+  #   else:
+  #       self.speed=5
+  #
+  #   cx = round(px + self.velocityX*self.speed)
+  #   cy = round(py + self.velocityY*self.speed)
+  #   # ----HandsPoint moving ----end
+  #   if cx < 0 or cx > 1280 or cy < 0 or cy > 720:
+  #     if cx < 0: cx = 0
+  #     if cx > 1280: cx = 1280
+  #     if cy < 0: cy = 0
+  #     if cy > 720: cy = 720
+  #
+  #   if cx == 0 or cx == 1280:
+  #     self.velocityX = -self.velocityX
+  #   if cy == 0 or cy == 720:
+  #     self.velocityY = -self.velocityY
+  #
+  #   return cx, cy
+
   def set_snake_speed(self, HandPoints, s_speed):
     px, py = self.previousHead
     # ----HandsPoint moving ----
+    s_speed = 20
     if HandPoints:
-        m_x, m_y = HandPoints
-        dx = m_x - px  # -1~1
-        dy = m_y - py
+      m_x, m_y = HandPoints
+      dx = m_x - px  # -1~1
+      dy = m_y - py
 
+      # speed 범위: 0~1460
+      if math.hypot(dx, dy) > math.hypot(1280, 720) / 10:
+        self.speed = math.hypot(1280, 720) / 10  # 146
+      elif math.hypot(dx, dy) < s_speed:
+        self.speed = s_speed
+      else:
+        self.speed = math.hypot(dx, dy)
 
-        # head로부터 handpoint가 근접하면 이전 direction을 따름
-        if math.hypot(dx, dy) < 5:
-            self.speed=5 # 최소속도
-        else:
-            if math.hypot(dx, dy) > 50:
-                self.speed=50 #최대속도
-            else:
-                self.speed = math.hypot(dx, dy)
+      if dx != 0:
+        self.velocityX = dx / 1280
+      if dy != 0:
+        self.velocityY = dy / 720
 
-        # 벡터 합 생성,크기가 1인 방향 벡터
-        if dx!=0 and dy!=0:
-          self.velocityX = dx/math.sqrt(dx**2+dy**2)
-          self.velocityY = dy/math.sqrt(dx**2+dy**2)
+      # print(self.velocityX)
+      # print(self.velocityY)
 
     else:
-        self.speed=5
+      self.speed = s_speed
 
-    cx = round(px + self.velocityX*self.speed)
-    cy = round(py + self.velocityY*self.speed)
+    cx = round(px + self.velocityX * self.speed)
+    cy = round(py + self.velocityY * self.speed)
     # ----HandsPoint moving ----end
     if cx < 0 or cx > 1280 or cy < 0 or cy > 720:
       if cx < 0: cx = 0
