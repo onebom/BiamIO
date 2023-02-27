@@ -1,6 +1,12 @@
 body {
-  background: black;
+  margin: 0;
   overflow: hidden;
+  background: black;
+}
+canvas {
+  z-index: -1;
+  display: flex;
+  position: absolute;
 }
 
 .gamesection-container {
@@ -246,7 +252,7 @@ a{
   letter-spacing: 4px;
   overflow: hidden;
   margin-right: 50px;
- 
+
 }
 a:hover{
   background: #03e9f4;
@@ -336,4 +342,3 @@ a span:nth-child(4){
       bottom: 100%;
   }
 }
-

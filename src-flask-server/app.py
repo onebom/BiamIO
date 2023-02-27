@@ -272,7 +272,7 @@ class SnakeGameClass:
     self.opp_addr = ()
     self.is_udp = False
     self.gameOver = False
-    
+
     self.multi=True
 
 
@@ -377,23 +377,23 @@ class SnakeGameClass:
         dx = m_x - px  # -1~1
         dy = m_y - py
 
-        
+
         # head로부터 handpoint가 근접하면 이전 direction을 따름
-        if math.hypot(dx, dy) < 1: 
+        if math.hypot(dx, dy) < 1:
             self.speed=1 # 최소 속도
         else:
             if math.hypot(dx, dy) > 40:
                 self.speed=40 #최대속도
             else:
                 self.speed = math.hypot(dx, dy)
-        
+
         # 벡터 합 생성,크기가 1인 방향 벡터
         if dx!=0:
           a_vx=(self.velocityX*self.speed+dx/math.sqrt(dx**2+dy**2))
           self.velocityX = dx/math.sqrt(dx**2+dy**2)
         else:
           a_vx=self.velocityX*self.speed
-          
+
         if dy!=0:
           a_vy=(self.velocityY*self.speed+dy/math.sqrt(dx**2+dy**2))
           self.velocityY = dy/math.sqrt(dx**2+dy**2)
@@ -640,7 +640,7 @@ def snake():
         lmList = hands[0]['lmList']
         pointIndex = lmList[8][0:2]
 
-      img = game.update(img, opponent_data, pointIndex, False)
+      img = game.update(img, pointIndex)
 
       # encode the image as a JPEG string
       _, img_encoded = cv2.imencode('.jpg', img)
