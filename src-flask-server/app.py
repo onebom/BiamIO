@@ -25,6 +25,7 @@ from flask import Flask, render_template, Response, request, redirect, url_for, 
 from flask_socketio import SocketIO, emit, join_room
 import socket
 from engineio.payload import Payload
+
 # import pprint
 
 ########################################################################################################################
@@ -66,7 +67,7 @@ pathFood = './src-flask-server/static/food.png'
 
 # Network connections variables
 opponent_data = {}  # 상대 데이터 (현재 손위치, 현재 뱀위치)
-gameover_flag = False  # ^^ 게임오버
+gameover_flag = False  # TODO : 게임오버
 now_my_room = ""  # 현재 내가 있는 방
 now_my_sid = ""  # 현재 나의 sid
 MY_PORT = 0  # socket_bind를 위한 내 포트 번호
@@ -273,8 +274,7 @@ class SnakeGameClass:
     self.is_udp = False
     self.gameOver = False
 
-    self.multi=True
-
+    self.multi = True
 
   def ccw(self, p, a, b):
     # print("확인3")
@@ -373,50 +373,49 @@ class SnakeGameClass:
     px, py = self.previousHead
     # ----HandsPoint moving ----
     if HandPoints:
-        m_x, m_y = HandPoints
-        dx = m_x - px  # -1~1
-        dy = m_y - py
+      m_x, m_y = HandPoints
+      dx = m_x - px  # -1~1
+      dy = m_y - py
 
-
-        # head로부터 handpoint가 근접하면 이전 direction을 따름
-        if math.hypot(dx, dy) < 1:
-            self.speed=1 # 최소 속도
+      # head로부터 handpoint가 근접하면 이전 direction을 따름
+      if math.hypot(dx, dy) < 1:
+        self.speed = 1  # 최소 속도
+      else:
+        if math.hypot(dx, dy) > 40:
+          self.speed = 40  # 최대속도
         else:
-            if math.hypot(dx, dy) > 40:
-                self.speed=40 #최대속도
-            else:
-                self.speed = math.hypot(dx, dy)
+          self.speed = math.hypot(dx, dy)
 
-        # 벡터 합 생성,크기가 1인 방향 벡터
-        if dx!=0:
-          a_vx=(self.velocityX*self.speed+dx/math.sqrt(dx**2+dy**2))
-          self.velocityX = dx/math.sqrt(dx**2+dy**2)
-        else:
-          a_vx=self.velocityX*self.speed
+      # 벡터 합 생성,크기가 1인 방향 벡터
+      if dx != 0:
+        a_vx = (self.velocityX * self.speed + dx / math.sqrt(dx ** 2 + dy ** 2))
+        self.velocityX = dx / math.sqrt(dx ** 2 + dy ** 2)
+      else:
+        a_vx = self.velocityX * self.speed
 
-        if dy!=0:
-          a_vy=(self.velocityY*self.speed+dy/math.sqrt(dx**2+dy**2))
-          self.velocityY = dy/math.sqrt(dx**2+dy**2)
-        else:
-          a_vy=self.velocityY*self.speed
+      if dy != 0:
+        a_vy = (self.velocityY * self.speed + dy / math.sqrt(dx ** 2 + dy ** 2))
+        self.velocityY = dy / math.sqrt(dx ** 2 + dy ** 2)
+      else:
+        a_vy = self.velocityY * self.speed
 
     else:
-        a_vx=self.velocityX*self.speed
-        a_vy=self.velocityY*self.speed
+      a_vx = self.velocityX * self.speed
+      a_vy = self.velocityY * self.speed
 
     cx = round(px + a_vx)
     cy = round(py + a_vy)
     # ----HandsPoint moving ----end
-    if cx<0 or cx>1280 or cy< 0 or cy>720:
-        if cx<0: cx=0
-        if cx>1280: cx=1280
-        if cy<0: cy=0
-        if cy>720: cy=720
+    if cx < 0 or cx > 1280 or cy < 0 or cy > 720:
+      if cx < 0: cx = 0
+      if cx > 1280: cx = 1280
+      if cy < 0: cy = 0
+      if cy > 720: cy = 720
 
-    if cx==0 or cx==1280:
-        self.velocityX=-self.velocityX
-    if cy== 0 or cy==720:
-        self.velocityY=-self.velocityY
+    if cx == 0 or cx == 1280:
+      self.velocityX = -self.velocityX
+    if cy == 0 or cy == 720:
+      self.velocityY = -self.velocityY
 
     return cx, cy
 
@@ -461,10 +460,10 @@ class SnakeGameClass:
     if self.gameOver:
       gameover_flag = False
     else:
-      opp_bodys=[]
+      opp_bodys = []
       # 0 이면 상대 뱀
       if opponent_data:
-        opp_bodys=opponent_data['opp_body_node']
+        opp_bodys = opponent_data['opp_body_node']
       imgMain = self.draw_snakes(imgMain, opp_bodys, self.opp_score, 0)
 
       # update and draw own snake
@@ -530,6 +529,7 @@ class SnakeGameClass:
 ######################################## FLASK APP ROUTINGS ############################################################
 
 game = SnakeGameClass(pathFood)
+
 
 # Defualt Root Routing for Flask Server Check
 @api.resource('/')
@@ -646,7 +646,7 @@ def snake():
       _, img_encoded = cv2.imencode('.jpg', img)
       yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
-      if gameover_flag:  # ^^ 게임 오버 시
+      if gameover_flag:  # TODO : 게임 오버 시
         pass
 
   return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -722,10 +722,10 @@ def bot_data_update():
 @app.route('/test_bed')
 def test_bed():
   def generate():
-    global bot_data, game, gameover_flag,sid
+    global bot_data, game, gameover_flag, sid
     global opponent_data
 
-    game.multi=False
+    game.multi = False
     while True:
       success, img = cap.read()
       img = cv2.flip(img, 1)
@@ -738,9 +738,9 @@ def test_bed():
         pointIndex = lmList[8][0:2]
 
       bot_data_update()
-      opponent_data['opp_body_node']=bot_data["bot_body_node"]
+      opponent_data['opp_body_node'] = bot_data["bot_body_node"]
       # print(pointIndex)
-      img = game.update(img,pointIndex)
+      img = game.update(img, pointIndex)
 
       # encode the image as a JPEG string
       _, img_encoded = cv2.imencode('.jpg', img)
