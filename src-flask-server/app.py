@@ -73,6 +73,10 @@ now_my_sid = "" # 현재 나의 sid
 MY_PORT = 0 # socket_bind를 위한 내 포트 번호
 # ====================================
 
+# 배경 검정색
+isBlack = False
+
+
 
 ########################################################################################################################
 ################################ Mediapipe Detecting Module ############################################################
@@ -112,10 +116,14 @@ class HandDetector:
     :param draw: Flag to draw the output on the image.
     :return: Image with or without drawings
     """
+    global isBlack
+
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     self.results = self.hands.process(imgRGB)
     allHands = []
     h, w, c = img.shape
+    menuimg = np.zeros([h, w, c])
+    menuimg.fill(0)
     if self.results.multi_hand_landmarks:
       for handType, handLms in zip(self.results.multi_handedness, self.results.multi_hand_landmarks):
         myHand = {}
@@ -157,17 +165,23 @@ class HandDetector:
 
         ## draw
         if draw:
-          self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
-          # cv2.rectangle(img, (bbox[0] - 20, bbox[1] - 20),
-          #               (bbox[0] + bbox[2] + 20, bbox[1] + bbox[3] + 20),
-          #               (255, 0, 255), 2)
-          cv2.putText(img, myHand["type"], (bbox[0] - 30, bbox[1] - 30), cv2.FONT_HERSHEY_PLAIN,
-                      2, (255, 0, 255), 2)
+          if isBlack:
+            self.mpDraw.draw_landmarks(menuimg, handLms, self.mpHands.HAND_CONNECTIONS)
+          else:
+            self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
+            # cv2.rectangle(img, (bbox[0] - 20, bbox[1] - 20),
+            #               (bbox[0] + bbox[2] + 20, bbox[1] + bbox[3] + 20),
+            #               (255, 0, 255), 2)
+            cv2.putText(img, myHand["type"], (bbox[0] - 30, bbox[1] - 30), cv2.FONT_HERSHEY_PLAIN,
+                        2, (255, 0, 255), 2)
     else:
       sigma = 10
       img = (cv2.GaussianBlur(img, (0, 0), sigma))
     if draw:
-      return allHands, img
+        if isBlack:
+          return allHands, menuimg
+        else:
+          return allHands, img
     else:
       return allHands
 
@@ -471,6 +485,16 @@ class SnakeGameClass:
       imgMain = self.draw_Food(imgMain)
       # 1 이면 내 뱀
       imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
+
+    return imgMain
+
+  # Menu 화면에서 쓰일 검은 배경 뱀
+  def update_blackbg(self, imgMain, HandPoints):
+    global gameover_flag, opponent_data
+
+    # update and draw own snake
+    self.my_snake_update(HandPoints)
+    imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
     return imgMain
 
@@ -780,6 +804,34 @@ def test():
 
   return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+# Main Menu Selection
+@app.route('/menu_snake')
+def menu_snake():
+  def generate():
+    global isBlack
+
+    isBlack = True
+    game.multi = False
+
+    while True:
+      success, img = cap.read()
+      img = cv2.flip(img, 1)
+      hands, menuimg = detector.findHands(img, flipType=False)
+
+      pointIndex = []
+
+      if hands:
+        lmList = hands[0]['lmList']
+        pointIndex = lmList[8][0:2]
+
+      menuimg = game.update_blackbg(menuimg, pointIndex)
+
+      # encode the image as a JPEG string
+      _, img_encoded = cv2.imencode('.jpg', menuimg)
+      yield (b'--frame\r\n'
+             b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
+
+  return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 ########################################################################################################################
 ########################## Legacy Electron Template Routing ############################################################
