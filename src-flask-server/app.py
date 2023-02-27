@@ -65,12 +65,13 @@ api = Api(app)
 # Setting Path to food.png
 pathFood = './src-flask-server/static/food.png'
 
-# Network connections variables
-opponent_data = {}  # 상대 데이터 (현재 손위치, 현재 뱀위치)
-gameover_flag = False  # TODO : 게임오버
-now_my_room = ""  # 현재 내가 있는 방
-now_my_sid = ""  # 현재 나의 sid
-MY_PORT = 0  # socket_bind를 위한 내 포트 번호
+# =========== Global variables ===========
+opponent_data = {} # 상대 데이터 (현재 손위치, 현재 뱀위치)
+gameover_flag = False # ^^ 게임오버
+now_my_room = "" # 현재 내가 있는 방
+now_my_sid = "" # 현재 나의 sid
+MY_PORT = 0 # socket_bind를 위한 내 포트 번호
+# ====================================
 
 
 ########################################################################################################################
@@ -272,8 +273,9 @@ class SnakeGameClass:
     self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     self.opp_addr = ()
     self.is_udp = False
+    self.udp_count = 0
     self.gameOver = False
-
+    self.foodOnOff = True
     self.multi = True
 
   def ccw(self, p, a, b):
@@ -358,7 +360,8 @@ class SnakeGameClass:
 
     self.length_reduction()
 
-    self.check_snake_eating(cx, cy)
+    if self.foodOnOff:
+      self.check_snake_eating(cx, cy)
 
     self.send_data_to_opp()
 
@@ -429,6 +432,7 @@ class SnakeGameClass:
       ry - (self.hFood // 2) < cy < ry + (self.hFood // 2)):
       self.allowedLength += 50
       self.score += 1
+      self.foodOnOff = False
 
       if self.multi:
         socketio.emit('user_ate_food', {'score': self.score})
@@ -485,30 +489,40 @@ class SnakeGameClass:
     global opponent_data
 
     try:
-      data, _ = self.sock.recvfrom(15000)
-      decode_data = data.decode()
-      if decode_data == 'A':
-        pass
-      else:
-        opponent_data['opp_body_node'] = eval(decode_data)
+        data, _ = self.sock.recvfrom(15000)
+        decode_data = data.decode()
+        if decode_data[0] == '[':
+            opponent_data['opp_body_node'] = eval(decode_data)
+            self.udp_count = 0
+        else:
+            pass
     except socket.timeout:
-      pass
+        self.udp_count += 1
+        if self.udp_count > 25:
+            socketio.emit('opponent_escaped')
 
   # udp로 통신할지 말지
   def test_connect(self):
     a = 0
+    b = 0
+    test_code = str(sid)
 
-    for i in range(10):
-      test_code = 'A'
-      self.sock.sendto(test_code.encode(), self.opp_addr)
-      try:
-        data, result = self.sock.recvfrom(1000)
-      except socket.timeout:
-        a += 1
+    for i in range(50):
+        if i % 2 == 0:
+            test_code = str(sid)
+        self.sock.sendto(test_code.encode(), self.opp_addr)
+        try:
+            data, _ = self.sock.recvfrom(600)
+            test_code = data.decode() 
+            if test_code == str(sid):
+                b += 1
+        except socket.timeout:
+            a += 1
 
-    if a != 0:
-      self.is_udp = True
-      print("UDP MODE")
+    if a != 50 and b != 0:
+        self.is_udp = True
+    
+    print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
 
   # 소멸자 소켓 bind 해제
   def __del__(self):
@@ -589,10 +603,10 @@ def set_address(data):
   global game
   opp_ip = data['ip_addr']
   opp_port = data['port']
+  sid = data['sid']
 
   game.set_socket(MY_PORT, opp_ip, opp_port)
-  game.test_connect()
-  socketio.emit('connection_result')
+  game.test_connect(sid)
 
 
 # socketio로 받은 상대방 정보
@@ -607,6 +621,7 @@ def opp_data_transfer(data):
 def set_food_loc(data):
   global game
   game.foodPoint = data['foodPoint']
+  game.foodOnOff = True
 
 
 # socketio로 받은 먹이 위치와 상대 점수
@@ -615,6 +630,7 @@ def set_food_loc(data):
   global game
   game.foodPoint = data['foodPoint']
   game.opp_score = data['opp_score']
+  game.foodOnOff = True
 
 
 ########################################################################################################################
