@@ -25,22 +25,18 @@
 
         socket.on('waiting', function(data) {
           console.log("waiting...")
-          console.log(data)
           $("#isMatched").text("waiting...");
-          $("#alarm").text("user : " + data['sid'] + " entered room : " + data['room_id']);
+          $("#alarm").text("user : " + data['sid']);
         });
 
         socket.on('matched', function(data) {
           console.log("matched!");
-          console.log(data)
           $("#isMatched").text("matched!!!");
           $("#alarm").text("user : " + data['sid'] + " entered room : " + data['room_id']);
         });
 
         socket.on('start-game', function(data) {
-          console.log(data)
           let url = '/enter_snake?room_id=' + data['room_id'] + '&sid=' + data['sid'];
-          console.log(url)
           window.location.href = url;
         });
       });

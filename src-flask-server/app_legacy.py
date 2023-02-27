@@ -1,13 +1,7 @@
-########################################################################################################################
-# KRAFTON JUNGLE 1기 나만의 무기 만들기 프로젝트
-# Project Biam.io
-# by.Team dabCAT
-# 박찬우 : https://github.com/pcw999
-# 박현우 : https://github.com/phwGithub
-# 우한봄 : https://github.com/onebom
-# 이민섭 : https://github.com/InFinity-dev
-########################################################################################################################
-##################################### PYTHON PACKAGE IMPORT ############################################################
+from ctypes import pydll
+import json
+import datetime
+import time
 import math
 import random
 import cvzone
@@ -17,22 +11,22 @@ import mediapipe as mp
 import sys
 import os
 from flask_restful import Resource, Api
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
+import pprint
 from datetime import datetime
+
+from copyreg import pickle
 import datetime
 import time
 from flask import Flask, render_template, Response, request, redirect, url_for, session
 from flask_socketio import SocketIO, emit, join_room
+import uuid
+# from socket import *
 import socket
 from engineio.payload import Payload
-# import pprint
-
-########################################################################################################################
-################################## SETTING GOLBAL VARIABLES ############################################################
 
 Payload.max_decode_packets = 200
 
-# PYTHON - ELECTRON VARIABLES
 # This wil report the electron exe location, and not the /tmp dir where the exe
 # is actually expanded and run from!
 print(f"flask is running in {os.getcwd()}, __name__ is {__name__}", flush=True)
@@ -48,7 +42,9 @@ if hasattr(sys, '_MEIPASS'):
   print('detected bundled mode', sys._MEIPASS)
   base_dir = os.path.join(sys._MEIPASS)
 
-app = Flask(__name__, static_folder=os.path.join(base_dir, 'static'),
+# app = Flask(__name__)
+app = Flask(__name__,
+            static_folder=os.path.join(base_dir, 'static'),
             template_folder=os.path.join(base_dir, 'templates'))
 
 app.config['SECRET_KEY'] = "roomfitisdead"
@@ -58,21 +54,18 @@ app.config['EXPLAIN_TEMPLATE_LOADING'] = False  # won't work unless debug is on
 socketio = SocketIO(app, cors_allowed_origins='*')
 
 CORS(app, origins='http://localhost:5000')
+# CORS(app)
 
 api = Api(app)
+
+# True -> udp 통신, False -> 서버 통신
+use_udp = True
+# use_udp = False
 
 # Setting Path to food.png
 pathFood = './src-flask-server/static/food.png'
 
-# Network connections variables
-opponent_data = {}  # 상대 데이터 (현재 손위치, 현재 뱀위치)
-gameover_flag = False  # ^^ 게임오버
-now_my_room = ""  # 현재 내가 있는 방
-now_my_sid = ""  # 현재 나의 sid
-MY_PORT = 0  # socket_bind를 위한 내 포트 번호
 
-
-########################################################################################################################
 ################################ Mediapipe Detecting Module ############################################################
 class HandDetector:
   """
@@ -228,8 +221,8 @@ class HandDetector:
 
 
 ########################################################################################################################
-############################## SNAKE GAME LOGIC SECTION ##############################
-# video setting
+
+################################## SNAKE GAME LOGIC SECTION ############################################################
 cap = cv2.VideoCapture(0)
 
 # Ubuntu YUYV cam setting low frame rate problem fixed
@@ -240,7 +233,7 @@ cap.set(4, 720)
 cap.set(cv2.CAP_PROP_FPS, 60)
 fps = cap.get(cv2.CAP_PROP_FPS)
 
-# Color templates
+# color templates
 red = (0, 0, 255)  # red
 megenta = (255, 0, 255)  # magenta
 green = (0, 255, 0)  # green
@@ -248,33 +241,50 @@ yellow = (0, 255, 255)  # yellow
 cyan = (255, 255, 0)  # cyan
 detector = HandDetector(detectionCon=0.5, maxHands=1)
 
+# UDP 전송 위해 딕셔너리로 자료형 변환함. 문제 발생시 참조
+opponent_data = {}
+food_data = []
+gameover_flag = False
+
 
 class SnakeGameClass:
-  # 생성자, class를 선언하면서 기본 변수들을 설정함
-  def __init__(self, pathFood):
+  def __init__(self, pathFood, port_num, opp_ip, opp_port):
+    # 통신 세팅
+    self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    self.sock.bind(('0.0.0.0', int(port_num)))
+    self.sock.settimeout(0.02)
+    self.opp_addr = (opp_ip, int(opp_port))
+
     self.points = []  # all points of the snake
     self.lengths = []  # distance between each point
     self.currentLength = 0  # total length of the snake
     self.allowedLength = 150  # total allowed Length
-    self.previousHead = random.randint(100, 1000), random.randint(100, 600)
 
-    self.speed = 5
-    self.velocityX = random.choice([-1, 0, 1])
-    self.velocityY = random.choice([-1, 1])
+    # [TODO] 조건문으로 host,request에 대한 previeousHead, velocity 할당
+    # start point: host=(0,360), request=(1280, 360)
+    self.previousHead = random.randint(100, 1000), random.randint(100, 600)
+    # self.previousHead = (5, 360)
+
+    self.speed = 0.1
+
+    # self.velocityX ,self.velocityY : host= 1,0  request: -1,0
+    # self.velocityX = random.choice([-1, 0, 1])
+    # self.velocityY = random.choice([-1, 0, 1])
+    self.velocityX, self.velocityY = 1, 0
 
     self.imgFood = cv2.imread(pathFood, cv2.IMREAD_UNCHANGED)
     self.hFood, self.wFood, _ = self.imgFood.shape
-    self.foodPoint = 640, 360
+    self.foodPoint = 0, 0
+
+    # socketio.emit('foodEat', {'foodEat': True})
+
+    # FOR TEST ISOLOATION
+    self.randomFoodLocation()
 
     self.score = 0
-    self.opp_score = 0
-    self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    self.opp_addr = ()
-    self.is_udp = False
     self.gameOver = False
-    
-    self.multi=True
 
+    # ---collision function---
 
   def ccw(self, p, a, b):
     # print("확인3")
@@ -309,6 +319,19 @@ class SnakeGameClass:
         return True
     return False
 
+  # ---collision function---end
+  # FOR TEST ISOLOATION
+  # def randomFoodLocation(self, foodEat):
+  def randomFoodLocation(self):
+########################################################################################################################
+    # global food_data
+    # if food_data:
+    #   self.foodPoint = food_data
+    # else:
+    #   if foodEat:
+    #     self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
+########################################################################################################################
+    self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
   def draw_snakes(self, imgMain, points, score, isMe):
 
     bodercolor = cyan
@@ -335,93 +358,68 @@ class SnakeGameClass:
     return imgMain
 
   def draw_Food(self, imgMain):
+    # Draw Food
     rx, ry = self.foodPoint
-    imgMain = cvzone.overlayPNG(imgMain, self.imgFood, (rx - self.wFood // 2, ry - self.hFood // 2))
+    imgMain = cvzone.overlayPNG(imgMain, self.imgFood,
+                                (rx - self.wFood // 2, ry - self.hFood // 2))
     return imgMain
 
-  ############################################################
-  # 내 뱀 상황 업데이트
-  def my_snake_update(self, HandPoints):
-    global opponent_data
-
+############################################################
+  def my_snake_update(self, HandPoints, o_bodys):
     px, py = self.previousHead
+    # ----HandsPoint moving ----
+    s_speed = 20
+    if HandPoints:
+      m_x, m_y = HandPoints
+      dx = m_x - px  # -1~1
+      dy = m_y - py
 
-    s_speed = 30
-    cx, cy = self.set_snake_speed(HandPoints, s_speed)
+      # speed 범위: 0~1460
+      if math.hypot(dx, dy) > math.hypot(1280, 720) / 10:
+        self.speed = math.hypot(1280, 720) / 10  # 146
+      elif math.hypot(dx, dy) < s_speed:
+        self.speed = s_speed
+      else:
+        self.speed = math.hypot(dx, dy)
+
+      if dx != 0:
+        self.velocityX = dx / 1280
+      if dy != 0:
+        self.velocityY = dy / 720
+
+      # print(self.velocityX)
+      # print(self.velocityY)
+
+    else:
+      self.speed = s_speed
+
+    cx = round(px + self.velocityX * self.speed)
+    cy = round(py + self.velocityY * self.speed)
+    # ----HandsPoint moving ----end
+    if cx < 0 or cx > 1280 or cy < 0 or cy > 720:
+      if cx < 0: cx = 0
+      if cx > 1280: cx = 1280
+      if cy < 0: cy = 0
+      if cy > 720: cy = 720
+
+    if cx == 0 or cx == 1280:
+      self.velocityX = -self.velocityX
+    if cy == 0 or cy == 720:
+      self.velocityY = -self.velocityY
+
+    # print(f'{cx} , {cy}')
 
     self.points.append([[px, py], [cx, cy]])
+    # print(f'{self.points}')
 
     distance = math.hypot(cx - px, cy - py)
     self.lengths.append(distance)
+    # print(f'self.length -> {self.lengths}')
     self.currentLength += distance
     self.previousHead = cx, cy
 
-    self.length_reduction()
-
-    self.check_snake_eating(cx, cy)
-
-    self.send_data_to_opp()
-
-    if self.is_udp:
-      self.receive_data_from_opp()
-
-    # if self.isCollision(self.points[-1], o_bodys):
-    #     self.execute()
-
-  # 내 뱀이 움직이는 속도 설정
-  def set_snake_speed(self, HandPoints, s_speed):
-    px, py = self.previousHead
-    # ----HandsPoint moving ----
-    if HandPoints:
-        m_x, m_y = HandPoints
-        dx = m_x - px  # -1~1
-        dy = m_y - py
-
-        
-        # head로부터 handpoint가 근접하면 이전 direction을 따름
-        if math.hypot(dx, dy) < 1: 
-            self.speed=1 # 최소 속도
-        else:
-            if math.hypot(dx, dy) > 40:
-                self.speed=40 #최대속도
-            else:
-                self.speed = math.hypot(dx, dy)
-        
-        # 벡터 합 생성,크기가 1인 방향 벡터
-        if dx!=0:
-          a_vx=(self.velocityX*self.speed+dx/math.sqrt(dx**2+dy**2))
-          self.velocityX = dx/math.sqrt(dx**2+dy**2)
-        else:
-          a_vx=self.velocityX*self.speed
-          
-        if dy!=0:
-          a_vy=(self.velocityY*self.speed+dy/math.sqrt(dx**2+dy**2))
-          self.velocityY = dy/math.sqrt(dx**2+dy**2)
-        else:
-          a_vy=self.velocityY*self.speed
-
-    else:
-        a_vx=self.velocityX*self.speed
-        a_vy=self.velocityY*self.speed
-
-    cx = round(px + a_vx)
-    cy = round(py + a_vy)
-    # ----HandsPoint moving ----end
-    if cx<0 or cx>1280 or cy< 0 or cy>720:
-        if cx<0: cx=0
-        if cx>1280: cx=1280
-        if cy<0: cy=0
-        if cy>720: cy=720
-
-    if cx==0 or cx==1280:
-        self.velocityX=-self.velocityX
-    if cy== 0 or cy==720:
-        self.velocityY=-self.velocityY
-
-    return cx, cy
-
-  # 뱀 길이 조정
-  def length_reduction(self):
+    # Length Reduction
+    # print(self.allowedLength)
     if self.currentLength > self.allowedLength:
       for i, length in enumerate(self.lengths):
         self.currentLength -= length
@@ -431,105 +429,135 @@ class SnakeGameClass:
         if self.currentLength < self.allowedLength:
           break
 
-  # 뱀 식사 여부 확인
-  def check_snake_eating(self, cx, cy):
+    # Check if snake ate the Food
     rx, ry = self.foodPoint
-    if (rx - (self.wFood // 2) < cx < rx + (self.wFood // 2)) and (
-      ry - (self.hFood // 2) < cy < ry + (self.hFood // 2)):
+    # print(f'foodPoint in my_snake_update func = {rx, ry}')
+    foodEat = False
+    # print(f'먹이 위치 : {self.foodPoint}')
+    if rx - self.wFood // 2 < cx < rx + self.wFood // 2 and \
+      ry - self.hFood // 2 < cy < ry + self.hFood // 2:
+      foodEat = True
       self.allowedLength += 50
       self.score += 1
+      # FOR TEST ISOLOATION
+      self.randomFoodLocation()
 
-      if self.multi:
-        socketio.emit('user_ate_food', {'score': self.score})
-      else:
-        self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
+    # print(foodEat)
+########################################################################################################################
+    # socketio.emit('foodEat', {'foodEat': foodEat})
+########################################################################################################################
+    # print(self.foodPoint)
+    # FOR TEST ISOLATION
+    # self.randomFoodLocation(foodEat)
 
-  # 뱀이 충돌했을때
-  def execute(self):
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Hit")
-    self.gameOver = False
-    self.points = []  # all points of the snake
-    self.lengths = []  # distance between each point
-    self.currentLength = 0  # total length of the snake
-    self.allowedLength = 150  # total allowed Length
-    self.previousHead = 0, 0  # previous head point
+    if use_udp:
+      self.send_data(cx, cy)
+    else:
+      socketio.emit('game_data',
+                    {'head_x': cx, 'head_y': cy, 'body_node': self.points, 'score': self.score, 'fps': fps})
 
-  # 송출될 프레임 업데이트
-  def update(self, imgMain, HandPoints):
-    global gameover_flag, opponent_data
+    # ---- Collision ----
+    # print(self.points[-1])
+
+    if self.points and self.isCollision(self.points[-1], o_bodys):
+      print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Hit")
+      self.gameOver = False
+      self.points = []  # all points of the snake
+      self.lengths = []  # distance between each point
+      self.currentLength = 0  # total length of the snake
+      self.allowedLength = 150  # total allowed Length
+      self.previousHead = 0, 0  # previous head point
+      self.randomFoodLocation()
+
+  def update(self, imgMain, receive_Data, HandPoints, isBot):
+    global gameover_flag
 
     if self.gameOver:
+      # pass
+      # cvzone.putTextRect(imgMain, "Game Over", [300, 400],
+      #                    scale=7, thickness=5, offset=20)
+      # cvzone.putTextRect(imgMain, f'Your Score: {self.score}', [300, 550],
+      #                    scale=7, thickness=5, offset=20)
       gameover_flag = False
     else:
       # draw others snake
+      body_node = []
+      score = 0
+
+      if receive_Data:
+        if isBot:
+          body_node = receive_Data["bot_body_node"]
+        else:
+          body_node = receive_Data["opp_body_node"]
+          score = receive_Data["opp_score"]
 
       # 0 이면 상대 뱀
-      imgMain = self.draw_snakes(imgMain, opponent_data, self.opp_score, 0)
+      imgMain = self.draw_snakes(imgMain, body_node, score, 0)
 
       # update and draw own snake
-      self.my_snake_update(HandPoints)
-
+      # print(f'trying to call my_snake_update function : self.foodPoint-> {self.foodPoint}')
+      self.my_snake_update(HandPoints, body_node)
       imgMain = self.draw_Food(imgMain)
       # 1 이면 내 뱀
       imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
     return imgMain
 
-  # 통신 관련 변수 설정
-  def set_socket(self, my_port, opp_ip, opp_port):
-    self.sock.bind(('0.0.0.0', int(my_port)))
-    self.sock.settimeout(0.02)
-    self.opp_addr = (opp_ip, int(opp_port))
-
-  # 데이터 전송
-  def send_data_to_opp(self):
-    if self.is_udp:
-      data_set = str(self.points)
-      self.sock.sendto(data_set.encode(), self.opp_addr)
-    else:
-      socketio.emit('game_data', {'body_node': self.points})
-
-  # 데이터 수신 (udp 통신 일때만 사용)
-  def receive_data_from_opp(self):
+  def send_data(self, cx, cy):
     global opponent_data
+    data_set = str(cx) + '/' + str(cy) + '/' + str(self.points) + '/' + str(self.score)
+    self.sock.sendto(data_set.encode(), self.opp_addr)
 
     try:
-      data, _ = self.sock.recvfrom(15000)
+      data, _ = self.sock.recvfrom(10000)
       decode_data = data.decode()
       if decode_data == 'A':
         pass
       else:
-        opponent_data['opp_body_node'] = eval(decode_data)
+        decode_data_list = decode_data.split('/')
+        # print(f'recieved opp node data = {decode_data_list}')
+
+        opponent_data['opp_head_x'] = int(decode_data_list[0])
+        opponent_data['opp_head_y'] = int(decode_data_list[1])
+        opponent_data['opp_body_node'] = eval(decode_data_list[2])
+        opponent_data['opp_score'] = int(decode_data_list[3])
     except socket.timeout:
       pass
 
-  # udp로 통신할지 말지
   def test_connect(self):
+    global use_udp
     a = 0
 
     for i in range(10):
       test_code = 'A'
       self.sock.sendto(test_code.encode(), self.opp_addr)
       try:
-        data, result = self.sock.recvfrom(1000)
+        data, result = self.sock.recvfrom(100)
       except socket.timeout:
         a += 1
 
-    if a != 0:
-      self.is_udp = True
-      print("UDP MODE")
+    if a == 0:
+      use_udp = False
 
-  # 소멸자 소켓 bind 해제
   def __del__(self):
-    global opponent_data
-    opponent_data = {}
+    global use_udp
+    use_udp = True
+    # use_udp = False
     self.sock.close()
 
 
-######################################################################################
-######################################## FLASK APP ROUTINGS ############################################################
+########################################################################################################################
 
-game = SnakeGameClass(pathFood)
+#################### SETTING SERVER COMMUNICATION VARIABLES ############################################################
+room_id = ""
+sid = ""
+MY_PORT = int(0)
+game = SnakeGameClass(pathFood, MY_PORT, '0.0.0.0', int(0))
+
+
+########################################################################################################################
+
+######################################## FLASK APP ROUTINGS ############################################################
 
 # Defualt Root Routing for Flask Server Check
 @api.resource('/')
@@ -549,35 +577,33 @@ def index():
 # Game Screen
 @app.route("/enter_snake", methods=["GET", "POST"])
 def enter_snake():
-  global now_my_sid
-  global now_my_room
   global game
+  global room_id
+  global sid
 
-  now_my_room = request.args.get('room_id')
-  now_my_sid = request.args.get('sid')
-  print(now_my_room, now_my_sid)
+  room_id = request.args.get('room_id')
+  sid = request.args.get('sid')
+  print(room_id, sid)
 
-  game = SnakeGameClass(pathFood)
-
-  return render_template("snake.html", room_id=now_my_room, sid=now_my_sid)
+  return render_template("snake.html", room_id=room_id, sid=sid)
 
 
-########################################################################################################################
 ############## SERVER SOCKET AND PEER TO PEER ESTABLISHMENT ############################################################
-
-# 페이지에서 로컬 flask 서버와 소켓 통신 개시 되었을때 자동으로 실행
 @socketio.on('connect')
 def test_connect():
   print('Client connected!!!')
 
 
-# 페이지에서 로컬 flask 서버와 소켓 통신 종료 되었을때 자동으로 실행
 @socketio.on('disconnect')
 def test_disconnect():
-  print('Client disconnected!!!')
+  global room_id
+  global sid
+
+  socketio.emit('server_disconnect', {'room_id': room_id, 'sid': sid})
+  print('Disconnected From Server!!!')
 
 
-# 현재 내 포트 번호 요청
+# webpage로 부터 받은 내 port
 @socketio.on('my_port')
 def my_port(data):
   global MY_PORT
@@ -593,31 +619,24 @@ def set_address(data):
   opp_ip = data['ip_addr']
   opp_port = data['port']
 
-  game.set_socket(MY_PORT, opp_ip, opp_port)
+  game = SnakeGameClass(pathFood, MY_PORT, opp_ip, opp_port)
   game.test_connect()
   socketio.emit('connection_result')
 
 
-# socketio로 받은 상대방 정보
 @socketio.on('opp_data_transfer')
 def opp_data_transfer(data):
   global opponent_data
   opponent_data = data['data']
+  # socketio.emit('opp_data_to_test_server', {'data' : data}, broadcast=True)
+  # print('Received data from client:', opp_head_x, opp_head_y, opp_score, opp_sid)
 
 
-# socketio로 받은 먹이 위치
-@socketio.on('set_food_location')
-def set_food_loc(data):
-  global game
-  game.foodPoint = data['foodPoint']
-
-
-# socketio로 받은 먹이 위치와 상대 점수
-@socketio.on('set_food_location_score')
-def set_food_loc(data):
-  global game
-  game.foodPoint = data['foodPoint']
-  game.opp_score = data['opp_score']
+@socketio.on('foodPoint_to_flask')
+def foodPoint_to_flask(data):
+  global food_data
+  food_data = data['foodPoint']
+  # print(f'food_data get from server : {food_data}')
 
 
 ########################################################################################################################
@@ -628,6 +647,15 @@ def snake():
     global opponent_data
     global game
     global gameover_flag
+    global sid
+
+    # time.sleep(1)
+########################################################################################################################
+    # FOR TEST ISOLOATION
+    # socketio.emit('foodEat', {'foodEat': True})
+    # game.randomFoodLocation(True)
+########################################################################################################################
+    # print(f'inside generator before while loop')
 
     while True:
       success, img = cap.read()
@@ -644,10 +672,16 @@ def snake():
 
       # encode the image as a JPEG string
       _, img_encoded = cv2.imencode('.jpg', img)
-      yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
+      yield (b'--frame\r\n'
+             b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
-      if gameover_flag:  # ^^ 게임 오버 시
-        pass
+      if gameover_flag:
+        print("game ended")
+        gameover_flag = False
+        time.sleep(1)
+        socketio.emit('gameover', {'sid': sid})
+        time.sleep(2)
+        break
 
   return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -722,10 +756,11 @@ def bot_data_update():
 @app.route('/test_bed')
 def test_bed():
   def generate():
-    global bot_data, game, gameover_flag,sid
-    global opponent_data
+    global bot_data
+    global game
+    global gameover_flag
+    global sid
 
-    game.multi=False
     while True:
       success, img = cap.read()
       img = cv2.flip(img, 1)
@@ -738,9 +773,8 @@ def test_bed():
         pointIndex = lmList[8][0:2]
 
       bot_data_update()
-      opponent_data=bot_data["bot_body_node"]
       # print(pointIndex)
-      img = game.update(img,pointIndex)
+      img = game.update(img, bot_data, pointIndex, True)
 
       # encode the image as a JPEG string
       _, img_encoded = cv2.imencode('.jpg', img)
@@ -756,9 +790,8 @@ def test_bed():
         break
 
   return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
 ########################################################################################################################
+
 ########################## Legacy Electron Template Routing ############################################################
 @app.route('/hello')
 def hello():
@@ -771,9 +804,10 @@ def hello_vue():
 
 
 ########################################################################################################################
-####################################### FLASK APP ARGUMENTS ############################################################
 
 if __name__ == "__main__":
   socketio.run(app, host='localhost', port=5000, debug=False, allow_unsafe_werkzeug=True)
 
-########################################################################################################################
+# if __name__ == "__main__":
+#   # app.run()
+#   app.run(host="localhost", port=5000, debug=True)
