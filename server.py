@@ -20,6 +20,7 @@ waiting_players = [] # 매칭 잡은 유저 목록
 room_of_players = {} # 해당 sid에 할당된 룸
 players_in_room = {} # 해당 room에 존재하는 sid들
 address = {} # 먼저 방에 들어온 사람 주소 (전송을 위해 저장)
+escape_count = {}
 
 # server test page
 @app.route("/")
@@ -39,9 +40,9 @@ def test_disconnect():
     global room_of_players
     global players_in_room
     
-    if request.sid in room_of_players:
-        room_id = room_of_players[request.sid]
-        players_in_room[room_id].remove(request.sid)
+    room_id = room_of_players[request.sid]
+
+    players_in_room[room_id].remove(request.sid)
 
     ip_addr = request.remote_addr
     port = request.environ['REMOTE_PORT']
@@ -53,6 +54,7 @@ def handle_join():
     global waiting_players
     global waiting_user_idx
     global room_of_players
+    global escape_count
 
     if request.sid in waiting_players:
         print("이미 매칭 중인 유저입니다.")
@@ -66,6 +68,7 @@ def handle_join():
         user2 = waiting_players[waiting_user_idx]
         # 룸 id 할당
         room_id = str(uuid.uuid4())
+        escape_count[room_id] = 0
         # sid에게 들어갈 방 알려줌
 
         # 매칭 잡힌 사실 index 페이지에 보내줌
@@ -81,12 +84,15 @@ def handle_join():
 @socketio.on('send_data')
 def send_data(data):
     global players_in_room
+    global escape_count
     
     body_node = data['body_node']
     room_id = data['room_id']
 
     if len(players_in_room[room_id]) == 1:
-        emit('opponent_escaped_server', to=request.sid)
+        escape_count[room_id] += 1
+        if escape_count[room_id] > 30:
+            emit('opponent_escaped', to=request.sid)
     else:
         emit('opp_data', {'opp_body_node' : body_node, 'opp_room_id' : room_id}, broadcast=True, include_self=False, room=room_id)
 
@@ -133,11 +139,11 @@ def my_port(data):
     emit('my_port', {'my_port':port})
 
     if len(players_in_room[room_id]) == 2:
-        room_of_players[players_in_room[room_id][0]] = room_id
-        room_of_players[players_in_room[room_id][1]] = room_id
+        room_of_players[request.sid] = room_id
         emit('opponent_address', {'ip_addr' : ip_addr, 'port' : port}, broadcast=True, include_self=False, room=room_id)
         emit('opponent_address', {'ip_addr' : address[room_id][0], 'port' : address[room_id][1]}, to=request.sid)
     else:
+        room_of_players[request.sid] = room_id
         address[room_id] = [ip_addr, port]
 
 # 각 클라이언트에게 음식 좌표와 상대 점수 전송
@@ -149,4 +155,5 @@ def provide_food_data(data):
 
 if __name__ == "__main__":
     # socketio.run(app, host='0.0.0.0', port=80, debug=True)
-    socketio.run(app, host='0.0.0.0', port=80, debug=False, allow_unsafe_werkzeug=True)
+    # socketio.run(app, host='0.0.0.0', port=80, debug=False, allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', port=8080, debug=False, allow_unsafe_werkzeug=True)
