@@ -549,7 +549,7 @@ def enter_snake():
   now_my_sid = request.args.get('sid')
   print(now_my_room, now_my_sid)
 
-  game = SnakeGameClass("./static/food.png")  # ^^ 이식 시 파일 경로 설정
+  game = SnakeGameClass(pathFood)
 
   return render_template("snake.html", room_id=now_my_room, sid=now_my_sid)
 
