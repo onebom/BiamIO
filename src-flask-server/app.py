@@ -78,7 +78,6 @@ isBlack = False
 isMaze = False
 
 
-
 ########################################################################################################################
 ################################ Mediapipe Detecting Module ############################################################
 class HandDetector:
@@ -117,7 +116,7 @@ class HandDetector:
     :param draw: Flag to draw the output on the image.
     :return: Image with or without drawings
     """
-    global isBlack,isMaze
+    global isBlack, isMaze
 
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     self.results = self.hands.process(imgRGB)
@@ -169,7 +168,7 @@ class HandDetector:
           if isBlack:
             # [TODO]maze_map 화면에 적용시키기
             if isMaze:
-              menuimg[np.where(game.maze_map==1)]=(0,0,255)
+              menuimg[np.where(game.maze_map == 1)] = (0, 0, 255)
             self.mpDraw.draw_landmarks(menuimg, handLms, self.mpHands.HAND_CONNECTIONS)
           else:
             self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
@@ -182,12 +181,12 @@ class HandDetector:
       sigma = 10
       img = (cv2.GaussianBlur(img, (0, 0), sigma))
     if draw:
-        if isBlack:
-          if isMaze:
-            menuimg[np.where(game.maze_map==1)]=(0,0,255)
-          return allHands, menuimg
-        else:
-          return allHands, img
+      if isBlack:
+        if isMaze:
+          menuimg[np.where(game.maze_map == 1)] = (0, 0, 255)
+        return allHands, menuimg
+      else:
+        return allHands, img
     else:
       return allHands
 
@@ -298,9 +297,9 @@ class SnakeGameClass:
     self.foodOnOff = True
     self.multi = True
 
-    self.maze_start=0,0
-    self.maze_end=0,0
-    self.maze_map=np.array([])
+    self.maze_start = 0, 0
+    self.maze_end = 0, 0
+    self.maze_map = np.array([])
 
   def ccw(self, p, a, b):
     # print("확인3")
@@ -336,18 +335,18 @@ class SnakeGameClass:
     return False
 
   def maze_collision(self):
-    x,y=self.previousHead
-    if self.maze_map[y,x]==1:
+    x, y = self.previousHead
+    if self.maze_map[y, x] == 1:
       return False
     return True
 
   # maze 초기화
   def maze_initialize(self):
-    self.maze_start,self.maze_end,self.maze_map=create_maze(1280,720,9,16)
-    self.previousHead=self.maze_start
-    self.velocityX=0
-    self.velocityY=0
-    self.points=[]
+    self.maze_start, self.maze_end, self.maze_map = create_maze(1280, 720, 9, 16)
+    self.previousHead = self.maze_start
+    self.velocityX = 0
+    self.velocityY = 0
+    self.points = []
 
   def draw_snakes(self, imgMain, points, score, isMe):
 
@@ -399,12 +398,11 @@ class SnakeGameClass:
       self.execute()
 
     # end point 도달
-    end_pt1,end_pt2=self.maze_end
-    if end_pt1[0]<=cx<=end_pt2[0] and end_pt1[0]<=cy<=end_pt2[1]:
+    end_pt1, end_pt2 = self.maze_end
+    if end_pt1[0] <= cx <= end_pt2[0] and end_pt1[0] <= cy <= end_pt2[1]:
       self.maze_initialize()
       # 시간 제한 넣는다면 그것도 다시 돌리기
       time.sleep(3)
-
 
   # 내 뱀 상황 업데이트
   def my_snake_update(self, HandPoints):
@@ -633,9 +631,9 @@ class SnakeGameClass:
         pass
     except socket.timeout:
 
-        self.udp_count += 1
-        if self.udp_count > 25:
-            socketio.emit('opponent_escaped')
+      self.udp_count += 1
+      if self.udp_count > 25:
+        socketio.emit('opponent_escaped')
 
   # udp로 통신할지 말지
   def test_connect(self, sid):
@@ -914,10 +912,11 @@ def test():
 
 
 menu_game = SnakeGameClass(pathFood)
+
+
 # Main Menu Selection
 @app.route('/menu_snake')
 def menu_snake():
-
   global isBlack
 
   isBlack = True
@@ -945,41 +944,43 @@ def menu_snake():
 
   return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+
 def create_maze(image_w, image_h, block_rows, block_cols):
   manager = MazeManager()
-  maze = manager.add_maze(9,16)
+  maze = manager.add_maze(9, 16)
 
-  wall_map = np.zeros((image_h,image_w)) # (h,w)
-  block_h = image_h//block_rows
-  block_w = image_w//block_cols
+  wall_map = np.zeros((image_h, image_w))  # (h,w)
+  block_h = image_h // block_rows
+  block_w = image_w // block_cols
 
   start = []
-  end = [[],[]]
+  end = [[], []]
   r = 5
 
   for i in range(block_rows):
     for j in range(block_cols):
       if maze.initial_grid[i][j].is_entry_exit == "entry":
-        end=[[j-r,i-r],[j+r,i+r]]
+        end = [[j - r, i - r], [j + r, i + r]]
       elif maze.initial_grid[i][j].is_entry_exit == "exit":
-        start=[j,i]
+        start = [j, i]
 
       if maze.initial_grid[i][j].walls["top"]:
-          if i==0:
-              wall_map[i*block_h:i*block_h+r,j*block_w:(j+1)*block_w]=1
-          else:
-              wall_map[i*block_h-r:i*block_h+r,j*block_w:(j+1)*block_w]=1
+        if i == 0:
+          wall_map[i * block_h:i * block_h + r, j * block_w:(j + 1) * block_w] = 1
+        else:
+          wall_map[i * block_h - r:i * block_h + r, j * block_w:(j + 1) * block_w] = 1
       if maze.initial_grid[i][j].walls["right"]:
-          wall_map[i*block_h:(i+1)*block_h,(j+1)*block_w-r:(j+1)*block_w+r]=1
+        wall_map[i * block_h:(i + 1) * block_h, (j + 1) * block_w - r:(j + 1) * block_w + r] = 1
       if maze.initial_grid[i][j].walls["bottom"]:
-          wall_map[(i+1)*block_h-r:(i+1)*block_h+r,j*block_w:(j+1)*block_w]=1
+        wall_map[(i + 1) * block_h - r:(i + 1) * block_h + r, j * block_w:(j + 1) * block_w] = 1
       if maze.initial_grid[i][j].walls["left"]:
-          if j==0:
-              wall_map[i*block_h:(i+1)*block_h,j*block_w:j*block_w+r]=1
-          else:
-              wall_map[i*block_h:(i+1)*block_h,j*block_w-r:j*block_w+r]=1
+        if j == 0:
+          wall_map[i * block_h:(i + 1) * block_h, j * block_w:j * block_w + r] = 1
+        else:
+          wall_map[i * block_h:(i + 1) * block_h, j * block_w - r:j * block_w + r] = 1
 
   return start, end, wall_map
+
 
 @app.route('/maze_play')
 def maze_play():
@@ -1018,6 +1019,7 @@ def maze_play():
         break
 
   return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 ########################################################################################################################
 ########################## Legacy Electron Template Routing ############################################################
