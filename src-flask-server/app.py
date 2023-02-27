@@ -523,6 +523,8 @@ class SnakeGameClass:
 ######################################################################################
 ######################################## FLASK APP ROUTINGS ############################################################
 
+game = SnakeGameClass(pathFood)
+
 # Defualt Root Routing for Flask Server Check
 @api.resource('/')
 class HelloWorld(Resource):
