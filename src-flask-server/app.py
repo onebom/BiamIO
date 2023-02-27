@@ -67,13 +67,11 @@ api = Api(app)
 # Setting Path to food.png
 pathFood = './src-flask-server/static/food.png'
 
-# =========== Global variables ===========
 opponent_data = {}  # 상대 데이터 (현재 손위치, 현재 뱀위치)
 gameover_flag = False  # ^^ 게임오버
 now_my_room = ""  # 현재 내가 있는 방
 now_my_sid = ""  # 현재 나의 sid
 MY_PORT = 0  # socket_bind를 위한 내 포트 번호
-# ====================================
 
 # 배경 검정색
 isBlack = False
