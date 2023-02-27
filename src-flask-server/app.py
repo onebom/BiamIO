@@ -533,13 +533,13 @@ class HelloWorld(Resource):
 
 
 # Game Main Menu
-@app.route("/", methods=["GET"])
+@app.route("/index", methods=["GET", "POST"])
 def index():
   return render_template("index.html")
 
 
 # Game Screen
-@app.route("/enter_snake", methods=["GET"])
+@app.route("/enter_snake", methods=["GET", "POST"])
 def enter_snake():
   global now_my_sid
   global now_my_room
