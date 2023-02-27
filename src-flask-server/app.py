@@ -66,16 +66,15 @@ api = Api(app)
 pathFood = './src-flask-server/static/food.png'
 
 # =========== Global variables ===========
-opponent_data = {} # 상대 데이터 (현재 손위치, 현재 뱀위치)
-gameover_flag = False # ^^ 게임오버
-now_my_room = "" # 현재 내가 있는 방
-now_my_sid = "" # 현재 나의 sid
-MY_PORT = 0 # socket_bind를 위한 내 포트 번호
+opponent_data = {}  # 상대 데이터 (현재 손위치, 현재 뱀위치)
+gameover_flag = False  # ^^ 게임오버
+now_my_room = ""  # 현재 내가 있는 방
+now_my_sid = ""  # 현재 나의 sid
+MY_PORT = 0  # socket_bind를 위한 내 포트 번호
 # ====================================
 
 # 배경 검정색
 isBlack = False
-
 
 
 ########################################################################################################################
@@ -178,10 +177,10 @@ class HandDetector:
       sigma = 10
       img = (cv2.GaussianBlur(img, (0, 0), sigma))
     if draw:
-        if isBlack:
-          return allHands, menuimg
-        else:
-          return allHands, img
+      if isBlack:
+        return allHands, menuimg
+      else:
+        return allHands, img
     else:
       return allHands
 
@@ -352,7 +351,7 @@ class SnakeGameClass:
 
   def draw_Food(self, imgMain):
     rx, ry = self.foodPoint
-    socketio.emit('foodPoint', {'food_x':rx ,'food_y':ry})
+    socketio.emit('foodPoint', {'food_x': rx, 'food_y': ry})
     imgMain = cvzone.overlayPNG(imgMain, self.imgFood, (rx - self.wFood // 2, ry - self.hFood // 2))
 
     return imgMain
@@ -526,7 +525,7 @@ class SnakeGameClass:
 
       # update and draw own snake
       self.my_snake_update(HandPoints)
-      imgMain = self.draw_Food(imgMain)
+      # imgMain = self.draw_Food(imgMain)
       # 1 이면 내 뱀
       imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
@@ -557,24 +556,24 @@ class SnakeGameClass:
       socketio.emit('game_data', {'body_node': self.points})
 
   def send_data_to_html(self):
-    socketio.emit('game_data', {'body_node': self.points, 'score': self.score, 'fps' : fps})
+    socketio.emit('game_data', {'body_node': self.points, 'score': self.score, 'fps': fps})
 
   # 데이터 수신 (udp 통신 일때만 사용)
   def receive_data_from_opp(self):
     global opponent_data
 
     try:
-        data, _ = self.sock.recvfrom(15000)
-        decode_data = data.decode()
-        if decode_data[0] == '[':
-            opponent_data['opp_body_node'] = eval(decode_data)
-            self.udp_count = 0
-        else:
-            pass
+      data, _ = self.sock.recvfrom(15000)
+      decode_data = data.decode()
+      if decode_data[0] == '[':
+        opponent_data['opp_body_node'] = eval(decode_data)
+        self.udp_count = 0
+      else:
+        pass
     except socket.timeout:
-        self.udp_count += 1
-        if self.udp_count > 25:
-            socketio.emit('opponent_escaped_udp')
+      self.udp_count += 1
+      if self.udp_count > 25:
+        socketio.emit('opponent_escaped_udp')
 
   # udp로 통신할지 말지
   def test_connect(self, sid):
@@ -583,19 +582,19 @@ class SnakeGameClass:
     test_code = str(sid)
 
     for i in range(50):
-        if i % 2 == 0:
-            test_code = str(sid)
-        self.sock.sendto(test_code.encode(), self.opp_addr)
-        try:
-            data, _ = self.sock.recvfrom(600)
-            test_code = data.decode()
-            if test_code == str(sid):
-                b += 1
-        except socket.timeout:
-            a += 1
+      if i % 2 == 0:
+        test_code = str(sid)
+      self.sock.sendto(test_code.encode(), self.opp_addr)
+      try:
+        data, _ = self.sock.recvfrom(600)
+        test_code = data.decode()
+        if test_code == str(sid):
+          b += 1
+      except socket.timeout:
+        a += 1
 
     if a != 50 and b != 0:
-        self.is_udp = True
+      self.is_udp = True
 
     print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
     socketio.emit('NetworkMode', {'UDP': self.is_udp})
@@ -627,10 +626,10 @@ class HelloWorld(Resource):
 def index():
   return render_template("index.html")
 
+
 @app.route('/testbed')
 def testbed():
   return render_template("testbed.html")
-
 
 
 # Game Screen
@@ -848,15 +847,18 @@ def test():
 
   return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+
 # Main Menu Selection
 @app.route('/menu_snake')
 def menu_snake():
+  menu_game = SnakeGameClass(pathFood)
+  global isBlack
+
+  isBlack = True
+  menu_game.multi = False
+  menu_game.foodOnOff = False
+
   def generate():
-    global isBlack
-
-    isBlack = True
-    game.multi = False
-
     while True:
       success, img = cap.read()
       img = cv2.flip(img, 1)
@@ -868,7 +870,7 @@ def menu_snake():
         lmList = hands[0]['lmList']
         pointIndex = lmList[8][0:2]
 
-      menuimg = game.update_blackbg(menuimg, pointIndex)
+      menuimg = menu_game.update_blackbg(menuimg, pointIndex)
 
       # encode the image as a JPEG string
       _, img_encoded = cv2.imencode('.jpg', menuimg)
@@ -876,6 +878,7 @@ def menu_snake():
              b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
   return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 ########################################################################################################################
 ########################## Legacy Electron Template Routing ############################################################
