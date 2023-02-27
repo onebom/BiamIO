@@ -525,7 +525,7 @@ class SnakeGameClass:
 
       # update and draw own snake
       self.my_snake_update(HandPoints)
-      imgMain = self.draw_Food(imgMain)
+      # imgMain = self.draw_Food(imgMain)
       # 1 이면 내 뱀
       imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
