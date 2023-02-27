@@ -39,9 +39,9 @@ def test_disconnect():
     global room_of_players
     global players_in_room
     
-    room_id = room_of_players[request.sid]
-
-    players_in_room[room_id].remove(request.sid)
+    if request.sid in room_of_players:
+        room_id = room_of_players[request.sid]
+        players_in_room[room_id].remove(request.sid)
 
     ip_addr = request.remote_addr
     port = request.environ['REMOTE_PORT']
