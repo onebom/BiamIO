@@ -541,7 +541,9 @@ class SnakeGameClass:
             self.receive_data_from_opp()         
 
         if self.isCollision(self.points[-1], opp_bodys):
-            self.execute()
+            global user_move
+            if user_move:
+                self.execute()
 
 
     ################################## VECTORING SPEED METHOD ##########################################################
@@ -928,12 +930,12 @@ def snake():
                 if user_number == 1:
                     cx += 3
                     if cx > 450:
-                        cx = 100
+                        cx = 70
                         user_move = True
                 elif user_number == 2:
                     cx -= 3
                     if cx < 830:
-                        cx = 1180    
+                        cx = 1210    
                         user_move = True
 
             img = game.update(img, pointIndex)
