@@ -78,6 +78,7 @@ now_my_room = ""  # 현재 내가 있는 방
 now_my_sid = ""  # 현재 나의 sid
 MY_PORT = 0  # socket_bind를 위한 내 포트 번호
 user_number = 0 # 1p, 2p를 나타내는 번호
+user_move = False
 
 ############################################################ 아마도 자바스크립트로 HTML단에서 처리 예정
 # 배경음악이나 버튼음은 자바스크립트, 게임오버나 스킬 사용 효과음은 파이썬
@@ -658,11 +659,17 @@ class SnakeGameClass:
 
     # 뱀이 충돌했을때
     def execute(self):
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Hit")
+        global user_move
+        global user_number
         self.points = []  # all points of the snake
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
+        if user_number == 1:
+            self.previousHead = 100, 180
+        elif user_number == 2:
+            self.previousHead = 1180, 540
+        user_move = False
         socketio.emit('gameover')
 
     def update_mazeVer(self, imgMain, HandPoints):
@@ -885,6 +892,7 @@ def snake():
     def generate():
         global opponent_data
         global game
+        global user_move
 
         while True :
             if user_number == 1:
@@ -917,11 +925,11 @@ def snake():
             if not user_move:
                 if user_number == 1:
                     cx += 3
-                    if cx > 500:
+                    if cx > 450:
                         user_move = True
                 elif user_number == 2:
                     cx -= 3
-                    if cx < 780:    
+                    if cx < 830:    
                         user_move = True
 
             # encode the image as a JPEG string
