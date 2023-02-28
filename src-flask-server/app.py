@@ -269,7 +269,7 @@ cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
 
 cap.set(3, 1280)
 cap.set(4, 720)
-cap.set(cv2.CAP_PROP_FPS, 60)
+cap.set(cv2.CAP_PROP_FPS, 30) # TODO : 영향 확인하기, 시간 탐지 기법 중 하나가 프레임이라 프레임 맞춰줌
 fps = cap.get(cv2.CAP_PROP_FPS)
 
 # Color templates
@@ -306,9 +306,7 @@ class SnakeGameClass:
         self.opp_addr = ()
         self.is_udp = False
         self.udp_count = 0
-        self.gameOver = False
         self.foodOnOff = True
-        self.remaining_lifes = 2
         self.multi = True
 
         self.maze_start = [[],[]]
@@ -340,9 +338,7 @@ class SnakeGameClass:
         self.opp_addr = ()
         self.is_udp = False
         self.udp_count = 0
-        self.gameOver = False
         self.foodOnOff = True
-        self.remaining_lifes = 2
         self.multi = True
 
         self.maze_start = [[],[]]
@@ -439,7 +435,7 @@ class SnakeGameClass:
         # Change hue every 100ms
         change_interval = 100
 
-        hue = int(time.time() * change_interval % 180)
+        hue = int(time.time() * change_interval % 180) # TODO : 마지막에 성능 부족 시 아낄 수 있음
         rainbow = np.array([hue, 255, 255], dtype=np.uint8)
         rainbow = cv2.cvtColor(np.array([[rainbow]]), cv2.COLOR_HSV2BGR)[0, 0]
         # Convert headcolor to tuple of integers
@@ -521,7 +517,7 @@ class SnakeGameClass:
 
         s_speed = 30
         cx, cy = self.set_snake_speed(HandPoints, s_speed)
-        socketio.emit('finger_cordinate', {'head_x': cx, 'head_y': cy})
+        socketio.emit('finger_cordinate', {'head_x': cx, 'head_y': cy}) 
 
         self.points.append([[px, py], [cx, cy]])
 
@@ -663,13 +659,11 @@ class SnakeGameClass:
     # 뱀이 충돌했을때
     def execute(self):
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Hit")
-        self.gameOver = False
         self.points = []  # all points of the snake
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
-        self.previousHead = 0, 360  # previous head point
-        # print(self.previousHead)
+        socketio.emit('gameover')
 
     def update_mazeVer(self, imgMain, HandPoints):
         global gameover_flag
@@ -686,20 +680,17 @@ class SnakeGameClass:
     def update(self, imgMain, HandPoints):
         global gameover_flag, opponent_data
 
-        if self.gameOver:
-            gameover_flag = False
-        else:
-            opp_bodys = []
-            # 0 이면 상대 뱀
-            if opponent_data:
-                opp_bodys = opponent_data['opp_body_node']
-            imgMain = self.draw_snakes(imgMain, opp_bodys, self.opp_score, 0)
+        opp_bodys = []
+        # 0 이면 상대 뱀
+        if opponent_data:
+            opp_bodys = opponent_data['opp_body_node']
+        imgMain = self.draw_snakes(imgMain, opp_bodys, self.opp_score, 0)
 
-            # update and draw own snake
-            self.my_snake_update(HandPoints, opp_bodys)
-            imgMain = self.draw_Food(imgMain)
-            # 1 이면 내 뱀
-            imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
+        # update and draw own snake
+        self.my_snake_update(HandPoints, opp_bodys)
+        imgMain = self.draw_Food(imgMain)
+        # 1 이면 내 뱀
+        imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
         return imgMain
 
@@ -716,7 +707,7 @@ class SnakeGameClass:
     # 통신 관련 변수 설정
     def set_socket(self, my_port, opp_ip, opp_port):
         self.sock.bind(('0.0.0.0', int(my_port)))
-        self.sock.settimeout(0.02)
+        self.sock.settimeout(0.01) # TODO 만약 udp, 서버 선택 오류 시 다시 0.02로
         self.opp_addr = (opp_ip, int(opp_port))
 
     # 데이터 전송
@@ -894,17 +885,18 @@ def snake():
     def generate():
         global opponent_data
         global game
-        global gameover_flag
 
-        if user_number == 1:
-            cx, cy = 100, 360
-            game.previousHead = (0, 360)
-        elif user_number == 2:
-            cx, cy = 1180, 360
-            game.previousHead = (1280, 360)
+        while True :
+            if user_number == 1:
+                cx, cy = 100, 360
+                game.previousHead = (0, 360)
+                break
+            elif user_number == 2:
+                cx, cy = 1180, 360
+                game.previousHead = (1280, 360)
+                break
         
         user_move = False
-        max_time_end = time.time() + 4
 
         while True:
             success, img = cap.read()
@@ -913,9 +905,6 @@ def snake():
             img=detector.drawHands(img)
 
             pointIndex = []
-
-            if max_time_end < time.time():
-                user_move = True
                 
             if hands and user_move:
                 lmList = hands[0]['lmList']
@@ -927,16 +916,17 @@ def snake():
 
             if not user_move:
                 if user_number == 1:
-                    cx += 2
+                    cx += 3
+                    if cx > 500:
+                        user_move = True
                 elif user_number == 2:
-                    cx -= 2    
+                    cx -= 3
+                    if cx < 780:    
+                        user_move = True
 
             # encode the image as a JPEG string
             _, img_encoded = cv2.imencode('.jpg', img)
             yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
-
-            if gameover_flag:  # TODO : 게임 오버 시
-                pass
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -952,13 +942,6 @@ bot_data = {'bot_head_x': 1000,
             'lengths': [],
             'bot_velocityX': random.choice([-1, 1]),
             'bot_velocityY': random.choice([-1, 1])}
-start_opp_data = {'head_x': 1000,
-                  'head_y': 360,
-                  'opp_body_node': [],
-                  'currentLength': 0,
-                  'lengths': [],
-                  'velocityX': random.choice([-1, 1]),
-                  'velocityY': random.choice([-1, 1])}
 bot_cnt = 0
 
 
