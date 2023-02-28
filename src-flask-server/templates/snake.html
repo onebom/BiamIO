@@ -41,7 +41,7 @@
         // 서버에서 받은 상대의 주소를 로컬 flask 서버로 전송
         server_socket.on('opponent_address', function (data) {
             console.log(data['ip_addr'], data['port'])
-            client_socket.emit('opponent_address', {'ip_addr': data['ip_addr'], 'port': data['port'], 'sid': sid})
+            client_socket.emit('opponent_address', {'ip_addr': data['ip_addr'], 'port': data['port'], 'user_number' : data['user_number'], 'sid': sid})
         });
     </script>
 </head>
@@ -184,7 +184,6 @@
         $("#food_x").text(data["food_x"]);
         $("#food_y").text(data["food_y"]);
     });
-
     // 로컬에서 보낸 내 위치 서버에게 보내기
     client_socket.on("game_data", function (data) {
         $("#body_node").text(data["body_node"]);
