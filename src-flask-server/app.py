@@ -928,12 +928,12 @@ def snake():
 
             if not user_move:
                 if user_number == 1:
-                    cx += 3
+                    cx += 4
                     if cx > 450:
                         cx = 70
                         user_move = True
                 elif user_number == 2:
-                    cx -= 3
+                    cx -= 4
                     if cx < 830:
                         cx = 1210    
                         user_move = True
