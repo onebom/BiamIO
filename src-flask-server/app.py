@@ -682,7 +682,7 @@ class SnakeGameClass:
             socketio.emit('game_data', {'body_node': self.points})
 
     def send_data_to_html(self):
-        socketio.emit('game_data', {'score': self.score, 'fps': fps})
+        socketio.emit('game_data_for_debug', {'score': self.score, 'fps': fps})
 
     # 데이터 수신 (udp 통신 일때만 사용)
     def receive_data_from_opp(self):

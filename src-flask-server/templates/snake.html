@@ -168,8 +168,7 @@
     client_socket.on("UDP", function (data) {
         $("#UDP").text(data["NetworkMode"]);
     });
-    client_socket.on("game_data", function (data) {
-        $("#body_node").text(data["body_node"]);
+    client_socket.on("game_data_for_debug", function (data) {
         $("#score").text(data["score"]);
         $("#fps").text(data["fps"]);
     });
