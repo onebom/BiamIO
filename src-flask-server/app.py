@@ -847,6 +847,7 @@ def snake():
         global gameover_flag
         global isBlack
         isBlack = False
+        game.testbed_initialize()
 
         max_time_end = time.time() + 3
         cx, cy = 200, 360
