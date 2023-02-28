@@ -493,7 +493,7 @@ class SnakeGameClass:
         self.send_data_to_html()
 
         if self.is_udp:
-            self.receive_data_from_opp()
+            self.receive_data_from_opp()         
 
         # if self.isCollision(self.points[-1], opp_bodys):
         #     self.execute()
@@ -696,9 +696,9 @@ class SnakeGameClass:
                 opponent_data['opp_body_node'] = eval(decode_data)
                 self.udp_count = 0
             else:
-                pass
+                test_code = decode_data
+                self.sock.sendto(test_code.encode(), self.opp_addr)
         except socket.timeout:
-
             self.udp_count += 1
             if self.udp_count > 25:
                 socketio.emit('opponent_escaped')
@@ -858,7 +858,7 @@ def snake():
         if user_number == 1:
             cx, cy = 100, 360
             game.previousHead = (0, 360)
-        else:
+        elif user_number == 2:
             cx, cy = 1180, 360
             game.previousHead = (1280, 360)
         
@@ -874,7 +874,7 @@ def snake():
             if hands and user_move:
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
-            elif not user_move:
+            if not user_move:
                 pointIndex = [cx, cy]
 
             img = game.update(img, pointIndex)
@@ -884,7 +884,7 @@ def snake():
                     cx += 3
                     if cx > 320:
                         user_move = True
-                else:
+                elif user_number == 2:
                     cx -= 3
                     if cx < 960:
                         user_move = True       

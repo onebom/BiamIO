@@ -36,12 +36,12 @@
         server_socket.on("my_port", function (data) {
             console.log(data['my_port'])
             client_socket.emit('my_port', {'my_port': data['my_port']})
-            $("#snake_video").attr("src", "{{ url_for('snake') }}")
         });
         // 서버에서 받은 상대의 주소를 로컬 flask 서버로 전송
         server_socket.on('opponent_address', function (data) {
             console.log(data['ip_addr'], data['port'])
             client_socket.emit('opponent_address', {'ip_addr': data['ip_addr'], 'port': data['port'], 'user_number' : data['user_number'], 'sid': sid})
+            $("#snake_video").attr("src", "{{ url_for('snake') }}")
         });
     </script>
 </head>
@@ -165,8 +165,8 @@
     server_socket.on("time", function (data) {
         $("#time").html(data["time"]);
     });
-    client_socket.on("UDP", function (data) {
-        $("#UDP").text(data["NetworkMode"]);
+    client_socket.on("NetworkMode", function (data) {
+        $("#UDP").text(data["UDP"]);
     });
     client_socket.on("game_data_for_debug", function (data) {
         $("#score").text(data["score"]);
