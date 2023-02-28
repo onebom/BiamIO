@@ -696,9 +696,9 @@ class SnakeGameClass:
                 opponent_data['opp_body_node'] = eval(decode_data)
                 self.udp_count = 0
             else:
-                pass
+                test_code = decode_data
+                self.sock.sendto(test_code.encode(), self.opp_addr)
         except socket.timeout:
-
             self.udp_count += 1
             if self.udp_count > 25:
                 socketio.emit('opponent_escaped')
@@ -709,7 +709,7 @@ class SnakeGameClass:
         b = 0
         test_code = str(sid)
 
-        for i in range(100):
+        for i in range(50):
             if i % 2 == 0:
                 test_code = str(sid)
             self.sock.sendto(test_code.encode(), self.opp_addr)
@@ -721,7 +721,7 @@ class SnakeGameClass:
             except socket.timeout:
                 a += 1
 
-        if a != 100 and b != 0:
+        if a != 50 and b != 0:
             self.is_udp = True
 
         print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
