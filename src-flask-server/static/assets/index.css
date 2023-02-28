@@ -170,7 +170,7 @@ canvas {
     bottom: 0;
     left: 0;
     right: 0;
-    opacity: 0.5;
+    opacity: 0.3;
     filter: blur(1.2em);
     transform: translateY(120%) rotateX(95deg) scale(1.2, 0.8);
     background: var(--glow-color);
@@ -207,9 +207,10 @@ canvas {
     opacity: 1;
 }
 
+/*마우스 오버시 아래 조명*/
 .glowing-btn:hover:before {
     filter: blur(1.5em);
-    opacity: 1;
+    opacity: 0.5;
 }
 
 .glowing-btn:hover:after {
