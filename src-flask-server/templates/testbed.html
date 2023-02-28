@@ -75,6 +75,19 @@
         </div>
     </section>
     <script>
+        const ambient = document.querySelector('.ambient');
+
+        setInterval(() => {
+            if (ambient.style.backgroundColor === 'rgb(0, 255, 0)') {
+                ambient.style.backgroundColor = 'rgb(255, 0, 0)';
+            } else if (ambient.style.backgroundColor === 'rgb(255, 0, 0)') {
+                ambient.style.backgroundColor = 'rgb(0, 0, 255)';
+            } else {
+                ambient.style.backgroundColor = 'rgb(0, 255, 0)';
+            }
+        }, 1000);
+    </script>
+    <script>
         const accordions = document.querySelectorAll('.draggable');
 
         // add event listeners to accordion headers
