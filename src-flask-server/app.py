@@ -540,10 +540,13 @@ class SnakeGameClass:
         if self.is_udp:
             self.receive_data_from_opp()         
 
-        if self.isCollision(self.points[-1], opp_bodys):
-            global user_move
-            if user_move:
-                self.execute()
+        if len(self.points) != 0: #out of range 용 성능 애바면 좀;;
+            if self.isCollision(self.points[-1], opp_bodys):
+                global user_move
+                if user_move:
+                    self.execute()
+        else:
+            print('point가 텅텅 !')
 
 
     ################################## VECTORING SPEED METHOD ##########################################################
@@ -902,12 +905,12 @@ def snake():
 
         while True :
             if user_number == 1:
-                cx, cy = 100, 360
-                game.previousHead = (0, 360)
+                cx = 100
+                game.previousHead = (100, 360)
                 break
             elif user_number == 2:
-                cx, cy = 1180, 360
-                game.previousHead = (1280, 360)
+                cx = 1180
+                game.previousHead = (1180, 360)
                 break
         
         user_move = False
@@ -923,15 +926,17 @@ def snake():
             if hands and user_move:
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
+            # if not user_move:
+            #     pointIndex = [cx, cy]
 
             if not user_move:
                 if user_number == 1:
-                    cx += 4
+                    cx += 5
                     if cx > 450:
                         cx = 70
                         user_move = True
                 elif user_number == 2:
-                    cx -= 4
+                    cx -= 5
                     if cx < 830:
                         cx = 1210    
                         user_move = True
