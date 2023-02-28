@@ -421,6 +421,8 @@ class SnakeGameClass:
         self.velocityX = 0
         self.velocityY = 0
         self.points = []
+        self.foodOnOff = True
+        self.multi = False
 
     def draw_snakes(self, imgMain, points, score, isMe):
 
@@ -1013,15 +1015,13 @@ def bot_data_update():
             if bot_data['currentLength'] < 250:
                 break
 
-
+single_game = SnakeGameClass(pathFood)
 # TEST BED ROUTING
 @app.route('/test')
 def test():
-    single_game = SnakeGameClass(pathFood)
     def generate():
-        global bot_data, gameover_flag, sid
+        global bot_data, single_game, gameover_flag
         global opponent_data
-        single_game.multi = False
         single_game.global_intialize()
         single_game.testbed_initialize()
         
