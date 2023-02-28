@@ -209,6 +209,8 @@ class HandDetector:
                         # [TODO]maze_map 화면에 적용시키기
                         if isMaze:
                             menuimg[np.where(game.maze_map == 1)] = (0, 0, 255)
+                            menuimg[np.where(game.maze_map == 2)] = (0, 255, 255)
+                            menuimg[np.where(game.maze_map == 3)] = (255,0, 255)
                         self.mpDraw.draw_landmarks(menuimg, handLms, self.mpHands.HAND_CONNECTIONS)
                     else:
                         self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
@@ -225,6 +227,8 @@ class HandDetector:
             if isBlack:
                 if isMaze:
                     menuimg[np.where(game.maze_map == 1)] = (0, 0, 255)
+                    menuimg[np.where(game.maze_map == 2)] = (0, 255, 255)
+                    menuimg[np.where(game.maze_map == 3)] = (255,0, 255)
                 return allHands, menuimg
             else:
                 return allHands, img
@@ -321,6 +325,8 @@ class SnakeGameClass:
         self.previousHead = random.randint(100, 1000), random.randint(100, 600)
 
         self.speed = 5
+        self.minspeed=10
+        self.maxspeed=math.hypot(1280, 720) / 10
         self.velocityX = random.choice([-1, 0, 1])
         self.velocityY = random.choice([-1, 1])
 
@@ -338,8 +344,8 @@ class SnakeGameClass:
         self.foodOnOff = True
         self.multi = True
 
-        self.maze_start = 0, 0
-        self.maze_end = 0, 0
+        self.maze_start = [[],[]]
+        self.maze_end = [[],[]]
         self.maze_map = np.array([])
 
     def ccw(self, p, a, b):
@@ -377,17 +383,22 @@ class SnakeGameClass:
 
     def maze_collision(self):
         x, y = self.previousHead
+        print(f"collision location : {x,y}")
         if self.maze_map[y, x] == 1:
-            return False
-        return True
+            return True
+        return False
 
     # maze 초기화
     def maze_initialize(self):
-        self.maze_start, self.maze_end, self.maze_map = create_maze(1280, 720, 9, 16)
-        self.previousHead = self.maze_start
+        self.maze_start, self.maze_end,self.maze_map = create_maze(720-300, 1280-300, 6, 14)
+        print(self.maze_start)
+        print(self.maze_end)
+        self.maze_map=np.pad(self.maze_map, ((150,150),(150,150)), 'constant', constant_values=0)
+        self.previousHead = (0, 360)
         self.velocityX = 0
         self.velocityY = 0
         self.points = []
+        self.maxspeed=30
 
     def menu_initialize(self):
         self.previousHead = (0, 360)
@@ -462,7 +473,9 @@ class SnakeGameClass:
 
         # end point 도달
         end_pt1, end_pt2 = self.maze_end
-        if end_pt1[0] <= cx <= end_pt2[0] and end_pt1[0] <= cy <= end_pt2[1]:
+        # print(f"end point : 1-{end_pt1}, 2-{end_pt2}")
+        if (end_pt1[0] <= cx <= end_pt2[0]) and (end_pt1[1] <= cy <= end_pt2[1]):
+            print("finish")
             self.maze_initialize()
             # 시간 제한 넣는다면 그것도 다시 돌리기
             time.sleep(3)
@@ -552,10 +565,10 @@ class SnakeGameClass:
             dy = m_y - py
 
             # speed 범위: 0~1460
-            if math.hypot(dx, dy) > math.hypot(1280, 720) / 10:
-                self.speed = math.hypot(1280, 720) / 10  # 146
-            elif math.hypot(dx, dy) < s_speed:
-                self.speed = s_speed
+            if math.hypot(dx, dy) > self.maxspeed : # 146
+                self.speed = self.maxspeed 
+            elif math.hypot(dx, dy) < self.minspeed:
+                self.speed = self.minspeed
             else:
                 self.speed = math.hypot(dx, dy)
 
@@ -568,7 +581,7 @@ class SnakeGameClass:
             # print(self.velocityY)
 
         else:
-            self.speed = s_speed
+            self.speed = self.minspeed
 
         cx = round(px + self.velocityX * self.speed)
         cy = round(py + self.velocityY * self.speed)
@@ -988,10 +1001,11 @@ def test():
 # Main Menu Selection
 @app.route('/menu_snake')
 def menu_snake():
-    global isBlack
+    global isBlack, isMaze
     menu_game = SnakeGameClass(pathFood)
 
     isBlack = True
+    isMaze = False
     menu_game.multi = False
     menu_game.foodOnOff = False
     def generate():
@@ -1018,25 +1032,28 @@ def menu_snake():
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-def create_maze(image_w, image_h, block_rows, block_cols):
+def create_maze(image_h, image_w, block_rows, block_cols):
     manager = MazeManager()
-    maze = manager.add_maze(9, 16)
+    maze = manager.add_maze(block_rows, block_cols)
 
     wall_map = np.zeros((image_h, image_w))  # (h,w)
     block_h = image_h // block_rows
     block_w = image_w // block_cols
 
-    start = []
+    start = [[],[]]
     end = [[], []]
-    r = 5
+    r = 2
 
     for i in range(block_rows):
         for j in range(block_cols):
             if maze.initial_grid[i][j].is_entry_exit == "entry":
-                end = [[j - r, i - r], [j + r, i + r]]
+              start = [[j * block_w + 150, i * block_h + 150], [(j+1) * block_w +150, (i+1) * block_h +150]]
+              wall_map[i * block_h : (i+1) * block_h, j * block_w : (j+1) * block_w] = 2
+              print(f"start in create_maze: {start}")
             elif maze.initial_grid[i][j].is_entry_exit == "exit":
-                start = [j, i]
-
+              end = [[j * block_w + 150, i * block_h+ 150], [(j+1) * block_w +150, (i+1) * block_h +150]]
+              wall_map[i * block_h : (i+1) * block_h, j * block_w : (j + 1) * block_w] = 3
+              print(f"end in create_maze:{end}")
             if maze.initial_grid[i][j].walls["top"]:
                 if i == 0:
                     wall_map[i * block_h:i * block_h + r, j * block_w:(j + 1) * block_w] = 1
