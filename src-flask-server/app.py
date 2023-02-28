@@ -315,6 +315,9 @@ class SnakeGameClass:
         self.maze_end = [[],[]]
         self.maze_map = np.array([])
         self.passStart=False
+        self.passMid=False
+        
+        self.maze_img=np.array([0])
 
     def ccw(self, p, a, b):
         # print("확인3")
@@ -349,28 +352,32 @@ class SnakeGameClass:
                 return True
         return False
 
-    def maze_collision(self):
-        x, y = self.previousHead
-        body_points = self.points
-        
-        for b_pt in body_points:
-          print(f"collision location : {b_pt}")
-          if self.maze_map[b_pt[1][1],b_pt[1][0]]==1:
-            return True
+    def maze_collision(self , head_pt, previous_pt):
+        head_pt=np.array(head_pt).astype(int)
+        # if self.maze_map[int(head_pt[1]),int(head_pt[0])]==1:
+        #   return True
+        pt_a = np.array(previous_pt).astype(int)
+        line_norm=np.linalg.norm(pt_a - head_pt).astype(int)
+        points_on_line = np.linspace(pt_a, head_pt, line_norm)
+        for p in points_on_line:
+          # print(p)
+          if self.maze_map[int(p[1]),int(p[0])]==1:
+                return True
         return False
 
     # maze 초기화
     def maze_initialize(self):
-        self.maze_start, self.maze_end,self.maze_map = create_maze(720-300, 1280-300, 6, 14)
-        print(self.maze_start)
-        print(self.maze_end)
+        self.maze_start, self.maze_mid, self.maze_end,self.maze_map = create_maze(720-300, 1280-300, 5, 12)
         self.maze_map=np.pad(self.maze_map, ((150,150),(150,150)), 'constant', constant_values=0)
+        self.maze_img=self.create_maze_image()
+        
         self.previousHead = (0, 360)
         self.velocityX = 0
         self.velocityY = 0
         self.points = []
         self.maxspeed=30
         self.passStart=False
+        self.passMid=False
 
     def menu_initialize(self):
         self.previousHead = (0, 360)
@@ -440,33 +447,40 @@ class SnakeGameClass:
         px, py = self.previousHead
         s_speed = 30
         cx, cy = self.set_snake_speed(HandPoints, s_speed)
-
+        
         self.points.append([[px, py], [cx, cy]])
         distance = math.hypot(cx - px, cy - py)
         self.lengths.append(distance)
         self.currentLength += distance
         self.previousHead = cx, cy
-
         
+        self.length_reduction()
+        if self.maze_collision([cx,cy],[px, py]):
+            self.passStart=False
+            self.passMid=False
+            self.execute()
+            
         # start point 시작!
         start_pt1, start_pt2 = self.maze_start
         if (start_pt1[0] <= cx <= start_pt2[0]) and (start_pt1[1] <= cy <= start_pt2[1]):
           self.passStart=True
         
-        self.length_reduction()
-        if self.maze_collision():
-            self.passStart=False
-            self.execute()
-
+        # 중간 point 패스!
+        mid_pt1, mid_pt2 = self.maze_mid
+        if (mid_pt1[0] <= cx <= mid_pt2[0]) and (mid_pt1[1] <= cy <= mid_pt2[1]):
+          if self.passStart:
+              self.passMid=True
+        
         # end point 도달
         end_pt1, end_pt2 = self.maze_end
         # print(f"end point : 1-{end_pt1}, 2-{end_pt2}")
         if (end_pt1[0] <= cx <= end_pt2[0]) and (end_pt1[1] <= cy <= end_pt2[1]):
-            if self.passStart:
-              print("finish")
+            if self.passStart and self.passMid:
               self.maze_initialize()
               # 시간 제한 넣는다면 그것도 다시 돌리기
               time.sleep(3)
+              
+        
 
     # 내 뱀 상황 업데이트
     def my_snake_update(self, HandPoints, opp_bodys):
@@ -621,8 +635,8 @@ class SnakeGameClass:
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
-
         self.previousHead = 0, 360  # previous head point
+        # print(self.previousHead)
 
     def update_mazeVer(self, imgMain, HandPoints):
         global gameover_flag
@@ -1075,6 +1089,7 @@ def menu_snake():
 def create_maze(image_h, image_w, block_rows, block_cols):
     manager = MazeManager()
     maze = manager.add_maze(block_rows, block_cols)
+    manager.solve_maze(maze.id, "DepthFirstBacktracker")
 
     wall_map = np.zeros((image_h, image_w))  # (h,w)
     block_h = image_h // block_rows
@@ -1088,11 +1103,11 @@ def create_maze(image_h, image_w, block_rows, block_cols):
         for j in range(block_cols):
             if maze.initial_grid[i][j].is_entry_exit == "entry":
               start = [[j * block_w + 150, i * block_h + 150], [(j+1) * block_w +150, (i+1) * block_h +150]]
-              wall_map[i * block_h +2 : (i+1) * block_h - 2, j * block_w +2 : (j+1) * block_w -2] = 2
+              wall_map[i * block_h +10 : (i+1) * block_h - 10, j * block_w +10 : (j+1) * block_w -10] = 2
               print(f"start in create_maze: {start}")
             elif maze.initial_grid[i][j].is_entry_exit == "exit":
               end = [[j * block_w + 150, i * block_h+ 150], [(j+1) * block_w +150, (i+1) * block_h +150]]
-              wall_map[i * block_h + 2 : (i+1) * block_h -2 , j * block_w + 2 : (j + 1) * block_w - 2] = 3
+              wall_map[i * block_h + 10 : (i+1) * block_h -10 , j * block_w + 10 : (j + 1) * block_w - 10] = 3
               print(f"end in create_maze:{end}")
             if maze.initial_grid[i][j].walls["top"]:
                 if i == 0:
@@ -1109,7 +1124,15 @@ def create_maze(image_h, image_w, block_rows, block_cols):
                 else:
                     wall_map[i * block_h:(i + 1) * block_h, j * block_w - r:j * block_w + r] = 1
 
-    return start, end, wall_map
+    solution_nodes=maze.solution_path
+    mid_goal_h=maze.solution_path[len(solution_nodes)//2][0][0]
+    mid_goal_x=maze.solution_path[len(solution_nodes)//2][0][1]
+    # print(len(solution_nodes))
+    # print(mid_goal_h)
+    # print(mid_goal_x)
+    mid=[[mid_goal_x * block_w + 150, mid_goal_h * block_h + 150], [(mid_goal_x+1) * block_w +150, (mid_goal_h+1) * block_h +150]]
+    
+    return start, mid, end, wall_map
 
 
 @app.route('/maze_play')
@@ -1119,14 +1142,13 @@ def maze_play():
 
         game.multi = False
         game.maze_initialize()
-        maze_img=game.create_maze_image()
 
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
             
             hands = detector.findHands(img, flipType=False)
-            showimg=detector.drawHands(maze_img) # 무조건 findHands 다음
+            showimg=detector.drawHands(game.maze_img) # 무조건 findHands 다음
 
             pointIndex = []
             if hands:
