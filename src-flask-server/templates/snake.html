@@ -47,6 +47,9 @@
 </head>
 
 <body>
+<audio id="bgm" loop>
+    <source src="{{ url_for('static', filename= 'bgm/snake_dual.mp3') }}" type="audio/mpeg">
+</audio>
 <canvas></canvas>
 <main class="main-container">
     <section class="right-container">
@@ -114,6 +117,10 @@
         </div>
     </div>
 </main>
+<script>
+    const bgm = document.getElementById('bgm');
+    bgm.play();
+</script>
 <script>
     const accordions = document.querySelectorAll('.draggable');
 

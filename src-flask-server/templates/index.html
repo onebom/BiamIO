@@ -47,7 +47,7 @@
     <source src="{{ url_for('static', filename= 'bgm/curSelect.wav') }}" type="audio/wav">
 </audio>
 <audio id="bgm" loop>
-    <source src="{{ url_for('static', filename= 'bgm/main.wav') }}" type="audio/wav">
+    <source src="{{ url_for('static', filename= 'bgm/menu_bgm.mp3') }}" type="audio/mpeg">
 </audio>
 <div class="gamesection-container">
     <canvas></canvas>
@@ -62,7 +62,7 @@
         <div class="menu">
             <a href="#" class="menu1" id="joinButton">Multi Play</a>
             <a href="{{ url_for('testbed') }}" class="menu2">Single Play</a>
-            <a href="{{ url_for('maze_play') }}" class="menu3">Maze Runner</a>
+            <a href="{{ url_for('mazerunner') }}" class="menu3">Maze Runner</a>
         </div>
     </div>
 </div>

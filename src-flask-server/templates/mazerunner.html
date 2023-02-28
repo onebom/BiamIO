@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>BiamIO</title>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/testbed.css') }}">
+</head>
+
+<body>
+<audio id="bgm" loop>
+    <source src="{{ url_for('static', filename= 'bgm/maze_bgm.mp3') }}" type="audio/mpeg">
+</audio>
+<canvas></canvas>
+<main class="main-container">
+    <section class="right-container">
+        <div class="gamesection-container">
+            <div class="hud-top">
+                <div class="myscore">
+                    <p>점수 :&nbsp;</p>
+                    <p id="my_score"></p>
+                </div>
+                <div class="opponentscore">
+                    <p>상대 점수 :&nbsp;</p>
+                    <p id="opp_score"></p>
+                </div>
+                <div class="timer">
+                    <p>남은 시간 :&nbsp;</p>
+                    <p></p>
+                </div>
+            </div>
+            <div id="ambient" class="ambient"></div>
+            <div class="cam-conatiner">
+                {#where OpenCV Cam Feed from python will come#}
+                <img class="camfeed" id="snake_video" src="{{ url_for('maze_play') }}">
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="accordion draggable">
+                <div class="accordion handle" role="tablist" id="accordion-1">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" role="tab">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#accordion-1 .item-1" aria-expanded="false" aria-controls="accordion-1 .item-1">
+                                SNAKE INFO
+                            </button>
+                        </h2>
+                        <div class="accordion-collapse collapse item-1" role="tabpanel" data-bs-parent="#accordion-1">
+                            <div class="accordion-body">
+                                <p class="mb-0">
+                                <div><a>Server Time : </a><a id="time"></a></div>
+                                <div><a>CAM fps : </a><a id="fps"></a></div>
+
+                                <div><a>먹이 X 좌표 : </a><a id="food_x"></a></div>
+                                <div><a>먹이 Y 좌표 : </a><a id="food_y"></a></div>
+
+                                <div><a>HEAD X 좌표 : </a><a id="head_x"></a></div>
+                                <div><a>HEAD Y 좌표 : </a><a id="head_y"></a></div>
+
+                                <div><a>BOT HEAD X 좌표 : </a><a id="bot_head_x"></a></div>
+                                <div><a>BOT HEAD Y 좌표 : </a><a id="bot_head_y"></a></div>
+
+                                <div><a>상대 스코어 : </a><a id="bot_score_console"></a></div>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        const bgm = document.getElementById('bgm');
+        bgm.play();
+    </script>
+    <script>
+        const ambient = document.querySelector('.ambient');
+
+        setInterval(() => {
+            if (ambient.style.backgroundColor === 'rgb(0, 255, 0)') {
+                ambient.style.backgroundColor = 'rgb(255, 0, 0)';
+            } else if (ambient.style.backgroundColor === 'rgb(255, 0, 0)') {
+                ambient.style.backgroundColor = 'rgb(0, 0, 255)';
+            } else {
+                ambient.style.backgroundColor = 'rgb(0, 255, 0)';
+            }
+        }, 1000);
+    </script>
+    <script>
+        const accordions = document.querySelectorAll('.draggable');
+
+        // add event listeners to accordion headers
+        accordions.forEach(accordion => {
+            const handle = accordion.querySelector('.handle');
+            let isDragging = false;
+            let startPosX, startPosY, currentPosX, currentPosY;
+
+            // handle mousedown event
+            handle.addEventListener('mousedown', event => {
+                event.preventDefault();
+                isDragging = true;
+                startPosX = event.clientX;
+                startPosY = event.clientY;
+                currentPosX = accordion.offsetLeft;
+                currentPosY = accordion.offsetTop;
+                accordion.style.zIndex = 1;
+            });
+
+            // handle mousemove event
+            document.addEventListener('mousemove', event => {
+                if (isDragging) {
+                    const deltaX = event.clientX - startPosX;
+                    const deltaY = event.clientY - startPosY;
+                    accordion.style.left = `${currentPosX + deltaX}px`;
+                    accordion.style.top = `${currentPosY + deltaY}px`;
+                }
+            });
+
+            // handle mouseup event
+            document.addEventListener('mouseup', event => {
+                isDragging = false;
+                accordion.style.zIndex = 0;
+            });
+        });
+    </script>
+    <script>
+        var client_socket = io.connect(
+            "http://" + document.domain + ":" + location.port
+        );
+        var server_socket = io.connect("http://dlsrks99.site:8080");
+        server_socket.emit("get_time");
+        server_socket.on("time", function (data) {
+            $("#time").html(data["time"]);
+        });
+
+        client_socket.on("game_data", function (data) {
+            $("#score").text(data["score"]);
+            $("#fps").text(data["fps"]);
+        });
+        client_socket.on("finger_cordinate", function (data) {
+            $("#head_x").text(data["head_x"]);
+            $("#head_y").text(data["head_y"]);
+        });
+        client_socket.on("bot_data", function (data) {
+            $("#bot_head_x").text(data["head_x"]);
+            $("#bot_head_y").text(data["head_x"]);
+        })
+        ;client_socket.on("foodPoint", function (data) {
+            $("#food_x").text(data["food_x"]);
+            $("#food_y").text(data["food_y"]);
+        });
+    </script>
+    <script>
+        let canvas = document.querySelector('canvas');
+        let c = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        let HorizontalArray = [];
+
+        function Horizontal(y) {
+            this.y = y;
+            this.dy = 0.5;
+            this.opacity = 0;
+
+            this.draw = () => {
+                c.beginPath();
+                c.lineWidth = 3;
+                c.strokeStyle = `rgba(255, 0, 255, ${this.opacity})`;
+                c.moveTo(0, this.y);
+                c.lineTo(canvas.width, this.y);
+                c.stroke();
+            }
+
+            this.update = () => {
+                if (this.y >= canvas.height) {
+                    HorizontalArray.splice(HorizontalArray.indexOf(this), 1);
+                }
+
+                this.opacity += 0.003;
+
+                this.dy += 0.05;
+                this.y += this.dy;
+                this.draw();
+            }
+        }
+
+        let grad = c.createLinearGradient(0, canvas.height, 0, 0);
+        grad.addColorStop("0", "rgba(255, 0, 255, 0.5)");
+        grad.addColorStop("0.55", "rgba(255, 0, 255, 0)");
+        grad.addColorStop("1.0", "rgba(255, 0, 255, 0)");
+        let VerticalArray = [];
+
+        function Vertical(x) {
+            this.x = x;
+
+            this.draw = () => {
+                c.beginPath();
+                c.lineWidth = 3;
+                c.strokeStyle = grad;
+                c.moveTo(canvas.width / 2, 200);
+                c.lineTo(this.x, canvas.height);
+                c.stroke();
+            }
+
+            this.update = () => {
+                this.draw();
+            }
+        }
+
+        let interval = (canvas.width / 10);
+        let cross = 0 - interval * 8;
+        for (let i = 0; i < 27; i++) {
+            VerticalArray.push(new Vertical(cross));
+            cross += interval;
+        }
+
+        setInterval(() => {
+            HorizontalArray.push(new Horizontal(canvas.height / 2));
+        }, 300);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            c.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < HorizontalArray.length; i++) {
+                HorizontalArray[i].update();
+            }
+            for (let i = 0; i < VerticalArray.length; i++) {
+                VerticalArray[i].update();
+            }
+        }
+
+        animate();
+    </script>
+</main>
+<script>
+    // 서버에서 시간 요청하기
+    server_socket.emit("get_time");
+    // 서버에서 받은 시간 페이지에 적용
+    server_socket.on("time", function (data) {
+        $("#time").html(data["time"]);
+    });
+</script>
+<script src="{{ url_for ('static', filename = 'assets/bootstrap/js/bootstrap.min.js') }}"></script>
+</body>
+</html>

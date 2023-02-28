@@ -16,6 +16,9 @@
 </head>
 
 <body>
+<audio id="bgm" loop>
+    <source src="{{ url_for('static', filename= 'bgm/snake_single.mp3') }}" type="audio/mpeg">
+</audio>
 <canvas></canvas>
 <main class="main-container">
     <section class="right-container">
@@ -74,6 +77,10 @@
             </div>
         </div>
     </section>
+    <script>
+        const bgm = document.getElementById('bgm');
+        bgm.play();
+    </script>
     <script>
         const ambient = document.querySelector('.ambient');
 

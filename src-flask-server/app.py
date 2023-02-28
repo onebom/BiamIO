@@ -88,10 +88,10 @@ isMaze = False
 bgm_play_obj = None
 # SETTING BGM PATH
 bgm_path = './src-flask-server/static/bgm/main.wav'
-vfx_1_path = './src-flask-server/bgm/curSelect.wav'
-vfx_2_path = './src-flask-server/bgm/eatFood.wav'
-vfx_3_path = './src-flask-server/bgm/boost.wav'
-vfx_4_path = './src-flask-server/bgm/gameOver.wav'
+vfx_1_path = './src-flask-server/static/bgm/curSelect.wav'
+vfx_2_path = './src-flask-server/static/bgm/eatFood.wav'
+vfx_3_path = './src-flask-server/static/bgm/boost.wav'
+vfx_4_path = './src-flask-server/static/bgm/gameOver.wav'
 vfx_5_path = './src-flask-server/static/bgm/stageWin.wav'
 def play_bgm():
     global bgm_play_obj
@@ -601,6 +601,8 @@ class SnakeGameClass:
         rx, ry = self.foodPoint
         if (rx - (self.wFood // 2) < cx < rx + (self.wFood // 2)) and (
                 ry - (self.hFood // 2) < cy < ry + (self.hFood // 2)):
+            sfx_thread = threading.Thread(target=play_selected_sfx, args=(vfx_2_path,))
+            sfx_thread.start()
             self.allowedLength += 50
             self.score += 1
 
@@ -752,6 +754,10 @@ def index():
 @app.route('/testbed')
 def testbed():
     return render_template("testbed.html")
+
+@app.route('/mazerunner')
+def mazerunner():
+    return render_template("mazerunner.html")
 
 
 # Game Screen
