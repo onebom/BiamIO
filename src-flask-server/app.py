@@ -200,8 +200,8 @@ class HandDetector:
 
                 # gaussian blur value
                 # [TODO] 조건문으로 가우시안 줄지말지 정하기
-                sigma = 10
-                img = (cv2.GaussianBlur(img, (0, 0), sigma))
+                # sigma = 10
+                # img = (cv2.GaussianBlur(img, (0, 0), sigma))
 
                 ## draw
                 if draw:
@@ -218,8 +218,9 @@ class HandDetector:
                         cv2.putText(img, myHand["type"], (bbox[0] - 30, bbox[1] - 30), cv2.FONT_HERSHEY_PLAIN,
                                     2, (255, 0, 255), 2)
         else:
-            sigma = 10
-            img = (cv2.GaussianBlur(img, (0, 0), sigma))
+            pass
+            # sigma = 10
+            # img = (cv2.GaussianBlur(img, (0, 0), sigma))
         if draw:
             if isBlack:
                 if isMaze:
