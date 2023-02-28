@@ -857,8 +857,10 @@ def snake():
 
         if user_number == 1:
             cx, cy = 100, 360
+            game.previousHead = (0, 360)
         else:
             cx, cy = 1180, 360
+            game.previousHead = (1280, 360)
         
         user_move = False
         
