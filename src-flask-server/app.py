@@ -874,7 +874,7 @@ def snake():
             if hands and user_move:
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
-            elif not user_move:
+            if not user_move:
                 pointIndex = [cx, cy]
 
             img = game.update(img, pointIndex)
