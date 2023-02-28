@@ -859,7 +859,8 @@ def snake():
             cx += 1
             pointIndex = [cx, cy]
 
-            opponent_data['head_x'] -= 1
+            bot_data_update()
+            opponent_data['opp_body_node'] = bot_data["bot_body_node"]
             # print(pointIndex)
             
             img = game.update(img, pointIndex)
@@ -908,7 +909,7 @@ bot_data = {'bot_head_x': 1000,
             'bot_velocityY': random.choice([-1, 1])}
 start_opp_data = {'head_x': 1000,
                   'head_y': 360,
-                  'body_node': [],
+                  'opp_body_node': [],
                   'currentLength': 0,
                   'lengths': [],
                   'velocityX': random.choice([-1, 1]),
