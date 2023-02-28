@@ -347,6 +347,7 @@ class SnakeGameClass:
         self.maze_start = [[],[]]
         self.maze_end = [[],[]]
         self.maze_map = np.array([])
+        self.passStart=False
 
     def ccw(self, p, a, b):
         # print("확인3")
@@ -383,8 +384,11 @@ class SnakeGameClass:
 
     def maze_collision(self):
         x, y = self.previousHead
-        print(f"collision location : {x,y}")
-        if self.maze_map[y, x] == 1:
+        body_points = self.points
+        
+        for b_pt in body_points:
+          print(f"collision location : {b_pt}")
+          if self.maze_map[b_pt[1][1],b_pt[1][0]]==1:
             return True
         return False
 
@@ -399,6 +403,7 @@ class SnakeGameClass:
         self.velocityY = 0
         self.points = []
         self.maxspeed=30
+        self.passStart=False
 
     def menu_initialize(self):
         self.previousHead = (0, 360)
@@ -467,6 +472,12 @@ class SnakeGameClass:
         self.currentLength += distance
         self.previousHead = cx, cy
 
+        
+        # start point 시작!
+        start_pt1, start_pt2 = self.maze_start
+        if (start_pt1[0] <= cx <= start_pt2[0]) and (start_pt1[1] <= cy <= start_pt2[1]):
+          self.passStart=True
+        
         self.length_reduction()
         if self.maze_collision():
             self.execute()
@@ -475,10 +486,11 @@ class SnakeGameClass:
         end_pt1, end_pt2 = self.maze_end
         # print(f"end point : 1-{end_pt1}, 2-{end_pt2}")
         if (end_pt1[0] <= cx <= end_pt2[0]) and (end_pt1[1] <= cy <= end_pt2[1]):
-            print("finish")
-            self.maze_initialize()
-            # 시간 제한 넣는다면 그것도 다시 돌리기
-            time.sleep(3)
+            if self.passStart:
+              print("finish")
+              self.maze_initialize()
+              # 시간 제한 넣는다면 그것도 다시 돌리기
+              time.sleep(3)
 
     # 내 뱀 상황 업데이트
     def my_snake_update(self, HandPoints):
