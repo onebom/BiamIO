@@ -79,6 +79,7 @@ now_my_sid = ""  # 현재 나의 sid
 MY_PORT = 0  # socket_bind를 위한 내 포트 번호
 user_number = 0 # 1p, 2p를 나타내는 번호
 user_move = False
+game_over_for_debug = False
 
 ############################################################ 아마도 자바스크립트로 HTML단에서 처리 예정
 # 배경음악이나 버튼음은 자바스크립트, 게임오버나 스킬 사용 효과음은 파이썬
@@ -350,13 +351,11 @@ class SnakeGameClass:
         user_number = 0
 
     def ccw(self, p, a, b):
-        print("확인3")
         vect_sub_ap = [a[0] - p[0], a[1] - p[1]]
         vect_sub_bp = [b[0] - p[0], b[1] - p[1]]
         return vect_sub_ap[0] * vect_sub_bp[1] - vect_sub_ap[1] * vect_sub_bp[0]
 
     def segmentIntersects(self, p1_a, p1_b, p2_a, p2_b):
-        print("확인2")
         ab = self.ccw(p1_a, p1_b, p2_a) * self.ccw(p1_a, p1_b, p2_b)
         cd = self.ccw(p2_a, p2_b, p1_a) * self.ccw(p2_a, p2_b, p1_b)
 
@@ -370,7 +369,6 @@ class SnakeGameClass:
         return ab <= 0 and cd <= 0
 
     def isCollision(self, u1_head_pt, u2_pts):
-        print("확인1")
         if not u2_pts:
             return False
         p1_a, p1_b = u1_head_pt[0], u1_head_pt[1]
@@ -378,7 +376,7 @@ class SnakeGameClass:
         for u2_pt in u2_pts:
             p2_a, p2_b = u2_pt[0], u2_pt[1]
             if self.segmentIntersects(p1_a, p1_b, p2_a, p2_b):
-                # print(u2_pt)
+                print(p1_a, p1_b, p2_a, p2_b)
                 return True
         return False
 
@@ -668,6 +666,7 @@ class SnakeGameClass:
     def execute(self):
         global user_move
         global user_number
+        global game_over_for_debug
         self.points = []  # all points of the snake
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
@@ -679,6 +678,7 @@ class SnakeGameClass:
         else:
             self.previousHead = 0, 360
         user_move = False
+        game_over_for_debug = True
         socketio.emit('gameover')
 
     def update_mazeVer(self, imgMain, HandPoints):
@@ -902,6 +902,7 @@ def snake():
         global opponent_data
         global game
         global user_move
+        global game_over_for_debug
 
         while True :
             if user_number == 1:
@@ -946,6 +947,9 @@ def snake():
             # encode the image as a JPEG string
             _, img_encoded = cv2.imencode('.jpg', img)
             yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
+
+            if game_over_for_debug :
+                break
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
