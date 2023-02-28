@@ -49,31 +49,37 @@
 <audio id="bgm" loop>
     <source src="{{ url_for('static', filename= 'bgm/menu_bgm.mp3') }}" type="audio/mpeg">
 </audio>
-<div class="gamesection-container">
-    <canvas></canvas>
-    <div class="img-container">
-        <img class="cam-feed" src="{{ url_for('menu_snake') }}">
+
+<canvas></canvas>
+
+<section class="wrapper">
+    <div class="titlebutton-container">
+        <button style="z-index: 7;" class="glowing-btn"><span class="glowing-txt">Biam.<span
+                class="faulty-letter">IO</span></span>
+        </button>
     </div>
-    <div class="menu-container">
-        <div class="titlebutton-container">
-            <button class="glowing-btn"><span class="glowing-txt">Biam.<span class="faulty-letter">IO</span></span>
-            </button>
+    <div class="gamesection-container">
+        <div class="cam-container">
+            <img class="cam-feed" src="{{ url_for('menu_snake') }}">
         </div>
-        <div class="menu">
-            <a href="#" class="menu1" id="joinButton">Multi Play</a>
-            <a href="{{ url_for('testbed') }}" class="menu2">Single Play</a>
-            <a href="{{ url_for('mazerunner') }}" class="menu3">Maze Runner</a>
+        <div class="cam-alt-container">
+            <img class="cam-feed-alt" src="{{ url_for('static', filename= 'images/placeholder.png') }}">
+        </div>
+        <div class="menu-container">
+            <div class="menu">
+                <a href="#" class="menu1" id="joinButton">Multi Play</a>
+                <a href="{{ url_for('testbed') }}" class="menu2">Single Play</a>
+                <a href="{{ url_for('mazerunner') }}" class="menu3">Maze Runner</a>
+            </div>
         </div>
     </div>
-</div>
+</section>
 <h2 id="isMatched"></h2>
 <h2 id="alarm"></h2>
-{#BGM#}
 <script>
     const bgm = document.getElementById('bgm');
     bgm.play();
 </script>
-{#button select SFX#}
 <script>
     const hoverSound = document.getElementById('hover-sound');
 
@@ -86,7 +92,6 @@
         });
     });
 </script>
-{#retro grid background#}
 <script>
     let canvas = document.querySelector('canvas');
     let c = canvas.getContext('2d');
