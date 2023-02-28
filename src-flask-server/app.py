@@ -494,8 +494,8 @@ class SnakeGameClass:
         if self.is_udp:
             self.receive_data_from_opp()         
 
-        # if self.isCollision(self.points[-1], opp_bodys):
-        #     self.execute()
+        if self.isCollision(self.points[-1], opp_bodys):
+            self.execute()
 
 
     ################################## VECTORING SPEED METHOD ##########################################################
