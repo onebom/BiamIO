@@ -336,6 +336,7 @@ class SnakeGameClass:
         self.udp_count = 0
         self.gameOver = False
         self.foodOnOff = True
+        self.remaining_lifes = 2
         self.multi = True
 
         self.maze_start = 0, 0
@@ -468,9 +469,7 @@ class SnakeGameClass:
             time.sleep(3)
 
     # 내 뱀 상황 업데이트
-    def my_snake_update(self, HandPoints):
-        global opponent_data
-
+    def my_snake_update(self, HandPoints, opp_bodys):
         px, py = self.previousHead
 
         s_speed = 30
@@ -495,8 +494,9 @@ class SnakeGameClass:
         if self.is_udp:
             self.receive_data_from_opp()
 
-        # if self.isCollision(self.points[-1], o_bodys):
-        #     self.execute()
+        if self.isCollision(self.points[-1], opp_bodys):
+            self.execute()
+
 
     ################################## VECTORING SPEED METHOD ##########################################################
     # def set_snake_speed(self, HandPoints, s_speed):
@@ -622,7 +622,8 @@ class SnakeGameClass:
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
         self.previousHead = 0, 0  # previous head point
-
+        self.remaining_lifes -= 1
+        
     def update_mazeVer(self, imgMain, HandPoints):
         global gameover_flag
 
@@ -648,7 +649,7 @@ class SnakeGameClass:
             imgMain = self.draw_snakes(imgMain, opp_bodys, self.opp_score, 0)
 
             # update and draw own snake
-            self.my_snake_update(HandPoints)
+            self.my_snake_update(HandPoints, opp_bodys)
             imgMain = self.draw_Food(imgMain)
             # 1 이면 내 뱀
             imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
@@ -660,7 +661,7 @@ class SnakeGameClass:
         global gameover_flag, opponent_data
 
         # update and draw own snake
-        self.my_snake_update(HandPoints)
+        self.my_snake_update(HandPoints, [])
         imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
         return imgMain
@@ -874,6 +875,7 @@ def snake():
             if time.time() > max_time_end:
                 break
         
+        game.previousHead = cx, cy
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
@@ -1007,7 +1009,8 @@ def test():
 
             if time.time() > max_time_end:
                 break
-            
+        
+        game.previousHead = cx, cy
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
