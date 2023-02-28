@@ -848,6 +848,30 @@ def snake():
         global isBlack
         isBlack = False
 
+        max_time_end = time.time() + 3
+        cx, cy = 200, 360
+        opponent_data = start_opp_data
+        while True:
+            success, img = cap.read()
+            img = cv2.flip(img, 1)
+            hands, img = detector.findHands(img, flipType=False)
+
+            cx += 1
+            pointIndex = [cx, cy]
+
+            opponent_data['head_x'] -= 1
+            # print(pointIndex)
+            
+            img = game.update(img, pointIndex)
+
+            # encode the image as a JPEG string
+            _, img_encoded = cv2.imencode('.jpg', img)
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
+
+            if time.time() > max_time_end:
+                break
+        
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
@@ -882,6 +906,13 @@ bot_data = {'bot_head_x': 1000,
             'lengths': [],
             'bot_velocityX': random.choice([-1, 1]),
             'bot_velocityY': random.choice([-1, 1])}
+start_opp_data = {'head_x': 1000,
+                  'head_y': 360,
+                  'body_node': [],
+                  'currentLength': 0,
+                  'lengths': [],
+                  'velocityX': random.choice([-1, 1]),
+                  'velocityY': random.choice([-1, 1])}
 bot_cnt = 0
 
 
