@@ -319,6 +319,7 @@ class SnakeGameClass:
         self.maze_img=np.array([0])
 
     def global_intialize(self):
+        global user_number
         self.points = []  # all points of the snake
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
@@ -346,6 +347,7 @@ class SnakeGameClass:
         self.maze_end = [[],[]]
         self.maze_map = np.array([])
         self.passStart=False
+        user_number = 0
 
     def ccw(self, p, a, b):
         # print("확인3")
@@ -669,6 +671,8 @@ class SnakeGameClass:
             self.previousHead = 100, 180
         elif user_number == 2:
             self.previousHead = 1180, 540
+        else:
+            self.previousHead = 0, 360
         user_move = False
         socketio.emit('gameover')
 
