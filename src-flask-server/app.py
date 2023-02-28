@@ -495,8 +495,8 @@ class SnakeGameClass:
         if self.is_udp:
             self.receive_data_from_opp()
 
-        if self.isCollision(self.points[-1], opp_bodys):
-            self.execute()
+        # if self.isCollision(self.points[-1], opp_bodys):
+        #     self.execute()
 
 
     ################################## VECTORING SPEED METHOD ##########################################################
@@ -881,11 +881,11 @@ def snake():
 
             if not user_move:
                 if user_number == 1:
-                    cx += 1
+                    cx += 3
                     if cx > 320:
                         user_move = True
                 else:
-                    cx -= 1
+                    cx -= 3
                     if cx < 960:
                         user_move = True       
 
