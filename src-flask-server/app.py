@@ -289,7 +289,7 @@ class SnakeGameClass:
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
-        self.previousHead = random.randint(100, 1000), random.randint(100, 600)
+        self.previousHead = (int), (int) # TODO 이거 됨 ?
 
         self.speed = 5
         self.minspeed=10
@@ -324,7 +324,7 @@ class SnakeGameClass:
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
-        self.previousHead = random.randint(100, 1000), random.randint(100, 600)
+        self.previousHead = (int), (int) # TODO 이거 됨 ?
 
         self.speed = 5
         self.minspeed=10
@@ -350,13 +350,13 @@ class SnakeGameClass:
         user_number = 0
 
     def ccw(self, p, a, b):
-        # print("확인3")
+        print("확인3")
         vect_sub_ap = [a[0] - p[0], a[1] - p[1]]
         vect_sub_bp = [b[0] - p[0], b[1] - p[1]]
         return vect_sub_ap[0] * vect_sub_bp[1] - vect_sub_ap[1] * vect_sub_bp[0]
 
     def segmentIntersects(self, p1_a, p1_b, p2_a, p2_b):
-        # print("확인2")
+        print("확인2")
         ab = self.ccw(p1_a, p1_b, p2_a) * self.ccw(p1_a, p1_b, p2_b)
         cd = self.ccw(p2_a, p2_b, p1_a) * self.ccw(p2_a, p2_b, p1_b)
 
@@ -370,7 +370,7 @@ class SnakeGameClass:
         return ab <= 0 and cd <= 0
 
     def isCollision(self, u1_head_pt, u2_pts):
-        # print("확인1")
+        print("확인1")
         if not u2_pts:
             return False
         p1_a, p1_b = u1_head_pt[0], u1_head_pt[1]
