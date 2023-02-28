@@ -77,6 +77,7 @@ gameover_flag = False  # ^^ 게임오버
 now_my_room = ""  # 현재 내가 있는 방
 now_my_sid = ""  # 현재 나의 sid
 MY_PORT = 0  # socket_bind를 위한 내 포트 번호
+user_number = 0 # 1p, 2p를 나타내는 번호
 
 # 배경 검정색
 isBlack = False
@@ -807,9 +808,11 @@ def my_port(data):
 def set_address(data):
     global MY_PORT
     global game
+    global user_number
     opp_ip = data['ip_addr']
     opp_port = data['port']
     sid = data['sid']
+    user_number = data['user_number']
 
     game.set_socket(MY_PORT, opp_ip, opp_port)
     game.test_connect(sid)
@@ -848,35 +851,17 @@ def snake():
         global game
         global gameover_flag
         global isBlack
+        global user_number
         isBlack = False
         game.testbed_initialize()
 
-        max_time_end = time.time() + 3
-        cx, cy = 200, 360
-        opponent_data = start_opp_data
-        while True:
-            success, img = cap.read()
-            img = cv2.flip(img, 1)
-            hands, img = detector.findHands(img, flipType=False)
-
-            cx += 1
-            pointIndex = [cx, cy]
-
-            bot_data_update()
-            opponent_data['opp_body_node'] = bot_data["bot_body_node"]
-            # print(pointIndex)
-            
-            img = game.update(img, pointIndex)
-
-            # encode the image as a JPEG string
-            _, img_encoded = cv2.imencode('.jpg', img)
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
-
-            if time.time() > max_time_end:
-                break
+        if user_number == 1:
+            cx, cy = 100, 360
+        else:
+            cx, cy = 1180, 360
         
-        game.previousHead = cx, cy
+        user_move = False
+        
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
@@ -884,11 +869,23 @@ def snake():
 
             pointIndex = []
 
-            if hands:
+            if hands and user_move:
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
+            elif not user_move:
+                pointIndex = [cx, cy]
 
             img = game.update(img, pointIndex)
+
+            if not user_move:
+                if user_number == 1:
+                    cx += 1
+                    if cx > 320:
+                        user_move = True
+                else:
+                    cx -= 1
+                    if cx < 960:
+                        user_move = True       
 
             # encode the image as a JPEG string
             _, img_encoded = cv2.imencode('.jpg', img)
