@@ -923,8 +923,6 @@ def snake():
             if hands and user_move:
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
-            if not user_move:
-                pointIndex = [cx, cy]
 
             if not user_move:
                 if user_number == 1:
