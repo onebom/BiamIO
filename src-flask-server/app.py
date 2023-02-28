@@ -949,6 +949,7 @@ def snake():
             yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
             if game_over_for_debug :
+                game_over_for_debug = False
                 break
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
