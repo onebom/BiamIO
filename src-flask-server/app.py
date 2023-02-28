@@ -875,8 +875,8 @@ def snake():
 ############################### TEST BED FOR GAME LOGIC DEV ############################################################
 
 # SETTING UP VARIABLES AND FUNCTION FOR BOT
-bot_data = {'bot_head_x': 300,
-            'bot_head_y': 500,
+bot_data = {'bot_head_x': 1000,
+            'bot_head_y': 360,
             'bot_body_node': [],
             'currentLength': 0,
             'lengths': [],
