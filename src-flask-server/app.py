@@ -78,10 +78,6 @@ now_my_room = ""  # 현재 내가 있는 방
 now_my_sid = ""  # 현재 나의 sid
 MY_PORT = 0  # socket_bind를 위한 내 포트 번호
 
-# 배경 검정색
-isBlack = False
-isMaze = False
-
 ############################################################ 아마도 자바스크립트로 HTML단에서 처리 예정
 # 배경음악이나 버튼음은 자바스크립트, 게임오버나 스킬 사용 효과음은 파이썬
 # Global Flag for BGM status
@@ -156,14 +152,11 @@ class HandDetector:
         :param draw: Flag to draw the output on the image.
         :return: Image with or without drawings
         """
-        global isBlack, isMaze
 
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.results = self.hands.process(imgRGB)
         allHands = []
         h, w, c = img.shape
-        menuimg = np.zeros([h, w, c])
-        menuimg.fill(0)
         if self.results.multi_hand_landmarks:
             for handType, handLms in zip(self.results.multi_handedness, self.results.multi_hand_landmarks):
                 myHand = {}
@@ -198,42 +191,14 @@ class HandDetector:
                     myHand["type"] = handType.classification[0].label
                 allHands.append(myHand)
 
-                # gaussian blur value
-                # [TODO] 조건문으로 가우시안 줄지말지 정하기
-                # sigma = 10
-                # img = (cv2.GaussianBlur(img, (0, 0), sigma))
+        return allHands
 
-                ## draw
-                if draw:
-                    if isBlack:
-                        # [TODO]maze_map 화면에 적용시키기
-                        if isMaze:
-                            menuimg[np.where(game.maze_map == 1)] = (0, 0, 255)
-                            menuimg[np.where(game.maze_map == 2)] = (0, 255, 255)
-                            menuimg[np.where(game.maze_map == 3)] = (255,0, 255)
-                        self.mpDraw.draw_landmarks(menuimg, handLms, self.mpHands.HAND_CONNECTIONS)
-                    else:
-                        self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
-                        # cv2.rectangle(img, (bbox[0] - 20, bbox[1] - 20),
-                        #               (bbox[0] + bbox[2] + 20, bbox[1] + bbox[3] + 20),
-                        #               (255, 0, 255), 2)
-                        cv2.putText(img, myHand["type"], (bbox[0] - 30, bbox[1] - 30), cv2.FONT_HERSHEY_PLAIN,
-                                    2, (255, 0, 255), 2)
-        else:
-            pass
-            # sigma = 10
-            # img = (cv2.GaussianBlur(img, (0, 0), sigma))
-        if draw:
-            if isBlack:
-                if isMaze:
-                    menuimg[np.where(game.maze_map == 1)] = (0, 0, 255)
-                    menuimg[np.where(game.maze_map == 2)] = (0, 255, 255)
-                    menuimg[np.where(game.maze_map == 3)] = (255,0, 255)
-                return allHands, menuimg
-            else:
-                return allHands, img
-        else:
-            return allHands
+    def drawHands(self, img):
+      img2=img.copy()
+      if self.results.multi_hand_landmarks:
+        for handType, handLms in zip(self.results.multi_handedness, self.results.multi_hand_landmarks):  
+          self.mpDraw.draw_landmarks(img2, handLms, self.mpHands.HAND_CONNECTIONS)
+      return img2
 
     def fingersUp(self, myHand):
         """
@@ -460,6 +425,14 @@ class SnakeGameClass:
         return imgMain
 
     ############################################################
+    def create_maze_image(self):
+          img=np.zeros((720,1280,3), dtype=np.uint8)
+          
+          img[np.where(self.maze_map == 1)] = (0, 0, 255)
+          img[np.where(self.maze_map == 2)] = (0, 255, 255)
+          img[np.where(self.maze_map == 3)] = (255,0, 255)
+          return img
+    
     # 내 뱀 상황 업데이트 - maze play에서
     def my_snake_update_mazeVer(self, HandPoints):
         px, py = self.previousHead
@@ -480,6 +453,7 @@ class SnakeGameClass:
         
         self.length_reduction()
         if self.maze_collision():
+            self.passStart=False
             self.execute()
 
         # end point 도달
@@ -646,7 +620,7 @@ class SnakeGameClass:
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
-        self.previousHead = 0, 0  # previous head point
+        self.previousHead = 0, 360  # previous head point
 
     def update_mazeVer(self, imgMain, HandPoints):
         global gameover_flag
@@ -870,13 +844,12 @@ def snake():
         global opponent_data
         global game
         global gameover_flag
-        global isBlack
-        isBlack = False
 
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
-            hands, img = detector.findHands(img, flipType=False)
+            hands = detector.findHands(img, flipType=False)
+            img=detector.drawHands(img)
 
             pointIndex = []
 
@@ -971,16 +944,14 @@ def test():
     def generate():
         global bot_data, game, gameover_flag, sid
         global opponent_data
-        global isBlack
-        isBlack = False
-
         game.multi = False
         game.testbed_initialize()
-
+        
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
-            hands, img = detector.findHands(img, flipType=False)
+            hands = detector.findHands(img, flipType=False)
+            img=detector.drawHands(img)
 
             pointIndex = []
 
@@ -1013,31 +984,28 @@ def test():
 # Main Menu Selection
 @app.route('/menu_snake')
 def menu_snake():
-    global isBlack, isMaze
     menu_game = SnakeGameClass(pathFood)
 
-    isBlack = True
-    isMaze = False
     menu_game.multi = False
     menu_game.foodOnOff = False
-    def generate():
+    menuimg=np.zeros((720,1280,3),dtype=np.uint8)
 
+    def generate():
         menu_game.menu_initialize()
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
-            hands, menuimg = detector.findHands(img, flipType=False)
-
+            hands = detector.findHands(img, flipType=False)
+            showimg=detector.drawHands(menuimg)
             pointIndex = []
 
             if hands:
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
 
-            menuimg = menu_game.update_blackbg(menuimg, pointIndex)
-
+            showimg = menu_game.update_blackbg(showimg, pointIndex)
             # encode the image as a JPEG string
-            _, img_encoded = cv2.imencode('.jpg', menuimg)
+            _, img_encoded = cv2.imencode('.jpg', showimg)
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
@@ -1060,11 +1028,11 @@ def create_maze(image_h, image_w, block_rows, block_cols):
         for j in range(block_cols):
             if maze.initial_grid[i][j].is_entry_exit == "entry":
               start = [[j * block_w + 150, i * block_h + 150], [(j+1) * block_w +150, (i+1) * block_h +150]]
-              wall_map[i * block_h : (i+1) * block_h, j * block_w : (j+1) * block_w] = 2
+              wall_map[i * block_h +2 : (i+1) * block_h - 2, j * block_w +2 : (j+1) * block_w -2] = 2
               print(f"start in create_maze: {start}")
             elif maze.initial_grid[i][j].is_entry_exit == "exit":
               end = [[j * block_w + 150, i * block_h+ 150], [(j+1) * block_w +150, (i+1) * block_h +150]]
-              wall_map[i * block_h : (i+1) * block_h, j * block_w : (j + 1) * block_w] = 3
+              wall_map[i * block_h + 2 : (i+1) * block_h -2 , j * block_w + 2 : (j + 1) * block_w - 2] = 3
               print(f"end in create_maze:{end}")
             if maze.initial_grid[i][j].walls["top"]:
                 if i == 0:
@@ -1087,29 +1055,28 @@ def create_maze(image_h, image_w, block_rows, block_cols):
 @app.route('/maze_play')
 def maze_play():
     def generate():
-        global isBlack, isMaze, game
-        global gameover_flag
+        global gameover_flag,game
 
-        isBlack = True
-        isMaze = True
         game.multi = False
         game.maze_initialize()
+        maze_img=game.create_maze_image()
 
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
-            hands, img = detector.findHands(img, flipType=False)
+            
+            hands = detector.findHands(img, flipType=False)
+            showimg=detector.drawHands(maze_img) # 무조건 findHands 다음
 
             pointIndex = []
-
             if hands:
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
 
-            img = game.update_mazeVer(img, pointIndex)
+            showimg = game.update_mazeVer(showimg, pointIndex)
 
             # encode the image as a JPEG string
-            _, img_encoded = cv2.imencode('.jpg', img)
+            _, img_encoded = cv2.imencode('.jpg', showimg)
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
