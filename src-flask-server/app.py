@@ -351,9 +351,15 @@ class SnakeGameClass:
         user_number = 0
 
     def ccw(self, p, a, b):
-        vect_sub_ap = [a[0] - p[0], a[1] - p[1]]
-        vect_sub_bp = [b[0] - p[0], b[1] - p[1]]
-        return vect_sub_ap[0] * vect_sub_bp[1] - vect_sub_ap[1] * vect_sub_bp[0]
+        s = p[0] * a[1] + a[0] * b[1] + b[0] * p[1]
+        s -= (p[1] * a[0] + a[1] * b[0] + b[1] * p[0])
+
+        if s > 0 :
+            return 1
+        elif s == 0 :
+            return 0
+        else :
+            return -1
 
     def segmentIntersects(self, p1_a, p1_b, p2_a, p2_b):
         ab = self.ccw(p1_a, p1_b, p2_a) * self.ccw(p1_a, p1_b, p2_b)
