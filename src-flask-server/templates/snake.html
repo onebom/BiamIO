@@ -2,190 +2,198 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-  <title>BiamIO</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>BiamIO</title>
 
-  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/bootstrap/css/bootstrap.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/snake.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/snake.css') }}">
 
-  <!-- 소켓 통신 관련 부분은 영상을 gen하는 것보다 빨라야 하기 때문에 위쪽에 위치 -->
-  <script>
-    var client_socket = io.connect(
-      "http://" + document.domain + ":" + location.port
-    );
-    // var server_socket = io.connect("http://krafton604.iptime.org");
-    var server_socket = io.connect("http://dlsrks99.site:8080");
+    <!-- 소켓 통신 관련 부분은 영상을 gen하는 것보다 빨라야 하기 때문에 위쪽에 위치 -->
+    <script>
+        var client_socket = io.connect(
+            "http://" + document.domain + ":" + location.port
+        );
+        // var server_socket = io.connect("http://krafton604.iptime.org");
+        var server_socket = io.connect("http://dlsrks99.site:8080");
 
-    let room_id = "{{room_id}}";
-    let sid = "{{sid}}";
+        let room_id = "{{room_id}}";
+        let sid = "{{sid}}";
 
-    console.log(room_id);
-    console.log(sid);
+        console.log(room_id);
+        console.log(sid);
 
-    // 서버와 통신개시 후 포트를 요청
-    server_socket.on("connect", function () {
-      server_socket.emit('my_port', { 'room_id': room_id });
-    });
-    // 서버에서 받은 나의 포트를 로컬 flask 서버로 전송
-    server_socket.on("my_port", function (data) {
-      console.log(data['my_port'])
-      client_socket.emit('my_port', { 'my_port': data['my_port'] })
-      $("#snake_video").attr("src", "{{ url_for('snake') }}")
-    });
-    // 서버에서 받은 상대의 주소를 로컬 flask 서버로 전송
-    server_socket.on('opponent_address', function (data) {
-      console.log(data['ip_addr'], data['port'])
-      client_socket.emit('opponent_address', { 'ip_addr': data['ip_addr'], 'port': data['port'], 'sid':sid })
-    });
-  </script>
+        // 서버와 통신개시 후 포트를 요청
+        server_socket.on("connect", function () {
+            server_socket.emit('my_port', {'room_id': room_id});
+        });
+        // 서버에서 받은 나의 포트를 로컬 flask 서버로 전송
+        server_socket.on("my_port", function (data) {
+            console.log(data['my_port'])
+            client_socket.emit('my_port', {'my_port': data['my_port']})
+            $("#snake_video").attr("src", "{{ url_for('snake') }}")
+        });
+        // 서버에서 받은 상대의 주소를 로컬 flask 서버로 전송
+        server_socket.on('opponent_address', function (data) {
+            console.log(data['ip_addr'], data['port'])
+            client_socket.emit('opponent_address', {'ip_addr': data['ip_addr'], 'port': data['port'], 'sid': sid})
+        });
+    </script>
 </head>
 
 <body>
 <main class="main-container">
-  <section class="right-container">
-    <div class="gamesection-container">
-      <div class="hud-top">
-        <div class="myscore">
-          <p>점수 :&nbsp;</p><p id="my_score"></p>
+    <section class="right-container">
+        <div class="gamesection-container">
+            <div class="hud-top">
+                <div class="myscore">
+                    <p>점수 :&nbsp;</p>
+                    <p id="my_score"></p>
+                </div>
+                <div class="opponentscore">
+                    <p>상대 점수 :&nbsp;</p>
+                    <p id="opp_score"></p>
+                </div>
+                <div class="timer">
+                    <p>남은 시간 :&nbsp;</p>
+                    <p></p>
+                </div>
+            </div>
+            <div id="ambient" class="ambient"></div>
+            <div class="cam-conatiner">
+                {#where OpenCV Cam Feed from python will come#}
+                <img class="camfeed" id="snake_video" src="">
+            </div>
         </div>
-        <div class="opponentscore">
-          <p>상대 점수 :&nbsp;</p><p id="opp_score"></p>
+    </section>
+    <div class="accordion" role="tablist" id="accordion-1">
+        <div class="accordion-item">
+            <h2 class="accordion-header" role="tab">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#accordion-1 .item-1" aria-expanded="true" aria-controls="accordion-1 .item-1">
+                    디버그 콘솔
+                </button>
+            </h2>
+            <div class="accordion-collapse collapse show item-1" role="tabpanel" data-bs-parent="#accordion-1">
+                <div class="accordion-body">
+                    <p class="mb-0">
+                    <div><a>Server Time : </a><a id="time"></a></div>
+                    <div><a>Network Mode : </a><a id="UDP"></a></div>
+
+
+                    <div><a>room_id : </a><a id="opp_room_id"></a></div>
+                    <div><a>상대 sid : </a><a id="opp_sid"></a></div>
+
+                    <div><a>CAM fps : </a><a id="fps"></a></div>
+                    <div><a>head_x 좌표 : </a><a id="head_x"></a></div>
+                    <div><a>head_y 좌표 : </a><a id="head_y"></a></div>
+                    <div><a>몸통 리스트 : </a><a id="body_node"></a></div>
+                    <div><a>상대 head_x 좌표 : </a><a id="opp_head_x"></a></div>
+                    <div><a>상대 head_y 좌표 : </a><a id="opp_head_y"></a></div>
+                    <div><a>상대 몸통 리스트 : </a><a id="opp_body_node"></a></div>
+                    <div><a>상대 스코어 : </a><a id="opp_score_console"></a></div>
+                    </p>
+                </div>
+            </div>
         </div>
-        <div class="timer">
-          <p>남은 시간 :&nbsp;</p><p></p>
-        </div>
-      </div>
-      <div id="ambient" class="ambient"></div>
-      <div class="cam-conatiner">
-        {#where OpenCV Cam Feed from python will come#}
-        <img class="camfeed" id="snake_video" src="">
-      </div>
     </div>
-  </section>
-  <div class="accordion" role="tablist" id="accordion-1">
-    <div class="accordion-item">
-      <h2 class="accordion-header" role="tab"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-1 .item-1" aria-expanded="true" aria-controls="accordion-1 .item-1">디버그 콘솔</button></h2>
-      <div class="accordion-collapse collapse show item-1" role="tabpanel" data-bs-parent="#accordion-1">
-        <div class="accordion-body" >
-          <p class="mb-0">
-          <div><a>Server Time : </a><a id="time"></a></div>
-          <div><a>Network Mode : </a><a id="UDP"></a></div>
-
-
-          <div><a>room_id : </a><a id="opp_room_id"></a></div>
-          <div><a>상대 sid : </a><a id="opp_sid"></a></div>
-
-          <div><a>CAM fps : </a><a id="fps"></a></div>
-          <div><a>head_x 좌표 : </a><a id="head_x"></a></div>
-          <div><a>head_y 좌표 : </a><a id="head_y"></a></div>
-          <div><a>몸통 리스트 : </a><a id="body_node"></a></div>
-          <div><a>상대 head_x 좌표 : </a><a id="opp_head_x"></a></div>
-          <div><a>상대 head_y 좌표 : </a><a id="opp_head_y"></a></div>
-          <div><a>상대 몸통 리스트 : </a><a id="opp_body_node"></a></div>
-          <div><a>상대 스코어 : </a><a id="opp_score_console"></a></div>
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
 </main>
 <script>
-  // 서버에서 시간 요청하기
-  server_socket.emit("get_time");
-  // 서버에서 받은 시간 페이지에 적용
-  server_socket.on("time", function (data) {
-    $("#time").html(data["time"]);
-  });
-  client_socket.on("UDP", function (data) {
-    $("#UDP").text(data["NetworkMode"]);
-  });
-  client_socket.on("game_data", function (data) {
-    $("#body_node").text(data["body_node"]);
-    $("#score").text(data["score"]);
-    $("#fps").text(data["fps"]);
-  });
-  client_socket.on("finger_cordinate", function (data) {
-    $("#head_x").text(data["head_x"]);
-    $("#head_y").text(data["head_y"]);
-  });
-  client_socket.on("bot_data", function (data) {
-    $("#bot_head_x").text(data["head_x"]);
-    $("#bot_head_y").text(data["head_x"]);
-  })
-  ;client_socket.on("foodPoint", function (data) {
-    $("#food_x").text(data["food_x"]);
-    $("#food_y").text(data["food_y"]);
-  });
-
-  // 로컬에서 보낸 내 위치 서버에게 보내기
-  client_socket.on("game_data", function (data) {
-    $("#body_node").text(data["body_node"]);
-    server_socket.emit("send_data", {
-      body_node: data["body_node"],
-      room_id: room_id
+    // 서버에서 시간 요청하기
+    server_socket.emit("get_time");
+    // 서버에서 받은 시간 페이지에 적용
+    server_socket.on("time", function (data) {
+        $("#time").html(data["time"]);
     });
-  });
-  // 서버에서 받은 상대 위치 내 로컬에 보내기
-  server_socket.on("opp_data", function (data) {
-    $("#opp_body_node").text(data["opp_body_node"]);
-    client_socket.emit("opp_data_transfer", { data: data });
-  });
-  // 내가 먹이를 먹은 경우, 서버에게 알리기
-  client_socket.on('user_ate_food', function (data) {
-    $("#my_score").text(data["score"]);
-    server_socket.emit('user_ate_food', {'score':data["score"], 'room_id':room_id});
-  })
-  // 내가 먹이를 먹은 경우, 서버에게 새로운 먹이 위치를 받은 것을 로컬에게 보냄
-  server_socket.on('ate_user', function (data) {
-    client_socket.emit('set_food_location', {'foodPoint':data['foodPoint']});
-  })
-  // 상대가 먹이를 먹은 경우, 서버에게 받은 새 먹이위치와 상대점수 로컬에게 보냄
-  server_socket.on('ate_user_opp', function (data) {
-    $("#opp_score").text(data["opp_score"]);
-    client_socket.emit('set_food_location_score', {'foodPoint':data['foodPoint'], 'opp_score':data['opp_score']});
-  })
-  // 상대가 탈주한 경우(매칭 중 또는 서버로 게임하던 중)
-  server_socket.on('opponent_escaped', function() {
-      alert("상대가 떠났습니다.")
-      window.location.href = '/index'
+    client_socket.on("UDP", function (data) {
+        $("#UDP").text(data["NetworkMode"]);
+    });
+    client_socket.on("game_data", function (data) {
+        $("#body_node").text(data["body_node"]);
+        $("#score").text(data["score"]);
+        $("#fps").text(data["fps"]);
+    });
+    client_socket.on("finger_cordinate", function (data) {
+        $("#head_x").text(data["head_x"]);
+        $("#head_y").text(data["head_y"]);
+    });
+    client_socket.on("bot_data", function (data) {
+        $("#bot_head_x").text(data["head_x"]);
+        $("#bot_head_y").text(data["head_x"]);
+    })
+    ;client_socket.on("foodPoint", function (data) {
+        $("#food_x").text(data["food_x"]);
+        $("#food_y").text(data["food_y"]);
+    });
+
+    // 로컬에서 보낸 내 위치 서버에게 보내기
+    client_socket.on("game_data", function (data) {
+        $("#body_node").text(data["body_node"]);
+        server_socket.emit("send_data", {
+            body_node: data["body_node"],
+            room_id: room_id
+        });
+    });
+    // 서버에서 받은 상대 위치 내 로컬에 보내기
+    server_socket.on("opp_data", function (data) {
+        $("#opp_body_node").text(data["opp_body_node"]);
+        client_socket.emit("opp_data_transfer", {data: data});
+    });
+    // 내가 먹이를 먹은 경우, 서버에게 알리기
+    client_socket.on('user_ate_food', function (data) {
+        $("#my_score").text(data["score"]);
+        server_socket.emit('user_ate_food', {'score': data["score"], 'room_id': room_id});
+    })
+    // 내가 먹이를 먹은 경우, 서버에게 새로운 먹이 위치를 받은 것을 로컬에게 보냄
+    server_socket.on('ate_user', function (data) {
+        client_socket.emit('set_food_location', {'foodPoint': data['foodPoint']});
+    })
+    // 상대가 먹이를 먹은 경우, 서버에게 받은 새 먹이위치와 상대점수 로컬에게 보냄
+    server_socket.on('ate_user_opp', function (data) {
+        $("#opp_score").text(data["opp_score"]);
+        client_socket.emit('set_food_location_score', {'foodPoint': data['foodPoint'], 'opp_score': data['opp_score']});
+    })
+    // 상대가 탈주한 경우(매칭 중 또는 서버로 게임하던 중)
+    server_socket.on('opponent_escaped', function () {
+        alert("상대가 떠났습니다.")
+        window.location.href = '/index'
     })
     // 상대가 탈주한 경우(udp로 게임하던 중)
-    client_socket.on('opponent_escaped', function() {
-      alert("상대가 떠났습니다.")
-      window.location.href = '/index'
+    client_socket.on('opponent_escaped', function () {
+        alert("상대가 떠났습니다.")
+        window.location.href = '/index'
     })
-  // TODO
-  client_socket.on("gameover", function(data) {
-    server_socket.emit("gameover_to_server", { sid: data["sid"] });
-  });
-  server_socket.on("gameover_to_clients", function(data) {
-    // TODO : 승패 판정 로직 다시 짤것
-    if (sid != data["sid"]) {
-      Swal.fire({
-        title: "게임 끝!",
-        text: "로비로 돌아갑니다",
-        icon: "success",
-        confirmButtonText: "OK"
-      }).then((result) => {
-        window.location.href = "/index";
-      });
-    } else {
-      Swal.fire({
-        title: "게임 끝!",
-        text: "로비로 돌아갑니다",
-        icon: "error",
-        confirmButtonText: "OK"
-      }).then((result) => {
-        window.location.href = "/index";
-      });
-    }
-  });
+    // TODO
+    client_socket.on("gameover", function (data) {
+        server_socket.emit("gameover_to_server", {sid: data["sid"]});
+    });
+    server_socket.on("gameover_to_clients", function (data) {
+        // TODO : 승패 판정 로직 다시 짤것
+        if (sid != data["sid"]) {
+            Swal.fire({
+                title: "게임 끝!",
+                text: "로비로 돌아갑니다",
+                icon: "success",
+                confirmButtonText: "OK"
+            }).then((result) => {
+                window.location.href = "/index";
+            });
+        } else {
+            Swal.fire({
+                title: "게임 끝!",
+                text: "로비로 돌아갑니다",
+                icon: "error",
+                confirmButtonText: "OK"
+            }).then((result) => {
+                window.location.href = "/index";
+            });
+        }
+    });
 </script>
 <script src="{{ url_for ('static', filename = 'assets/bootstrap/js/bootstrap.min.js') }}"></script>
 </body>

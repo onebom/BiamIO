@@ -1,8 +1,30 @@
 html {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  margin : 0px;
-  padding : 0px;
-  /* max-width: 38rem; */
-  /*padding: 2rem;*/
+  margin : 0;
+  padding : 0;
   overflow: hidden;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+.wrapper{
+  width: 100%;
+  position: relative;
+}
+.accordion {
+  width: 100%;
+  position: fixed;
+  z-index: 1;
+}
+div {
+  border:none;
+  margin:0;
+  padding:0;
+  overflow: hidden;
+}
+iframe {
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
 }

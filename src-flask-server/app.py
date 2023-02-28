@@ -28,6 +28,11 @@ from engineio.payload import Payload
 
 from src.maze_manager import MazeManager
 
+import simpleaudio as sa
+import threading
+import signal
+
+
 # import pprint
 
 ########################################################################################################################
@@ -77,6 +82,41 @@ MY_PORT = 0  # socket_bind를 위한 내 포트 번호
 isBlack = False
 isMaze = False
 
+############################################################ 아마도 자바스크립트로 HTML단에서 처리 예정
+# 배경음악이나 버튼음은 자바스크립트, 게임오버나 스킬 사용 효과음은 파이썬
+# Global Flag for BGM status
+bgm_play_obj = None
+# SETTING BGM PATH
+bgm_path = './src-flask-server/static/bgm/main.wav'
+vfx_1_path = './src-flask-server/bgm/curSelect.wav'
+vfx_2_path = './src-flask-server/bgm/eatFood.wav'
+vfx_3_path = './src-flask-server/bgm/boost.wav'
+vfx_4_path = './src-flask-server/bgm/gameOver.wav'
+vfx_5_path = './src-flask-server/static/bgm/stageWin.wav'
+def play_bgm():
+    global bgm_play_obj
+    bgm_wave_obj = sa.WaveObject.from_wave_file(bgm_path)
+    bgm_play_obj = bgm_wave_obj.play()
+    bgm_play_obj.wait_done()
+def stop_music_exit(signal, frame):
+    global bgm_play_obj
+    if bgm_play_obj is not None:
+        bgm_play_obj.stop()
+    exit(0)
+def stop_bgm():
+    global bgm_play_obj
+    if bgm_play_obj is not None:
+        bgm_play_obj.stop()
+# Create a new thread for each sound effect selected by the user
+def play_selected_sfx(track):
+    sfx_wave_obj = sa.WaveObject.from_wave_file(track)
+    sfx_play_obj = sfx_wave_obj.play()
+    sfx_play_obj.wait_done()
+# Create a thread for the BGM
+bgm_thread = threading.Thread(target=play_bgm)
+# Register the signal handler for SIGINT (Ctrl-C)
+signal.signal(signal.SIGINT, stop_music_exit)
+############################################################
 
 ########################################################################################################################
 ################################ Mediapipe Detecting Module ############################################################
@@ -354,6 +394,12 @@ class SnakeGameClass:
         self.velocityY = 0
         self.points = []
 
+    def testbed_initialize(self):
+        self.previousHead = (0, 360)
+        self.velocityX = 0
+        self.velocityY = 0
+        self.points = []
+
     def draw_snakes(self, imgMain, points, score, isMe):
 
         bodercolor = cyan
@@ -366,16 +412,26 @@ class SnakeGameClass:
             cvzone.putTextRect(imgMain, f'Score: {score}', [0, 40],
                                scale=3, thickness=3, offset=10)
 
-        # Draw Snake
-        if points:
-            cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
-            cv2.circle(imgMain, points[-1][1], 15, maincolor, cv2.FILLED)
+        # Change hue every 100ms
+        change_interval = 100
 
+        hue = int(time.time() * change_interval % 180)
+        rainbow = np.array([hue, 255, 255], dtype=np.uint8)
+        rainbow = cv2.cvtColor(np.array([[rainbow]]), cv2.COLOR_HSV2BGR)[0, 0]
+        # Convert headcolor to tuple of integers
+        rainbow = tuple(map(int, rainbow))
+
+        # Draw Snake
+        # TODO : 아이템 먹으면 무지개 색으로 변하게?
         pts = np.array(points, np.int32)
         if len(pts.shape) == 3:
             pts = pts[:, 1]
         pts = pts.reshape((-1, 1, 2))
         cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
+
+        if points:
+            cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
+            cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
 
         return imgMain
 
@@ -621,7 +677,7 @@ class SnakeGameClass:
             socketio.emit('game_data', {'body_node': self.points})
 
     def send_data_to_html(self):
-        socketio.emit('game_data', {'body_node': self.points, 'score': self.score, 'fps': fps})
+        socketio.emit('game_data', {'score': self.score, 'fps': fps})
 
     # 데이터 수신 (udp 통신 일때만 사용)
     def receive_data_from_opp(self):
@@ -877,6 +933,7 @@ def bot_data_update():
 # TEST BED ROUTING
 @app.route('/test')
 def test():
+
     def generate():
         global bot_data, game, gameover_flag, sid
         global opponent_data
@@ -884,6 +941,8 @@ def test():
         isBlack = False
 
         game.multi = False
+        game.testbed_initialize()
+
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
@@ -926,7 +985,6 @@ def menu_snake():
     isBlack = True
     menu_game.multi = False
     menu_game.foodOnOff = False
-
     def generate():
 
         menu_game.menu_initialize()
