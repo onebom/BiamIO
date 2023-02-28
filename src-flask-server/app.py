@@ -336,6 +336,7 @@ class SnakeGameClass:
         self.udp_count = 0
         self.gameOver = False
         self.foodOnOff = True
+        self.remaining_lifes = 2
         self.multi = True
 
         self.maze_start = 0, 0
@@ -410,8 +411,8 @@ class SnakeGameClass:
             bodercolor = megenta
             maincolor = green
             # Draw Score
-            cvzone.putTextRect(imgMain, f'Score: {score}', [0, 40],
-                               scale=3, thickness=3, offset=10)
+            # cvzone.putTextRect(imgMain, f'Score: {score}', [0, 40],
+            #                    scale=3, thickness=3, offset=10)
 
         # Change hue every 100ms
         change_interval = 100
@@ -468,9 +469,7 @@ class SnakeGameClass:
             time.sleep(3)
 
     # 내 뱀 상황 업데이트
-    def my_snake_update(self, HandPoints):
-        global opponent_data
-
+    def my_snake_update(self, HandPoints, opp_bodys):
         px, py = self.previousHead
 
         s_speed = 30
@@ -495,8 +494,9 @@ class SnakeGameClass:
         if self.is_udp:
             self.receive_data_from_opp()
 
-        # if self.isCollision(self.points[-1], o_bodys):
-        #     self.execute()
+        if self.isCollision(self.points[-1], opp_bodys):
+            self.execute()
+
 
     ################################## VECTORING SPEED METHOD ##########################################################
     # def set_snake_speed(self, HandPoints, s_speed):
@@ -622,7 +622,8 @@ class SnakeGameClass:
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
         self.previousHead = 0, 0  # previous head point
-
+        self.remaining_lifes -= 1
+        
     def update_mazeVer(self, imgMain, HandPoints):
         global gameover_flag
 
@@ -648,7 +649,7 @@ class SnakeGameClass:
             imgMain = self.draw_snakes(imgMain, opp_bodys, self.opp_score, 0)
 
             # update and draw own snake
-            self.my_snake_update(HandPoints)
+            self.my_snake_update(HandPoints, opp_bodys)
             imgMain = self.draw_Food(imgMain)
             # 1 이면 내 뱀
             imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
@@ -660,7 +661,7 @@ class SnakeGameClass:
         global gameover_flag, opponent_data
 
         # update and draw own snake
-        self.my_snake_update(HandPoints)
+        self.my_snake_update(HandPoints, [])
         imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
         return imgMain
@@ -847,7 +848,34 @@ def snake():
         global gameover_flag
         global isBlack
         isBlack = False
+        game.testbed_initialize()
 
+        max_time_end = time.time() + 3
+        cx, cy = 200, 360
+        opponent_data = start_opp_data
+        while True:
+            success, img = cap.read()
+            img = cv2.flip(img, 1)
+            hands, img = detector.findHands(img, flipType=False)
+
+            cx += 1
+            pointIndex = [cx, cy]
+
+            bot_data_update()
+            opponent_data['opp_body_node'] = bot_data["bot_body_node"]
+            # print(pointIndex)
+            
+            img = game.update(img, pointIndex)
+
+            # encode the image as a JPEG string
+            _, img_encoded = cv2.imencode('.jpg', img)
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
+
+            if time.time() > max_time_end:
+                break
+        
+        game.previousHead = cx, cy
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
@@ -875,13 +903,20 @@ def snake():
 ############################### TEST BED FOR GAME LOGIC DEV ############################################################
 
 # SETTING UP VARIABLES AND FUNCTION FOR BOT
-bot_data = {'bot_head_x': 300,
-            'bot_head_y': 500,
+bot_data = {'bot_head_x': 1000,
+            'bot_head_y': 360,
             'bot_body_node': [],
             'currentLength': 0,
             'lengths': [],
             'bot_velocityX': random.choice([-1, 1]),
             'bot_velocityY': random.choice([-1, 1])}
+start_opp_data = {'head_x': 1000,
+                  'head_y': 360,
+                  'opp_body_node': [],
+                  'currentLength': 0,
+                  'lengths': [],
+                  'velocityX': random.choice([-1, 1]),
+                  'velocityY': random.choice([-1, 1])}
 bot_cnt = 0
 
 
@@ -942,7 +977,6 @@ def bot_data_update():
 # TEST BED ROUTING
 @app.route('/test')
 def test():
-
     def generate():
         global bot_data, game, gameover_flag, sid
         global opponent_data
@@ -952,6 +986,31 @@ def test():
         game.multi = False
         game.testbed_initialize()
 
+        max_time_end = time.time() + 3
+        cx, cy = 200, 360
+        while True:
+            success, img = cap.read()
+            img = cv2.flip(img, 1)
+            hands, img = detector.findHands(img, flipType=False)
+
+            cx += 1
+            pointIndex = [cx, cy]
+
+            bot_data_update()
+            opponent_data['opp_body_node'] = bot_data["bot_body_node"]
+            # print(pointIndex)
+            
+            img = game.update(img, pointIndex)
+
+            # encode the image as a JPEG string
+            _, img_encoded = cv2.imencode('.jpg', img)
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
+
+            if time.time() > max_time_end:
+                break
+        
+        game.previousHead = cx, cy
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
