@@ -924,17 +924,19 @@ def snake():
             if not user_move:
                 pointIndex = [cx, cy]
 
-            img = game.update(img, pointIndex)
-
             if not user_move:
                 if user_number == 1:
                     cx += 3
                     if cx > 450:
+                        cx = 100
                         user_move = True
                 elif user_number == 2:
                     cx -= 3
-                    if cx < 830:    
+                    if cx < 830:
+                        cx = 1180    
                         user_move = True
+
+            img = game.update(img, pointIndex)
 
             # encode the image as a JPEG string
             _, img_encoded = cv2.imencode('.jpg', img)
