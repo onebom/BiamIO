@@ -858,7 +858,7 @@ def snake():
         if user_number == 1:
             cx, cy = 100, 360
             game.previousHead = (0, 360)
-        else:
+        elif user_number == 2:
             cx, cy = 1180, 360
             game.previousHead = (1280, 360)
         
@@ -884,7 +884,7 @@ def snake():
                     cx += 3
                     if cx > 320:
                         user_move = True
-                else:
+                elif user_number == 2:
                     cx -= 3
                     if cx < 960:
                         user_move = True       
