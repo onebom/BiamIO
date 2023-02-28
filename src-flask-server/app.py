@@ -623,6 +623,7 @@ class SnakeGameClass:
         self.allowedLength = 150  # total allowed Length
         self.previousHead = 0, 0  # previous head point
         self.remaining_lifes -= 1
+        socketio.emit('gameover')
         
     def update_mazeVer(self, imgMain, HandPoints):
         global gameover_flag
