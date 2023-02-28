@@ -40,9 +40,9 @@ def test_disconnect():
     global room_of_players
     global players_in_room
     
-    room_id = room_of_players[request.sid]
-
-    players_in_room[room_id].remove(request.sid)
+    if request.sid in room_of_players:
+        room_id = room_of_players[request.sid]
+        players_in_room[room_id].remove(request.sid)
 
     ip_addr = request.remote_addr
     port = request.environ['REMOTE_PORT']
@@ -152,6 +152,12 @@ def provide_food_data(data):
     foodPoint=(random.randint(100, 1000), random.randint(100, 600))
     emit('ate_user', {'foodPoint':foodPoint}, to=request.sid)
     emit('ate_user_opp', {'foodPoint':foodPoint, 'opp_score':data['score']}, room=data['room_id'], include_self=False)
+
+@socketio.on('gameover_to_server')
+def game_over(data):
+    # 이겻는가 0 : false, 1 : true
+    emit('gameover_to_clients', {'result':1}, broadcast=True, include_self=False, room=data['room_id']) # 상대한테
+    emit('gameover_to_clients', {'result':0}) # 나한테
 
 if __name__ == "__main__":
     # socketio.run(app, host='0.0.0.0', port=80, debug=True)
