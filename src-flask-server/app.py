@@ -410,8 +410,8 @@ class SnakeGameClass:
             bodercolor = megenta
             maincolor = green
             # Draw Score
-            cvzone.putTextRect(imgMain, f'Score: {score}', [0, 40],
-                               scale=3, thickness=3, offset=10)
+            # cvzone.putTextRect(imgMain, f'Score: {score}', [0, 40],
+            #                    scale=3, thickness=3, offset=10)
 
         # Change hue every 100ms
         change_interval = 100
@@ -942,7 +942,6 @@ def bot_data_update():
 # TEST BED ROUTING
 @app.route('/test')
 def test():
-
     def generate():
         global bot_data, game, gameover_flag, sid
         global opponent_data
@@ -952,6 +951,30 @@ def test():
         game.multi = False
         game.testbed_initialize()
 
+        max_time_end = time.time() + 3
+        cx, cy = 200, 360
+        while True:
+            success, img = cap.read()
+            img = cv2.flip(img, 1)
+            hands, img = detector.findHands(img, flipType=False)
+
+            cx += 1
+            pointIndex = [cx, cy]
+
+            bot_data_update()
+            opponent_data['opp_body_node'] = bot_data["bot_body_node"]
+            # print(pointIndex)
+            
+            img = game.update(img, pointIndex)
+
+            # encode the image as a JPEG string
+            _, img_encoded = cv2.imencode('.jpg', img)
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
+
+            if time.time() > max_time_end:
+                break
+            
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
