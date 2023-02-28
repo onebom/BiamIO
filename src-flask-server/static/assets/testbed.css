@@ -158,15 +158,13 @@ main {
   transition: all 0.5s ease-out;
 }
 
+
+/*countdown*/
+
 *, *:before, *:after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-body {
-  background: #000000;
-  font-family: Helvetica, Arial, sans-serif;
 }
 
 .demo {
