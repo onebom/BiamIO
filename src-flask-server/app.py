@@ -316,6 +316,37 @@ class SnakeGameClass:
         self.maze_map = np.array([])
         self.passStart=False
 
+    def global_intialize(self):
+        self.points = []  # all points of the snake
+        self.lengths = []  # distance between each point
+        self.currentLength = 0  # total length of the snake
+        self.allowedLength = 150  # total allowed Length
+        self.previousHead = random.randint(100, 1000), random.randint(100, 600)
+
+        self.speed = 5
+        self.minspeed=10
+        self.maxspeed=math.hypot(1280, 720) / 10
+        self.velocityX = random.choice([-1, 0, 1])
+        self.velocityY = random.choice([-1, 1])
+
+        self.hFood, self.wFood, _ = self.imgFood.shape
+        self.foodPoint = 640, 360
+
+        self.score = 0
+        self.opp_score = 0
+        self.opp_addr = ()
+        self.is_udp = False
+        self.udp_count = 0
+        self.gameOver = False
+        self.foodOnOff = True
+        self.remaining_lifes = 2
+        self.multi = True
+
+        self.maze_start = [[],[]]
+        self.maze_end = [[],[]]
+        self.maze_map = np.array([])
+        self.passStart=False
+
     def ccw(self, p, a, b):
         # print("확인3")
         vect_sub_ap = [a[0] - p[0], a[1] - p[1]]
@@ -972,14 +1003,16 @@ def bot_data_update():
 # TEST BED ROUTING
 @app.route('/test')
 def test():
+    single_game = SnakeGameClass(pathFood)
     def generate():
         global bot_data, game, gameover_flag, sid
         global opponent_data
         game.multi = False
+        game.global_intialize()
         game.testbed_initialize()
         
 ## CONFILIC FLAG HERE
-        max_time_end = time.time() + 3
+        max_time_end = time.time() + 4
         cx, cy = 200, 360
         while True:
             success, img = cap.read()
@@ -1049,9 +1082,10 @@ def menu_snake():
     menu_game.multi = False
     menu_game.foodOnOff = False
     menuimg=np.zeros((720,1280,3),dtype=np.uint8)
-
+    menu_game.global_intialize()
+    menu_game.menu_initialize()
+    
     def generate():
-        menu_game.menu_initialize()
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
