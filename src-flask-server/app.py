@@ -77,6 +77,7 @@ gameover_flag = False  # ^^ 게임오버
 now_my_room = ""  # 현재 내가 있는 방
 now_my_sid = ""  # 현재 나의 sid
 MY_PORT = 0  # socket_bind를 위한 내 포트 번호
+user_number = 0 # 1p, 2p를 나타내는 번호
 
 ############################################################ 아마도 자바스크립트로 HTML단에서 처리 예정
 # 배경음악이나 버튼음은 자바스크립트, 게임오버나 스킬 사용 효과음은 파이썬
@@ -307,6 +308,7 @@ class SnakeGameClass:
         self.udp_count = 0
         self.gameOver = False
         self.foodOnOff = True
+        self.remaining_lifes = 2
         self.multi = True
 
         self.maze_start = [[],[]]
@@ -391,8 +393,8 @@ class SnakeGameClass:
             bodercolor = megenta
             maincolor = green
             # Draw Score
-            cvzone.putTextRect(imgMain, f'Score: {score}', [0, 40],
-                               scale=3, thickness=3, offset=10)
+            # cvzone.putTextRect(imgMain, f'Score: {score}', [0, 40],
+            #                    scale=3, thickness=3, offset=10)
 
         # Change hue every 100ms
         change_interval = 100
@@ -467,9 +469,7 @@ class SnakeGameClass:
               time.sleep(3)
 
     # 내 뱀 상황 업데이트
-    def my_snake_update(self, HandPoints):
-        global opponent_data
-
+    def my_snake_update(self, HandPoints, opp_bodys):
         px, py = self.previousHead
 
         s_speed = 30
@@ -492,10 +492,11 @@ class SnakeGameClass:
         self.send_data_to_html()
 
         if self.is_udp:
-            self.receive_data_from_opp()
+            self.receive_data_from_opp()         
 
-        # if self.isCollision(self.points[-1], o_bodys):
+        # if self.isCollision(self.points[-1], opp_bodys):
         #     self.execute()
+
 
     ################################## VECTORING SPEED METHOD ##########################################################
     # def set_snake_speed(self, HandPoints, s_speed):
@@ -620,6 +621,7 @@ class SnakeGameClass:
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
+
         self.previousHead = 0, 360  # previous head point
 
     def update_mazeVer(self, imgMain, HandPoints):
@@ -647,7 +649,7 @@ class SnakeGameClass:
             imgMain = self.draw_snakes(imgMain, opp_bodys, self.opp_score, 0)
 
             # update and draw own snake
-            self.my_snake_update(HandPoints)
+            self.my_snake_update(HandPoints, opp_bodys)
             imgMain = self.draw_Food(imgMain)
             # 1 이면 내 뱀
             imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
@@ -659,7 +661,7 @@ class SnakeGameClass:
         global gameover_flag, opponent_data
 
         # update and draw own snake
-        self.my_snake_update(HandPoints)
+        self.my_snake_update(HandPoints, [])
         imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
         return imgMain
@@ -679,7 +681,7 @@ class SnakeGameClass:
             socketio.emit('game_data', {'body_node': self.points})
 
     def send_data_to_html(self):
-        socketio.emit('game_data', {'score': self.score, 'fps': fps})
+        socketio.emit('game_data_for_debug', {'score': self.score, 'fps': fps})
 
     # 데이터 수신 (udp 통신 일때만 사용)
     def receive_data_from_opp(self):
@@ -692,9 +694,9 @@ class SnakeGameClass:
                 opponent_data['opp_body_node'] = eval(decode_data)
                 self.udp_count = 0
             else:
-                pass
+                test_code = decode_data
+                self.sock.sendto(test_code.encode(), self.opp_addr)
         except socket.timeout:
-
             self.udp_count += 1
             if self.udp_count > 25:
                 socketio.emit('opponent_escaped')
@@ -804,9 +806,11 @@ def my_port(data):
 def set_address(data):
     global MY_PORT
     global game
+    global user_number
     opp_ip = data['ip_addr']
     opp_port = data['port']
     sid = data['sid']
+    user_number = data['user_number']
 
     game.set_socket(MY_PORT, opp_ip, opp_port)
     game.test_connect(sid)
@@ -845,6 +849,15 @@ def snake():
         global game
         global gameover_flag
 
+        if user_number == 1:
+            cx, cy = 100, 360
+            game.previousHead = (0, 360)
+        elif user_number == 2:
+            cx, cy = 1180, 360
+            game.previousHead = (1280, 360)
+        
+        user_move = False
+        
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
@@ -853,11 +866,23 @@ def snake():
 
             pointIndex = []
 
-            if hands:
+            if hands and user_move:
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
+            if not user_move:
+                pointIndex = [cx, cy]
 
             img = game.update(img, pointIndex)
+
+            if not user_move:
+                if user_number == 1:
+                    cx += 3
+                    if cx > 320:
+                        user_move = True
+                elif user_number == 2:
+                    cx -= 3
+                    if cx < 960:
+                        user_move = True       
 
             # encode the image as a JPEG string
             _, img_encoded = cv2.imencode('.jpg', img)
@@ -873,13 +898,20 @@ def snake():
 ############################### TEST BED FOR GAME LOGIC DEV ############################################################
 
 # SETTING UP VARIABLES AND FUNCTION FOR BOT
-bot_data = {'bot_head_x': 300,
-            'bot_head_y': 500,
+bot_data = {'bot_head_x': 1000,
+            'bot_head_y': 360,
             'bot_body_node': [],
             'currentLength': 0,
             'lengths': [],
             'bot_velocityX': random.choice([-1, 1]),
             'bot_velocityY': random.choice([-1, 1])}
+start_opp_data = {'head_x': 1000,
+                  'head_y': 360,
+                  'opp_body_node': [],
+                  'currentLength': 0,
+                  'lengths': [],
+                  'velocityX': random.choice([-1, 1]),
+                  'velocityY': random.choice([-1, 1])}
 bot_cnt = 0
 
 
@@ -940,13 +972,41 @@ def bot_data_update():
 # TEST BED ROUTING
 @app.route('/test')
 def test():
-
     def generate():
         global bot_data, game, gameover_flag, sid
         global opponent_data
         game.multi = False
         game.testbed_initialize()
         
+## CONFILIC FLAG HERE
+        max_time_end = time.time() + 3
+        cx, cy = 200, 360
+        while True:
+            success, img = cap.read()
+            img = cv2.flip(img, 1)
+            hands = detector.findHands(img, flipType=False)
+            img=detector.drawHands(img)
+
+            cx += 1
+            pointIndex = [cx, cy]
+
+            bot_data_update()
+            opponent_data['opp_body_node'] = bot_data["bot_body_node"]
+            # print(pointIndex)
+            
+            img = game.update(img, pointIndex)
+
+            # encode the image as a JPEG string
+            _, img_encoded = cv2.imencode('.jpg', img)
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
+
+            if time.time() > max_time_end:
+                break
+        
+        game.previousHead = cx, cy
+## CONFILIC FLAG HERE
+
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
