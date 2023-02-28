@@ -857,7 +857,8 @@ def snake():
             game.previousHead = (1280, 360)
         
         user_move = False
-        
+        max_time_end = time.time() + 4
+
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
@@ -866,6 +867,9 @@ def snake():
 
             pointIndex = []
 
+            if max_time_end < time.time():
+                user_move = True
+                
             if hands and user_move:
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
@@ -876,13 +880,9 @@ def snake():
 
             if not user_move:
                 if user_number == 1:
-                    cx += 3
-                    if cx > 320:
-                        user_move = True
+                    cx += 2
                 elif user_number == 2:
-                    cx -= 3
-                    if cx < 960:
-                        user_move = True       
+                    cx -= 2    
 
             # encode the image as a JPEG string
             _, img_encoded = cv2.imencode('.jpg', img)
