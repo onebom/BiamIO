@@ -493,7 +493,7 @@ class SnakeGameClass:
         self.send_data_to_html()
 
         if self.is_udp:
-            self.receive_data_from_opp()
+            self.receive_data_from_opp()         
 
         # if self.isCollision(self.points[-1], opp_bodys):
         #     self.execute()
