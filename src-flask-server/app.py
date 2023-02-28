@@ -421,6 +421,8 @@ class SnakeGameClass:
         self.velocityX = 0
         self.velocityY = 0
         self.points = []
+        self.foodOnOff = True
+        self.multi = False
 
     def draw_snakes(self, imgMain, points, score, isMe):
 
@@ -1013,17 +1015,15 @@ def bot_data_update():
             if bot_data['currentLength'] < 250:
                 break
 
-
+single_game = SnakeGameClass(pathFood)
 # TEST BED ROUTING
 @app.route('/test')
 def test():
-    single_game = SnakeGameClass(pathFood)
     def generate():
-        global bot_data, game, gameover_flag, sid
+        global bot_data, single_game, gameover_flag
         global opponent_data
-        game.multi = False
-        game.global_intialize()
-        game.testbed_initialize()
+        single_game.global_intialize()
+        single_game.testbed_initialize()
         
 ## CONFILIC FLAG HERE
         max_time_end = time.time() + 4
@@ -1041,7 +1041,7 @@ def test():
             opponent_data['opp_body_node'] = bot_data["bot_body_node"]
             # print(pointIndex)
             
-            img = game.update(img, pointIndex)
+            img = single_game.update(img, pointIndex)
 
             # encode the image as a JPEG string
             _, img_encoded = cv2.imencode('.jpg', img)
@@ -1051,7 +1051,7 @@ def test():
             if time.time() > max_time_end:
                 break
         
-        game.previousHead = cx, cy
+        single_game.previousHead = cx, cy
 ## CONFILIC FLAG HERE
 
         while True:
@@ -1070,7 +1070,7 @@ def test():
             opponent_data['opp_body_node'] = bot_data["bot_body_node"]
             # print(pointIndex)
 
-            img = game.update(img, pointIndex)
+            img = single_game.update(img, pointIndex)
 
             # encode the image as a JPEG string
             _, img_encoded = cv2.imencode('.jpg', img)
@@ -1098,7 +1098,7 @@ def menu_snake():
     menuimg=np.zeros((720,1280,3),dtype=np.uint8)
     menu_game.global_intialize()
     menu_game.menu_initialize()
-    
+
     def generate():
         while True:
             success, img = cap.read()
