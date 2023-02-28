@@ -26,7 +26,28 @@ main {
   display: flex;
   gap: 30px;
 }
+canvas {
+  z-index: -1;
+  display: flex;
+  position: absolute;
+}
 
+.wrapper{
+  position: absolute;
+  top: 30px;
+  right : 510px;
+}
+.accordion{
+  position: absolute;
+  left:0;
+  right:0;
+}
+.draggable {
+  cursor: move;
+}
+.handle {
+  cursor: pointer;
+}
 .accordion-item {
   width: 400px;
 }

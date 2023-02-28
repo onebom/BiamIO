@@ -47,6 +47,7 @@
 </head>
 
 <body>
+<canvas></canvas>
 <main class="main-container">
     <section class="right-container">
         <div class="gamesection-container">
@@ -71,38 +72,85 @@
             </div>
         </div>
     </section>
-    <div class="accordion" role="tablist" id="accordion-1">
-        <div class="accordion-item">
-            <h2 class="accordion-header" role="tab">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#accordion-1 .item-1" aria-expanded="true" aria-controls="accordion-1 .item-1">
-                    디버그 콘솔
-                </button>
-            </h2>
-            <div class="accordion-collapse collapse show item-1" role="tabpanel" data-bs-parent="#accordion-1">
-                <div class="accordion-body">
-                    <p class="mb-0">
-                    <div><a>Server Time : </a><a id="time"></a></div>
-                    <div><a>Network Mode : </a><a id="UDP"></a></div>
+    <div class="wrapper">
+        <div class="accordion draggable">
+            <div class="accordion handle" role="tablist" id="accordion-1">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" role="tab">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#accordion-1 .item-1" aria-expanded="false" aria-controls="accordion-1 .item-1">
+                            SNAKE INFO
+                        </button>
+                    </h2>
+                    <div class="accordion-collapse collapse item-1" role="tabpanel" data-bs-parent="#accordion-1">
+                        <div class="accordion-body">
+                            <p class="mb-0">
+                            <div><a>Server Time : </a><a id="time"></a></div>
+                            <div><a>Network Mode : </a><a id="UDP"></a></div>
 
+                            <div><a>room_id : </a><a id="opp_room_id"></a></div>
+                            <div><a>상대 sid : </a><a id="opp_sid"></a></div>
 
-                    <div><a>room_id : </a><a id="opp_room_id"></a></div>
-                    <div><a>상대 sid : </a><a id="opp_sid"></a></div>
+                            <div><a>CAM fps : </a><a id="fps"></a></div>
 
-                    <div><a>CAM fps : </a><a id="fps"></a></div>
-                    <div><a>head_x 좌표 : </a><a id="head_x"></a></div>
-                    <div><a>head_y 좌표 : </a><a id="head_y"></a></div>
-                    <div><a>몸통 리스트 : </a><a id="body_node"></a></div>
-                    <div><a>상대 head_x 좌표 : </a><a id="opp_head_x"></a></div>
-                    <div><a>상대 head_y 좌표 : </a><a id="opp_head_y"></a></div>
-                    <div><a>상대 몸통 리스트 : </a><a id="opp_body_node"></a></div>
-                    <div><a>상대 스코어 : </a><a id="opp_score_console"></a></div>
-                    </p>
+                            <div><a>먹이 X 좌표 : </a><a id="food_x"></a></div>
+                            <div><a>먹이 Y 좌표 : </a><a id="food_y"></a></div>
+
+                            <div><a>HEAD X 좌표 : </a><a id="head_x"></a></div>
+                            <div><a>HEAD Y 좌표 : </a><a id="head_y"></a></div>
+
+                            <div><a>몸통 리스트 : </a><a id="body_node"></a></div>
+
+                            <div><a>상대 스코어 : </a><a id="opp_score_console"></a></div>
+                            <div><a>상대 HEAD X 좌표 : </a><a id="opp_head_x"></a></div>
+                            <div><a>상대 HEAD Y 좌표 : </a><a id="opp_head_y"></a></div>
+                            <div><a>상대 몸통 리스트 : </a><a id="opp_body_node"></a></div>
+
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </main>
+<script>
+    const accordions = document.querySelectorAll('.draggable');
+
+    // add event listeners to accordion headers
+    accordions.forEach(accordion => {
+        const handle = accordion.querySelector('.handle');
+        let isDragging = false;
+        let startPosX, startPosY, currentPosX, currentPosY;
+
+        // handle mousedown event
+        handle.addEventListener('mousedown', event => {
+            event.preventDefault();
+            isDragging = true;
+            startPosX = event.clientX;
+            startPosY = event.clientY;
+            currentPosX = accordion.offsetLeft;
+            currentPosY = accordion.offsetTop;
+            accordion.style.zIndex = 1;
+        });
+
+        // handle mousemove event
+        document.addEventListener('mousemove', event => {
+            if (isDragging) {
+                const deltaX = event.clientX - startPosX;
+                const deltaY = event.clientY - startPosY;
+                accordion.style.left = `${currentPosX + deltaX}px`;
+                accordion.style.top = `${currentPosY + deltaY}px`;
+            }
+        });
+
+        // handle mouseup event
+        document.addEventListener('mouseup', event => {
+            isDragging = false;
+            accordion.style.zIndex = 0;
+        });
+    });
+</script>
 <script>
     // 서버에서 시간 요청하기
     server_socket.emit("get_time");
@@ -194,6 +242,95 @@
             });
         }
     });
+</script>
+<script>
+    let canvas = document.querySelector('canvas');
+    let c = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+
+    let HorizontalArray = [];
+
+    function Horizontal(y) {
+        this.y = y;
+        this.dy = 0.5;
+        this.opacity = 0;
+
+        this.draw = () => {
+            c.beginPath();
+            c.lineWidth = 3;
+            c.strokeStyle = `rgba(255, 0, 255, ${this.opacity})`;
+            c.moveTo(0, this.y);
+            c.lineTo(canvas.width, this.y);
+            c.stroke();
+        }
+
+        this.update = () => {
+            if (this.y >= canvas.height) {
+                HorizontalArray.splice(HorizontalArray.indexOf(this), 1);
+            }
+
+            this.opacity += 0.003;
+
+            this.dy += 0.05;
+            this.y += this.dy;
+            this.draw();
+        }
+    }
+
+    let grad = c.createLinearGradient(0, canvas.height, 0, 0);
+    grad.addColorStop("0", "rgba(255, 0, 255, 0.5)");
+    grad.addColorStop("0.55", "rgba(255, 0, 255, 0)");
+    grad.addColorStop("1.0", "rgba(255, 0, 255, 0)");
+    let VerticalArray = [];
+
+    function Vertical(x) {
+        this.x = x;
+
+        this.draw = () => {
+            c.beginPath();
+            c.lineWidth = 3;
+            c.strokeStyle = grad;
+            c.moveTo(canvas.width / 2, 200);
+            c.lineTo(this.x, canvas.height);
+            c.stroke();
+        }
+
+        this.update = () => {
+            this.draw();
+        }
+    }
+
+    let interval = (canvas.width / 10);
+    let cross = 0 - interval * 8;
+    for (let i = 0; i < 27; i++) {
+        VerticalArray.push(new Vertical(cross));
+        cross += interval;
+    }
+
+    setInterval(() => {
+        HorizontalArray.push(new Horizontal(canvas.height / 2));
+    }, 300);
+
+    function animate() {
+        requestAnimationFrame(animate);
+        c.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < HorizontalArray.length; i++) {
+            HorizontalArray[i].update();
+        }
+        for (let i = 0; i < VerticalArray.length; i++) {
+            VerticalArray[i].update();
+        }
+    }
+
+    animate();
 </script>
 <script src="{{ url_for ('static', filename = 'assets/bootstrap/js/bootstrap.min.js') }}"></script>
 </body>

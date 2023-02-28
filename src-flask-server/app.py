@@ -838,6 +838,8 @@ def snake():
         global opponent_data
         global game
         global gameover_flag
+        global isBlack
+        isBlack = False
 
         while True:
             success, img = cap.read()
