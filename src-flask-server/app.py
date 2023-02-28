@@ -360,11 +360,11 @@ class SnakeGameClass:
         cd = self.ccw(p2_a, p2_b, p1_a) * self.ccw(p2_a, p2_b, p1_b)
 
         if (ab == 0 and cd == 0):
-            if (p1_b[0] < p1_a[0] and p1_b[1] < p1_a[1]):
+            if (p1_a[0] > p1_b[0] or p1_a[1] > p1_b[1]):
                 p1_a, p1_b = p1_b, p1_a
-            if (p2_b[0] < p2_a[0] and p2_b[1] < p2_a[1]):
+            if (p2_a[0] > p2_b[0] or p2_a[1] > p2_b[1]):
                 p2_a, p2_b = p2_b, p2_a
-            return not ((p1_b[0] < p2_a[0] and p1_b[1] < p2_a[1]) or (p2_b[0] < p1_a[0] and p2_b[1] < p1_a[1]))
+            return (p2_a[0] <= p1_b[0] and p2_a[1] <= p1_b[1]) and (p1_a[0] <= p2_b[0] and p1_a[1] <= p2_b[1])
 
         return ab <= 0 and cd <= 0
 
