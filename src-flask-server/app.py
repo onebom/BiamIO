@@ -328,10 +328,12 @@ class SnakeGameClass:
         self.maze_map = np.array([])
         self.passStart = False
         self.passMid = False
+        self.maze_img = np.array([0])
 
         self.gameOver = False
 
-        self.maze_img = np.array([0])
+        self.menu_type = 0
+        self.menu_time = 0
 
     def global_intialize(self):
         global user_number
@@ -498,6 +500,32 @@ class SnakeGameClass:
         img[np.where(self.maze_map == 2)] = (0, 255, 255)
         img[np.where(self.maze_map == 3)] = (255, 0, 255)
         return img
+
+    # 내 뱀 상황 업데이트 - main에서
+    def my_snake_update_menu(self, HandPoints):
+        px, py = self.previousHead
+        s_speed = 30
+        cx, cy = self.set_snake_speed(HandPoints, s_speed)
+
+        self.points.append([[px, py], [cx, cy]])
+        distance = math.hypot(cx - px, cy - py)
+        self.lengths.append(distance)
+        self.currentLength += distance
+        self.previousHead = cx, cy
+
+        self.length_reduction()
+
+        menu_type=0
+        if 490<=cx<=790:
+            if 70<=cy<=170: # menu_type: 1, MULTI PLAY
+                menu_type=1
+            elif 310<=cy<=410: # menu_type: 2, SINGLE PLAY
+                menu_type=2
+            elif 550<=cy<=650: # menu_type: 3, MAZE RUNNER
+                menu_type=3
+
+        return menu_type
+
 
     # 내 뱀 상황 업데이트 - maze play에서
     def my_snake_update_mazeVer(self, HandPoints):
@@ -745,7 +773,19 @@ class SnakeGameClass:
         global gameover_flag, opponent_data
 
         # update and draw own snake
-        self.my_snake_update(HandPoints, [])
+        menu_type=self.my_snake_update_menu(HandPoints)
+
+        if self.menu_type != 0:
+            if self.menu_type == menu_type:
+                self.menu_time += 1
+
+            if self.menu_time == 5: #5초간 menu bar에 머무른 경우
+                # 할일: menu_type(1:multi, 2:single, 3:maze) 사용해서 routing
+                self.menu_time = 0
+                self.menu_type = 0
+
+        self.menu_type = menu_type
+
         imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
         return imgMain
