@@ -342,7 +342,6 @@ class SnakeGameClass:
         self.passMid = False
         self.maze_img = np.array([0])
         self.dist = 500
-        self.gameOver = False
 
         self.menu_type = 0
         self.menu_time = 0
@@ -763,19 +762,14 @@ class SnakeGameClass:
         socketio.emit('gameover')
 
     def update_mazeVer(self, imgMain, HandPoints):
-        global gameover_flag
-
-        if self.gameOver:
-            gameover_flag = False
-        else:
-            self.my_snake_update_mazeVer(HandPoints)
-            imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
+        self.my_snake_update_mazeVer(HandPoints)
+        imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
         return imgMain
 
     # 송출될 프레임 업데이트
     def update(self, imgMain, HandPoints):
-        global gameover_flag, opponent_data
+        global opponent_data
 
         opp_bodys = []
         # 0 이면 상대 뱀
@@ -1283,11 +1277,11 @@ def create_maze(image_h, image_w, block_rows, block_cols):
 @app.route('/maze_play')
 def maze_play():
     def generate():
-        global gameover_flag, game
+        global game
 
         game.multi = False
         game.maze_initialize()
-        game.timer_end = time.time() + 120 # 2분 시간제한
+        game.timer_end = time.time() + 10 # 2분 시간제한
 
         while True:
             success, img = cap.read()
@@ -1311,13 +1305,10 @@ def maze_play():
             remain_time = int(game.timer_end - time.time())  # 할일: html에 보내기
             # print(f"remain_time: {remain_time}")
             socketio.emit('maze_timer', {"minutes": remain_time//60, "seconds": remain_time % 60})
-
-            if gameover_flag or (remain_time < 1):
+            print(remain_time)
+            if remain_time < 1:
                 print("game ended")
-                gameover_flag = False
-                time.sleep(1)
-                socketio.emit('gameover', {'sid': sid})
-                time.sleep(2)
+                socketio.emit('gameover')
                 break
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
