@@ -80,7 +80,6 @@ MY_PORT = 0  # socket_bind를 위한 내 포트 번호
 user_number = 0  # 1p, 2p를 나타내는 번호
 user_move = False
 game_over_for_debug = False
-print()
 
 ############################################################ 아마도 자바스크립트로 HTML단에서 처리 예정
 # 배경음악이나 버튼음은 자바스크립트, 게임오버나 스킬 사용 효과음은 파이썬
