@@ -1195,6 +1195,7 @@ def maze_play():
 
         game.multi = False
         game.maze_initialize()
+        timer_end = time.time() + 60 # 1분 시간제한
 
         while True:
             success, img = cap.read()
@@ -1215,7 +1216,9 @@ def maze_play():
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
-            if gameover_flag:
+            time_remaining = timer_end - time.time()  # [TODO] html에 보내기
+
+            if gameover_flag or (time_remaining == 0):
                 print("game ended")
                 gameover_flag = False
                 time.sleep(1)
