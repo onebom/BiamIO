@@ -30,7 +30,7 @@
 
         // 서버와 통신개시 후 포트를 요청
         server_socket.on("connect", function () {
-            server_socket.emit('my_port', {'room_id': room_id});
+            //server_socket.emit('my_port', {'room_id': room_id});
         });
         // 서버에서 받은 나의 포트를 로컬 flask 서버로 전송
         server_socket.on("my_port", function (data) {
@@ -124,7 +124,7 @@
     <div class="gamesection-container">
         <div id="ambient" class="ambient"></div>
         <div class="cam-container">
-            <img class="cam-feed" id="snake_video" src="" onload="showImage()">
+            <img class="cam-feed" id="snake_video" src="{{ url_for('snake') }}" onload="showImage()">
             <script>
                 function showImage() {
                     document.getElementById("snake_video").style.display = "block";
