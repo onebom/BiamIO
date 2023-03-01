@@ -939,10 +939,12 @@ def snake():
         while True:
             if user_number == 1:
                 cx = 100
+                cy = 360
                 game.previousHead = (100, 360)
                 break
             elif user_number == 2:
                 cx = 1180
+                cy = 360
                 game.previousHead = (1180, 360)
                 break
 
