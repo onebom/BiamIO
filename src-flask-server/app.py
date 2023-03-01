@@ -1287,7 +1287,8 @@ def maze_play():
                    b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
             remain_time = timer_end - time.time()  # 할일: html에 보내기
-            print(f"remain_time: {remain_time}")
+            # print(f"remain_time: {remain_time}")
+            socketio.emit('maze_timer', int(remain_time))
 
             if gameover_flag or (remain_time < 1):
                 print("game ended")
