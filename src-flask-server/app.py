@@ -73,6 +73,7 @@ pathFood = './src-flask-server/static/food.png'
 
 opponent_data = {}  # 상대 데이터 (현재 손위치, 현재 뱀위치)
 gameover_flag = False  # ^^ 게임오버
+bot_flag=False
 now_my_room = ""  # 현재 내가 있는 방
 now_my_sid = ""  # 현재 나의 sid
 MY_PORT = 0  # socket_bind를 위한 내 포트 번호
@@ -395,7 +396,7 @@ class SnakeGameClass:
         for u2_pt in u2_pts:
             p2_a, p2_b = u2_pt[0], u2_pt[1]
             if self.segmentIntersects(p1_a, p1_b, p2_a, p2_b):
-                print(p1_a, p1_b, p2_a, p2_b)
+                # print(p1_a, p1_b, p2_a, p2_b)
                 return True
         return False
 
@@ -531,6 +532,7 @@ class SnakeGameClass:
 
     # 내 뱀 상황 업데이트
     def my_snake_update(self, HandPoints, opp_bodys):
+        global bot_flag
         px, py = self.previousHead
 
         s_speed = 30
@@ -554,9 +556,13 @@ class SnakeGameClass:
 
         if self.is_udp:
             self.receive_data_from_opp()
-
+        
+        opp_bodys_collsion=opp_bodys
+        if bot_flag:
+            opp_bodys_collsion=opp_bodys+self.points
+            
         if len(self.points) != 0:  # out of range 용 성능 애바면 좀;;
-            if self.isCollision(self.points[-1], opp_bodys):
+            if self.isCollision(self.points[-1], opp_bodys_collsion):
                 global user_move
                 if user_move:
                     self.execute()
@@ -1047,13 +1053,15 @@ single_game = SnakeGameClass(pathFood)
 @app.route('/test')
 def test():
     def generate():
-        global bot_data, single_game, gameover_flag
+        global bot_data, single_game, gameover_flag, bot_flag
         global opponent_data
         single_game.global_intialize()
         single_game.testbed_initialize()
 
         max_time_end = time.time() + 4
         cx, cy = 200, 360
+        bot_flag=True
+        
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
@@ -1069,40 +1077,14 @@ def test():
 
             img = single_game.update(img, pointIndex)
 
-            # encode the image as a JPEG string
+            # encode the image as a JPEG string∂
             _, img_encoded = cv2.imencode('.jpg', img)
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
             if time.time() > max_time_end:
                 break
-
-        single_game.previousHead = cx, cy
-        ## CONFILIC FLAG HERE
-
-        while True:
-            success, img = cap.read()
-            img = cv2.flip(img, 1)
-            hands = detector.findHands(img, flipType=False)
-            img = detector.drawHands(img)
-
-            pointIndex = []
-
-            if hands:
-                lmList = hands[0]['lmList']
-                pointIndex = lmList[8][0:2]
-
-            bot_data_update()
-            opponent_data['opp_body_node'] = bot_data["bot_body_node"]
-            # print(pointIndex)
-
-            img = single_game.update(img, pointIndex)
-
-            # encode the image as a JPEG string
-            _, img_encoded = cv2.imencode('.jpg', img)
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
-
+        
             if gameover_flag:
                 print("game ended")
                 gameover_flag = False
@@ -1110,6 +1092,9 @@ def test():
                 socketio.emit('gameover', {'sid': sid})
                 time.sleep(2)
                 break
+            
+        single_game.previousHead = cx, cy
+        bot_flag=False
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -1164,11 +1149,11 @@ def create_maze(image_h, image_w, block_rows, block_cols):
             if maze.initial_grid[i][j].is_entry_exit == "entry":
                 start = [[j * block_w + 150, i * block_h + 150], [(j + 1) * block_w + 150, (i + 1) * block_h + 150]]
                 wall_map[i * block_h + 10: (i + 1) * block_h - 10, j * block_w + 10: (j + 1) * block_w - 10] = 2
-                print(f"start in create_maze: {start}")
+                # print(f"start in create_maze: {start}")
             elif maze.initial_grid[i][j].is_entry_exit == "exit":
                 end = [[j * block_w + 150, i * block_h + 150], [(j + 1) * block_w + 150, (i + 1) * block_h + 150]]
                 wall_map[i * block_h + 10: (i + 1) * block_h - 10, j * block_w + 10: (j + 1) * block_w - 10] = 3
-                print(f"end in create_maze:{end}")
+                # print(f"end in create_maze:{end}")
             if maze.initial_grid[i][j].walls["top"]:
                 if i == 0:
                     wall_map[i * block_h:i * block_h + r, j * block_w:(j + 1) * block_w] = 1
