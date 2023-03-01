@@ -989,10 +989,12 @@ def snake():
     def generate():
         global opponent_data
         global game
-        global user_move
+        global user_move, bot_flag
         global game_over_for_debug
 
-        game.multi=True
+        game.multi = True
+        bot_flag = False
+
         while True:
             if user_number == 1:
                 cx = 100
@@ -1169,7 +1171,7 @@ def test():
                     break
 
         single_game.previousHead = cx, cy
-        bot_flag=False
+
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -1287,7 +1289,7 @@ def maze_play():
             remain_time = timer_end - time.time()  # 할일: html에 보내기
             print(f"remain_time: {remain_time}")
 
-            if gameover_flag or (remain_time == 0):
+            if gameover_flag or (remain_time < 1):
                 print("game ended")
                 gameover_flag = False
                 time.sleep(1)
