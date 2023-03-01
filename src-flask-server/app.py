@@ -952,10 +952,11 @@ def set_address(data):
     opp_ip = data['ip_addr']
     opp_port = data['port']
     sid = data['sid']
+    print(f"opponent_address user_number, {data['user_number']}")
     user_number = data['user_number']
 
-    game.set_socket(MY_PORT, opp_ip, opp_port)
-    game.test_connect(sid)
+    # game.set_socket(MY_PORT, opp_ip, opp_port)
+    # game.test_connect(sid)
 
 
 # socketio로 받은 상대방 정보
@@ -995,18 +996,21 @@ def snake():
         game.multi = True
         bot_flag = False
 
+        print(f"app.py before while, {user_number}")
         while True:
             if user_number == 1:
                 cx = 100
                 cy = 360
                 game.previousHead = (100, 360)
+                print(f"app.py user_number, {user_number}")
                 break
             elif user_number == 2:
                 cx = 1180
                 cy = 360
                 game.previousHead = (1180, 360)
+                print(f"app.py user_number, {user_number}")
                 break
-
+                
         user_move = False
 
         while True:

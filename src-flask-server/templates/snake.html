@@ -46,6 +46,7 @@
                 'user_number': data['user_number'],
                 'sid': sid
             })
+            console.log("oppenent_address from server : before url snake")
             $("#snake_video").attr("src", "{{ url_for('snake') }}")
         });
     </script>
