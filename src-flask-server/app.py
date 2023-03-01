@@ -559,7 +559,10 @@ class SnakeGameClass:
         if self.maze_collision([cx, cy], [px, py]):
             self.passStart = False
             self.passMid = False
-            self.execute()
+            self.previousHead = 0, 360
+            self.points = []
+            self.lengths = []
+            self.currentLength = 0
 
         # start point 시작!
         start_pt1, start_pt2 = self.maze_start
@@ -1281,7 +1284,7 @@ def maze_play():
 
         game.multi = False
         game.maze_initialize()
-        game.timer_end = time.time() + 10 # 2분 시간제한
+        game.timer_end = time.time() + 120 # 2분 시간제한
 
         while True:
             success, img = cap.read()
