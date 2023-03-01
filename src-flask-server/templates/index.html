@@ -60,7 +60,12 @@
     </div>
     <div class="gamesection-container">
         <div class="cam-container">
-            <img class="cam-feed" src="{{ url_for('menu_snake') }}">
+            <img class="cam-feed" id="snake_video" src="{{ url_for('menu_snake') }}" onload="showImage()">
+            <script>
+                function showImage() {
+                    document.getElementById("snake_video").style.display = "block";
+                }
+            </script>
         </div>
         <div class="cam-alt-container">
             <img class="cam-feed-alt" src="{{ url_for('static', filename= 'images/placeholder.png') }}">
@@ -72,10 +77,10 @@
                 <a href="{{ url_for('mazerunner') }}" class="menu3">Maze Runner</a>
             </div>
         </div>
+        <h2 id="isMatched"></h2>
+        <h2 id="alarm"></h2>
     </div>
 </section>
-<h2 id="isMatched"></h2>
-<h2 id="alarm"></h2>
 <script>
     const bgm = document.getElementById('bgm');
     bgm.play();

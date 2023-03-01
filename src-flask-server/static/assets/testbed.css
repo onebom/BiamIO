@@ -17,6 +17,7 @@ canvas {
   display: flex;
   position: absolute;
 }
+
 body {
   width: 100vw;
   height: 100vh;
@@ -29,13 +30,87 @@ body {
   background-color: #0d1323;
   color: white;
 }
-main {
-  width: 1850px;
-  height: 1000px;
+
+.gamesection-container {
+  min-width: 1280px;
+  width: 1280px;
+  margin: auto;
+}
+.cam-feed {
+  border-radius: 16px;
+  position: absolute;
+  margin: auto;
+  width: 1280px;
+  height: 720px;
+}
+
+#snake_video {
+  display: none;
+}
+
+.cam-feed-alt {
+  position: absolute;
+  border-radius: 16px;
+  margin: auto;
+  width: 1280px;
+  height: 720px;
+}
+.cam-container {
   display: flex;
-  gap: 30px;
+  position: absolute;
+  z-index: 2;
+}
+.cam-alt-container {
+  display: flex;
+  position: absolute;
+  z-index: 1;
 }
 .wrapper{
+  width: 1280px;
+  height: 100%;
+  border-radius: 16px;
+  margin: auto;
+}
+
+p {
+  display: inline;
+}
+
+.hud-top {
+  height: 160px;
+  padding-top: 60px;
+  text-align: center;
+  z-index: 5;
+  font-size: 2.5em;
+}
+
+.myscore {
+  width: 33%;
+  display: inline-block;
+  float: left;
+}
+
+.opponentscore {
+  width: 33%;
+  display: inline-block;
+  float: left;
+}
+
+.timer {
+  width: 33%;
+  display: inline-block;
+}
+
+.camfeed {
+  border-radius: 16px;
+  width: 1280px;
+  height: 720px;
+}
+
+/* 디버그 메뉴 */
+.debug-wrapper {
+  opacity: 0.5;
+  z-index: 10;
   position: absolute;
   top: 30px;
   right : 510px;
@@ -62,60 +137,6 @@ main {
   margin: auto;
 }
 
-.left-top-section {
-  height: 70%;
-  /*padding-left: 30px;*/
-  border-radius: 16px;
-  background-color: #5746EA;
-}
-
-.left-bottom-section {
-}
-
-.right-container {
-  width: 80%;
-  height: 100%;
-  /*background-color: #5746EA;*/
-  border-radius: 16px;
-  margin: auto;
-}
-
-.gamesection-container {
-  min-width: 1280px;
-  width: 1280px;
-  margin: auto;
-  margin-top: 20px;
-}
-
-.cam-conatiner {
-}
-
-.hud-top {
-  font-size: xx-large;
-}
-
-.myscore {
-  width: 33%;
-  display: inline-block;
-  float: left;
-}
-
-.opponentscore {
-  width: 33%;
-  display: inline-block;
-  float: left;
-}
-
-.timer {
-  width: 33%;
-  display: inline-block;
-}
-
-.camfeed {
-  border-radius: 16px;
-  width: 1280px;
-  height: 720px;
-}
 
 /* ambient */
 
@@ -145,22 +166,8 @@ main {
   transition: all 0.5s ease-out;
 }
 
-.ambient {
-  width: 1280px;
-  height: 720px;
-  position: absolute;
-  --size: 1000px;
-  --speed: 50s;
-  --easing: cubic-bezier(0.8, 0.2, 0.2, 0.8);
-  filter: blur(calc(var(--size) / 5));
-  background-color: rgb(0, 255, 0);
-  z-index: -1;
-  transition: all 0.5s ease-out;
-}
-
 
 /*countdown*/
-
 *, *:before, *:after {
   box-sizing: border-box;
   margin: 0;
@@ -168,12 +175,13 @@ main {
 }
 
 .demo {
+  z-index: 100;
   position: absolute;
   left: 50%;
   top: 50%;
   width: 500px;
   height: 140px;
-  margin-top: -125px;
+  margin-top: -50px;
   padding: 10px;
   border-radius: 20px;
   transform: translateX(-50%);

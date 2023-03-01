@@ -8,10 +8,14 @@
 ::-webkit-scrollbar {
   display: none;
 }
-
 html {
   /*height: 100%;*/
   overflow: hidden;
+}
+canvas {
+  z-index: -1;
+  display: flex;
+  position: absolute;
 }
 
 body {
@@ -27,76 +31,57 @@ body {
   color: white;
 }
 
-main {
-  width: 1850px;
-  height: 1000px;
-  display: flex;
-  gap: 30px;
-}
-canvas {
-  z-index: -1;
-  display: flex;
-  position: absolute;
-}
-
-.wrapper{
-  position: absolute;
-  top: 30px;
-  right : 510px;
-}
-.accordion{
-  position: absolute;
-  left:0;
-  right:0;
-}
-.draggable {
-  cursor: move;
-}
-.handle {
-  cursor: pointer;
-}
-.accordion-item {
-  width: 400px;
-}
-
-.left-container {
-  width: 20%;
-  height: 100%;
-  border-radius: 16px;
-  background-color: #1D204B;
-  margin: auto;
-}
-
-.left-top-section {
-  height: 70%;
-  /*padding-left: 30px;*/
-  border-radius: 16px;
-  background-color: #5746EA;
-}
-
-.left-bottom-section {
-}
-
-.right-container {
-  width: 80%;
-  height: 100%;
-  /*background-color: #5746EA;*/
-  border-radius: 16px;
-  margin: auto;
-}
-
 .gamesection-container {
   min-width: 1280px;
   width: 1280px;
   margin: auto;
-  margin-top: 20px;
+}
+.cam-feed {
+  border-radius: 16px;
+  position: absolute;
+  margin: auto;
+  width: 1280px;
+  height: 720px;
 }
 
-.cam-conatiner {
+#snake_video {
+  display: none;
+}
+
+.cam-feed-alt {
+  position: absolute;
+  border-radius: 16px;
+  margin: auto;
+  width: 1280px;
+  height: 720px;
+}
+.cam-container {
+  display: flex;
+  position: absolute;
+  z-index: 2;
+}
+.cam-alt-container {
+  display: flex;
+  position: absolute;
+  z-index: 1;
+}
+.wrapper{
+  width: 1280px;
+  height: 100%;
+  border-radius: 16px;
+  margin: auto;
+}
+
+p {
+  display: inline;
 }
 
 .hud-top {
-  font-size: xx-large;
+  height: 160px;
+  padding-top: 60px;
+  text-align: center;
+  z-index: 5;
+  font-size: 2.5em;
 }
 
 .myscore {
@@ -121,6 +106,37 @@ canvas {
   width: 1280px;
   height: 720px;
 }
+
+/* 디버그 메뉴 */
+.debug-wrapper {
+  opacity: 0.5;
+  z-index: 10;
+  position: absolute;
+  top: 30px;
+  right : 510px;
+}
+.accordion{
+  position: absolute;
+  left:0;
+  right:0;
+}
+.draggable {
+  cursor: move;
+}
+.handle {
+  cursor: pointer;
+}
+.accordion-item {
+  width: 400px;
+}
+.left-container {
+  width: 20%;
+  height: 100%;
+  border-radius: 16px;
+  background-color: #1D204B;
+  margin: auto;
+}
+
 
 /* ambient */
 
@@ -150,8 +166,8 @@ canvas {
   transition: all 0.5s ease-out;
 }
 
-/*countdown*/
 
+/*countdown*/
 *, *:before, *:after {
   box-sizing: border-box;
   margin: 0;
@@ -159,12 +175,13 @@ canvas {
 }
 
 .demo {
+  z-index: 100;
   position: absolute;
   left: 50%;
   top: 50%;
   width: 500px;
   height: 140px;
-  margin-top: -125px;
+  margin-top: -50px;
   padding: 10px;
   border-radius: 20px;
   transform: translateX(-50%);

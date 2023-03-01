@@ -40,13 +40,19 @@
         // 서버에서 받은 상대의 주소를 로컬 flask 서버로 전송
         server_socket.on('opponent_address', function (data) {
             console.log(data['ip_addr'], data['port'])
-            client_socket.emit('opponent_address', {'ip_addr': data['ip_addr'], 'port': data['port'], 'user_number' : data['user_number'], 'sid': sid})
+            client_socket.emit('opponent_address', {
+                'ip_addr': data['ip_addr'],
+                'port': data['port'],
+                'user_number': data['user_number'],
+                'sid': sid
+            })
             $("#snake_video").attr("src", "{{ url_for('snake') }}")
         });
     </script>
 </head>
 
 <body>
+
 <div id="countdown" class="demo">
     <div class="demo__colored-blocks">
         <div class="demo__colored-blocks-rotater">
@@ -71,56 +77,72 @@
                Q25,44 34.4,27.4
                l7,-7 a16,16 0 0,1 22.6,22.6 l-30,30 l35,0 L69,73
                a20,10 0 0,1 20,10 a17,17 0 0,1 -34,0 L55,83
-               l0,-61 L40,28" />
+               l0,-61 L40,28"/>
         </svg>
     </div>
 </div>
 <script>
     const demo = document.querySelector('.demo');
     const counttext = document.getElementById("ready-start");
+
     function changeText() {
         counttext.textContent = 'START';
     }
+
     setTimeout(changeText, 2000);
-    setTimeout(function() {
+    setTimeout(function () {
         demo.classList.add('hidden');
     }, 4000);
 </script>
-<audio id="bgm" loop>
+
+<audio id="bgm" autoplay loop>
     <source src="{{ url_for('static', filename= 'bgm/snake_dual.mp3') }}" type="audio/mpeg">
 </audio>
+<script>
+    document.getElementById('bgm').addEventListener('ended', function () {
+        this.currentTime = 0;
+    }, false);
+</script>
+
 <canvas></canvas>
-<main class="main-container">
-    <section class="right-container">
-        <div class="gamesection-container">
-            <div class="hud-top">
-                <div class="myscore">
-                    <p>점수 :&nbsp;</p>
-                    <p id="my_score"></p>
-                </div>
-                <div class="opponentscore">
-                    <p>상대 점수 :&nbsp;</p>
-                    <p id="opp_score"></p>
-                </div>
-                <div class="timer">
-                    <p>남은 시간 :&nbsp;</p>
-                    <p></p>
-                </div>
-            </div>
-            <div id="ambient" class="ambient"></div>
-            <div class="cam-conatiner">
-                {#where OpenCV Cam Feed from python will come#}
-                <img class="camfeed" id="snake_video" src="">
-            </div>
+
+<section class="wrapper">
+    <div class="hud-top">
+        <div class="myscore">
+            <p>점수 :&nbsp;</p>
+            <p id="my_score"></p>
         </div>
-    </section>
-    <div class="wrapper">
+        <div class="opponentscore">
+            <p>상대 점수 :&nbsp;</p>
+            <p id="opp_score"></p>
+        </div>
+        <div class="timer">
+            <p>남은 시간 :&nbsp;</p>
+            <p></p>
+        </div>
+    </div>
+    <div class="gamesection-container">
+        <div id="ambient" class="ambient"></div>
+        <div class="cam-container">
+            <img class="cam-feed" id="snake_video" src="" onload="showImage()">
+            <script>
+                function showImage() {
+                    document.getElementById("snake_video").style.display = "block";
+                }
+            </script>
+        </div>
+        <div class="cam-alt-container">
+            <img class="cam-feed-alt" src="{{ url_for('static', filename= 'images/placeholder.png') }}">
+        </div>
+    </div>
+    <div class="debug-wrapper">
         <div class="accordion draggable">
             <div class="accordion handle" role="tablist" id="accordion-1">
                 <div class="accordion-item">
                     <h2 class="accordion-header" role="tab">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#accordion-1 .item-1" aria-expanded="false" aria-controls="accordion-1 .item-1">
+                                data-bs-target="#accordion-1 .item-1" aria-expanded="false"
+                                aria-controls="accordion-1 .item-1">
                             SNAKE INFO
                         </button>
                     </h2>
@@ -155,11 +177,8 @@
             </div>
         </div>
     </div>
-</main>
-<script>
-    const bgm = document.getElementById('bgm');
-    bgm.play();
-</script>
+</section>
+
 <script>
     const accordions = document.querySelectorAll('.draggable');
 
@@ -262,7 +281,7 @@
     })
     // TODO
     client_socket.on("gameover", function () {
-        server_socket.emit("gameover_to_server", {'room_id':room_id});
+        server_socket.emit("gameover_to_server", {'room_id': room_id});
     });
     server_socket.on("gameover_to_clients", function (data) {
         // TODO : 승패 판정 로직 다시 짤것
