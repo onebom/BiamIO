@@ -40,9 +40,9 @@
         </div>
         <div class="timer">
             <p>남은 시간 :&nbsp;</p>
-            <p>0</p>
+            <p id="maze_min">0</p>
             <p>분</p>
-            <p id="maze_timer">0</p>
+            <p id="maze_sec">0</p>
             <p>초</p>
         </div>
     </div>
@@ -152,7 +152,8 @@
     var server_socket = io.connect("http://dlsrks99.site:8080");
 
     client_socket.on("maze_timer", function (data) {
-        $("#maze_timer").text(data);
+        $("#maze_min").text(data["minutes"]);
+        $("#maze_sec").text(data["seconds"]);
     });
 
     client_socket.on("game_data", function (data) {
