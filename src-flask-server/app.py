@@ -328,10 +328,12 @@ class SnakeGameClass:
         self.maze_map = np.array([])
         self.passStart = False
         self.passMid = False
+        self.maze_img = np.array([0])
 
         self.gameOver = False
 
-        self.maze_img = np.array([0])
+        self.menu_type = 0
+        self.menu_time = 0
 
     def global_intialize(self):
         global user_number
@@ -513,6 +515,7 @@ class SnakeGameClass:
 
         self.length_reduction()
 
+        menu_type=0
         if 490<=cx<=790:
             if 70<=cy<=170: # menu_type: 1, MULTI PLAY
                 menu_type=1
@@ -521,8 +524,7 @@ class SnakeGameClass:
             elif 550<=cy<=650: # menu_type: 3, MAZE RUNNER
                 menu_type=3
 
-
-
+        return menu_type
 
 
     # 내 뱀 상황 업데이트 - maze play에서
@@ -771,10 +773,22 @@ class SnakeGameClass:
         global gameover_flag, opponent_data
 
         # update and draw own snake
-        menu_type, menu_time=self.my_snake_update_menu(HandPoints)
+        menu_type=self.my_snake_update_menu(HandPoints)
+
+        if self.menu_type != 0:
+            if self.menu_type == menu_type:
+                self.menu_time += 1
+
+            if self.menu_time == 5: #5초간 menu bar에 머무른 경우
+                # 할일: menu_type(1:multi, 2:single, 3:maze) 사용해서 routing
+                self.menu_time = 0
+                self.menu_type = 0
+
+        self.menu_type = menu_type
+
         imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
-        return imgMain, menu_type, menu_time
+        return imgMain
 
     # 통신 관련 변수 설정
     def set_socket(self, my_port, opp_ip, opp_port):
