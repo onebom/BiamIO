@@ -147,33 +147,33 @@
 
         // Otherwise load diagnostic html page into iframe
         let output_html = `
-<html style="background: black; width: 100%; height: 100%; color: #00FF00;">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&amp;display=swap">
-<div id="centered-div">
-    <img src="catrolling.gif">
-    <h1>> Flask Server is Running Late...<br><br>Wait a Sec and Refresh</h1>
-</div>
-<style>
-    html, body {
-        height: 100%;
-        font-family: 'VT323', monospace;
-    }
+                        <html style="background: black; width: 100%; height: 100%; color: #00FF00;">
+                        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&amp;display=swap">
+                        <div id="centered-div">
+                            <img src="catrolling.gif">
+                            <h1>> Flask Server is Running Late...<br><br>Wait a Sec and Refresh</h1>
+                        </div>
+                        <style>
+                            html, body {
+                                height: 100%;
+                                font-family: 'VT323', monospace;
+                            }
 
-    #centered-div {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-        font-size: 1.5em;
-    }
+                            #centered-div {
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                                text-align: center;
+                                font-size: 1.5em;
+                            }
 
-    #centered-div img {
-        display: block;
-        margin: 0 auto;
-    }
-</style>
-<html>
+                            #centered-div img {
+                                display: block;
+                                margin: 0 auto;
+                            }
+                        </style>
+                        <html>
             `
         let iframe = document.querySelector('iframe.flask-pages')
         iframe.srcdoc = output_html
