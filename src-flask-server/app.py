@@ -403,23 +403,20 @@ class SnakeGameClass:
         return ab <= 0 and cd <= 0
 
     def isCollision(self, u1_head_pt, u2_pts):
-        min_distance=100000
         if not u2_pts:
-            return False, min_distance
-        p1_a, p1_b = np.array(u1_head_pt[0]), np.array(u1_head_pt[1]) # p1_b: head point
+            return False
+        # p1_a, p1_b = np.array(u1_head_pt[0]), np.array(u1_head_pt[1]) # p1_b: head point
+        p1_a, p1_b = u1_head_pt[0], u1_head_pt[1]
 
         for u2_pt in u2_pts:
-            p2_a, p2_b = np.array(u2_pt[0]), np.array(u2_pt[1])
-
-            if self.multi:
-                pt_distance = abs(np.cross(p2_a-p1_b, p2_b-p1_b)/np.linalg.norm(p2_a-p1_b))
-                min_distance = min(min_distance, pt_distance)
+            # p2_a, p2_b = np.array(u2_pt[0]), np.array(u2_pt[1])
+            p2_a, p2_b = u2_pt[0], u2_pt[1]
 
             if self.segmentIntersects(p1_a, p1_b, p2_a, p2_b):
                 # print(p1_a, p1_b, p2_a, p2_b)
-                return True, 0
+                return True
 
-        return False, min_distance
+        return False
 
     def maze_collision(self, head_pt, previous_pt):
         head_pt = np.array(head_pt).astype(int)
@@ -605,16 +602,16 @@ class SnakeGameClass:
         if self.is_udp:
             self.receive_data_from_opp()
 
-        opp_bodys_collsion=opp_bodys
-        if bot_flag:
-            opp_bodys_collsion=opp_bodys+self.points[:-3]
-
-        iscollision_bool, pt_dist = self.isCollision(self.points[-1], opp_bodys_collsion)
+        pt_dist=math.dist(self.points[-1][1], opp_bodys[-1][1])
         # 할일: self.multi가 false일 때, pt_dist html에 보내기
         # print(f"point distance: {pt_dist}")
         socketio.emit('h2h_distance', pt_dist)
 
-        if iscollision_bool:
+        opp_bodys_collsion=opp_bodys
+        if bot_flag:
+            opp_bodys_collsion=opp_bodys+self.points[:-3]
+
+        if self.isCollision(self.points[-1], opp_bodys_collsion):
             global user_move
             if user_move:
                 self.execute()
