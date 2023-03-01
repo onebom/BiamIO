@@ -34,13 +34,16 @@
             <p>점수 :&nbsp;</p>
             <p id="my_score">0</p>
         </div>
-        <div class="opponentscore">
+        <div class="opponentscore" style="visibility: hidden;">
             <p>상대 점수 :&nbsp;</p>
             <p id="opp_score">0</p>
         </div>
         <div class="timer">
             <p>남은 시간 :&nbsp;</p>
+            <p>0</p>
+            <p>분</p>
             <p id="maze_timer">0</p>
+            <p>초</p>
         </div>
     </div>
     <div class="gamesection-container">
@@ -57,7 +60,7 @@
             <img class="cam-feed-alt" src="{{ url_for('static', filename= 'images/placeholder.png') }}">
         </div>
     </div>
-    <div class="debug-wrapper">
+    <div class="debug-wrapper" style="visibility: hidden;">
         <div class="accordion draggable">
             <div class="accordion handle" role="tablist" id="accordion-1">
                 <div class="accordion-item">
