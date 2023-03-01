@@ -848,7 +848,7 @@ class SnakeGameClass:
         b = 0
         test_code = str(sid)
 
-        for i in range(50):
+        for i in range(1):
             if i % 2 == 0:
                 test_code = str(sid)
             self.sock.sendto(test_code.encode(), self.opp_addr)
@@ -860,7 +860,7 @@ class SnakeGameClass:
             except socket.timeout:
                 a += 1
 
-        if a != 50 and b != 0:
+        if a != 1 and b != 0:
             self.is_udp = False
 
         print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
@@ -954,8 +954,8 @@ def set_address(data):
     sid = data['sid']
     user_number = data['user_number']
 
-    # game.set_socket(MY_PORT, opp_ip, opp_port)
-    #game.test_connect(sid)
+    game.set_socket(MY_PORT, opp_ip, opp_port)
+    game.test_connect(sid)
 
 
 # socketio로 받은 상대방 정보
