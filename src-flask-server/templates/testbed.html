@@ -135,22 +135,6 @@
     </div>
 </section>
 
-
-
-<script>
-    const ambient = document.querySelector('.ambient');
-
-    var h2h_distance = 0;
-
-    client_socket.on("h2h_distance", function (data) {
-        h2h_distance = data;
-        // update the color
-        var red = Math.round(255 * (510 - h2h_distance) / 510);
-        var green = Math.round(255 * h2h_distance / 510);
-        var color = "rgb(" + red + ", " + green + ", 0)";
-        document.getElementById("ambient").style.backgroundColor = color;
-    });
-</script>
 <script>
     const accordions = document.querySelectorAll('.draggable');
 
