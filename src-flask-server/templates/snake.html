@@ -181,6 +181,7 @@
 
     client_socket.on("h2h_distance", function (data) {
         h2h_distance = data;
+        console.log(data)
         // update the color
         var red = Math.round(255 * (510 - h2h_distance) / 510);
         var green = Math.round(255 * h2h_distance / 510);

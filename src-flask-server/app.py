@@ -954,7 +954,7 @@ def set_address(data):
     sid = data['sid']
     user_number = data['user_number']
 
-    game.set_socket(MY_PORT, opp_ip, opp_port)
+    # game.set_socket(MY_PORT, opp_ip, opp_port)
     #game.test_connect(sid)
 
 
