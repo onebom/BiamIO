@@ -32,7 +32,6 @@ import simpleaudio as sa
 import threading
 import signal
 
-
 # import pprint
 
 ########################################################################################################################
@@ -77,7 +76,7 @@ gameover_flag = False  # ^^ 게임오버
 now_my_room = ""  # 현재 내가 있는 방
 now_my_sid = ""  # 현재 나의 sid
 MY_PORT = 0  # socket_bind를 위한 내 포트 번호
-user_number = 0 # 1p, 2p를 나타내는 번호
+user_number = 0  # 1p, 2p를 나타내는 번호
 user_move = False
 game_over_for_debug = False
 
@@ -92,29 +91,41 @@ vfx_2_path = './src-flask-server/static/bgm/eatFood.wav'
 vfx_3_path = './src-flask-server/static/bgm/boost.wav'
 vfx_4_path = './src-flask-server/static/bgm/gameOver.wav'
 vfx_5_path = './src-flask-server/static/bgm/stageWin.wav'
+
+
 def play_bgm():
     global bgm_play_obj
     bgm_wave_obj = sa.WaveObject.from_wave_file(bgm_path)
     bgm_play_obj = bgm_wave_obj.play()
     bgm_play_obj.wait_done()
+
+
 def stop_music_exit(signal, frame):
     global bgm_play_obj
     if bgm_play_obj is not None:
         bgm_play_obj.stop()
     exit(0)
+
+
 def stop_bgm():
     global bgm_play_obj
     if bgm_play_obj is not None:
         bgm_play_obj.stop()
+
+
 # Create a new thread for each sound effect selected by the user
 def play_selected_sfx(track):
     sfx_wave_obj = sa.WaveObject.from_wave_file(track)
     sfx_play_obj = sfx_wave_obj.play()
     sfx_play_obj.wait_done()
+
+
 # Create a thread for the BGM
 bgm_thread = threading.Thread(target=play_bgm)
 # Register the signal handler for SIGINT (Ctrl-C)
 signal.signal(signal.SIGINT, stop_music_exit)
+
+
 ############################################################
 
 ########################################################################################################################
@@ -197,11 +208,11 @@ class HandDetector:
         return allHands
 
     def drawHands(self, img):
-      img2=img.copy()
-      if self.results.multi_hand_landmarks:
-        for handType, handLms in zip(self.results.multi_handedness, self.results.multi_hand_landmarks):  
-          self.mpDraw.draw_landmarks(img2, handLms, self.mpHands.HAND_CONNECTIONS)
-      return img2
+        img2 = img.copy()
+        if self.results.multi_hand_landmarks:
+            for handType, handLms in zip(self.results.multi_handedness, self.results.multi_hand_landmarks):
+                self.mpDraw.draw_landmarks(img2, handLms, self.mpHands.HAND_CONNECTIONS)
+        return img2
 
     def fingersUp(self, myHand):
         """
@@ -271,7 +282,7 @@ cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
 
 cap.set(3, 1280)
 cap.set(4, 720)
-cap.set(cv2.CAP_PROP_FPS, 30) # TODO : 영향 확인하기, 시간 탐지 기법 중 하나가 프레임이라 프레임 맞춰줌
+cap.set(cv2.CAP_PROP_FPS, 30)  # TODO : 영향 확인하기, 시간 탐지 기법 중 하나가 프레임이라 프레임 맞춰줌
 fps = cap.get(cv2.CAP_PROP_FPS)
 
 # Color templates
@@ -290,11 +301,11 @@ class SnakeGameClass:
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
-        self.previousHead = (int), (int) # TODO 이거 됨 ?
+        self.previousHead = (int), (int)  # TODO 이거 됨 ?
 
         self.speed = 5
-        self.minspeed=10
-        self.maxspeed=math.hypot(1280, 720) / 10
+        self.minspeed = 10
+        self.maxspeed = math.hypot(1280, 720) / 10
         self.velocityX = random.choice([-1, 0, 1])
         self.velocityY = random.choice([-1, 1])
 
@@ -311,13 +322,15 @@ class SnakeGameClass:
         self.foodOnOff = True
         self.multi = True
 
-        self.maze_start = [[],[]]
-        self.maze_end = [[],[]]
+        self.maze_start = [[], []]
+        self.maze_end = [[], []]
         self.maze_map = np.array([])
-        self.passStart=False
-        self.passMid=False
-        
-        self.maze_img=np.array([0])
+        self.passStart = False
+        self.passMid = False
+
+        self.gameOver = False
+
+        self.maze_img = np.array([0])
 
     def global_intialize(self):
         global user_number
@@ -325,11 +338,11 @@ class SnakeGameClass:
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
-        self.previousHead = (int), (int) # TODO 이거 됨 ?
+        self.previousHead = (int), (int)  # TODO 이거 됨 ?
 
         self.speed = 5
-        self.minspeed=10
-        self.maxspeed=math.hypot(1280, 720) / 10
+        self.minspeed = 10
+        self.maxspeed = math.hypot(1280, 720) / 10
         self.velocityX = random.choice([-1, 0, 1])
         self.velocityY = random.choice([-1, 1])
 
@@ -344,21 +357,21 @@ class SnakeGameClass:
         self.foodOnOff = True
         self.multi = True
 
-        self.maze_start = [[],[]]
-        self.maze_end = [[],[]]
+        self.maze_start = [[], []]
+        self.maze_end = [[], []]
         self.maze_map = np.array([])
-        self.passStart=False
+        self.passStart = False
         user_number = 0
 
     def ccw(self, p, a, b):
         s = p[0] * a[1] + a[0] * b[1] + b[0] * p[1]
         s -= (p[1] * a[0] + a[1] * b[0] + b[1] * p[0])
 
-        if s > 0 :
+        if s > 0:
             return 1
-        elif s == 0 :
+        elif s == 0:
             return 0
-        else :
+        else:
             return -1
 
     def segmentIntersects(self, p1_a, p1_b, p2_a, p2_b):
@@ -386,32 +399,32 @@ class SnakeGameClass:
                 return True
         return False
 
-    def maze_collision(self , head_pt, previous_pt):
-        head_pt=np.array(head_pt).astype(int)
+    def maze_collision(self, head_pt, previous_pt):
+        head_pt = np.array(head_pt).astype(int)
         # if self.maze_map[int(head_pt[1]),int(head_pt[0])]==1:
         #   return True
         pt_a = np.array(previous_pt).astype(int)
-        line_norm=np.linalg.norm(pt_a - head_pt).astype(int)
+        line_norm = np.linalg.norm(pt_a - head_pt).astype(int)
         points_on_line = np.linspace(pt_a, head_pt, line_norm)
         for p in points_on_line:
-          # print(p)
-          if self.maze_map[int(p[1]),int(p[0])]==1:
+            # print(p)
+            if self.maze_map[int(p[1]), int(p[0])] == 1:
                 return True
         return False
 
     # maze 초기화
     def maze_initialize(self):
-        self.maze_start, self.maze_mid, self.maze_end,self.maze_map = create_maze(720-300, 1280-300, 5, 12)
-        self.maze_map=np.pad(self.maze_map, ((150,150),(150,150)), 'constant', constant_values=0)
-        self.maze_img=self.create_maze_image()
-        
+        self.maze_start, self.maze_mid, self.maze_end, self.maze_map = create_maze(720 - 300, 1280 - 300, 5, 12)
+        self.maze_map = np.pad(self.maze_map, ((150, 150), (150, 150)), 'constant', constant_values=0)
+        self.maze_img = self.create_maze_image()
+
         self.previousHead = (0, 360)
         self.velocityX = 0
         self.velocityY = 0
         self.points = []
-        self.maxspeed=30
-        self.passStart=False
-        self.passMid=False
+        self.maxspeed = 30
+        self.passStart = False
+        self.passMid = False
 
     def menu_initialize(self):
         self.previousHead = (0, 360)
@@ -442,7 +455,7 @@ class SnakeGameClass:
         # Change hue every 100ms
         change_interval = 100
 
-        hue = int(time.time() * change_interval % 180) # TODO : 마지막에 성능 부족 시 아낄 수 있음
+        hue = int(time.time() * change_interval % 180)  # TODO : 마지막에 성능 부족 시 아낄 수 있음
         rainbow = np.array([hue, 255, 255], dtype=np.uint8)
         rainbow = cv2.cvtColor(np.array([[rainbow]]), cv2.COLOR_HSV2BGR)[0, 0]
         # Convert headcolor to tuple of integers
@@ -471,52 +484,50 @@ class SnakeGameClass:
 
     ############################################################
     def create_maze_image(self):
-          img=np.zeros((720,1280,3), dtype=np.uint8)
-          
-          img[np.where(self.maze_map == 1)] = (0, 0, 255)
-          img[np.where(self.maze_map == 2)] = (0, 255, 255)
-          img[np.where(self.maze_map == 3)] = (255,0, 255)
-          return img
-    
+        img = np.zeros((720, 1280, 3), dtype=np.uint8)
+
+        img[np.where(self.maze_map == 1)] = (0, 0, 255)
+        img[np.where(self.maze_map == 2)] = (0, 255, 255)
+        img[np.where(self.maze_map == 3)] = (255, 0, 255)
+        return img
+
     # 내 뱀 상황 업데이트 - maze play에서
     def my_snake_update_mazeVer(self, HandPoints):
         px, py = self.previousHead
         s_speed = 30
         cx, cy = self.set_snake_speed(HandPoints, s_speed)
-        
+
         self.points.append([[px, py], [cx, cy]])
         distance = math.hypot(cx - px, cy - py)
         self.lengths.append(distance)
         self.currentLength += distance
         self.previousHead = cx, cy
-        
+
         self.length_reduction()
-        if self.maze_collision([cx,cy],[px, py]):
-            self.passStart=False
-            self.passMid=False
+        if self.maze_collision([cx, cy], [px, py]):
+            self.passStart = False
+            self.passMid = False
             self.execute()
-            
+
         # start point 시작!
         start_pt1, start_pt2 = self.maze_start
         if (start_pt1[0] <= cx <= start_pt2[0]) and (start_pt1[1] <= cy <= start_pt2[1]):
-          self.passStart=True
-        
+            self.passStart = True
+
         # 중간 point 패스!
         mid_pt1, mid_pt2 = self.maze_mid
         if (mid_pt1[0] <= cx <= mid_pt2[0]) and (mid_pt1[1] <= cy <= mid_pt2[1]):
-          if self.passStart:
-              self.passMid=True
-        
+            if self.passStart:
+                self.passMid = True
+
         # end point 도달
         end_pt1, end_pt2 = self.maze_end
         # print(f"end point : 1-{end_pt1}, 2-{end_pt2}")
         if (end_pt1[0] <= cx <= end_pt2[0]) and (end_pt1[1] <= cy <= end_pt2[1]):
             if self.passStart and self.passMid:
-              self.maze_initialize()
-              # 시간 제한 넣는다면 그것도 다시 돌리기
-              time.sleep(3)
-              
-        
+                self.maze_initialize()
+                # 시간 제한 넣는다면 그것도 다시 돌리기
+                time.sleep(3)
 
     # 내 뱀 상황 업데이트
     def my_snake_update(self, HandPoints, opp_bodys):
@@ -524,7 +535,7 @@ class SnakeGameClass:
 
         s_speed = 30
         cx, cy = self.set_snake_speed(HandPoints, s_speed)
-        socketio.emit('finger_cordinate', {'head_x': cx, 'head_y': cy}) 
+        socketio.emit('finger_cordinate', {'head_x': cx, 'head_y': cy})
 
         self.points.append([[px, py], [cx, cy]])
 
@@ -542,16 +553,15 @@ class SnakeGameClass:
         self.send_data_to_html()
 
         if self.is_udp:
-            self.receive_data_from_opp()         
+            self.receive_data_from_opp()
 
-        if len(self.points) != 0: #out of range 용 성능 애바면 좀;;
+        if len(self.points) != 0:  # out of range 용 성능 애바면 좀;;
             if self.isCollision(self.points[-1], opp_bodys):
                 global user_move
                 if user_move:
                     self.execute()
         else:
             print('point가 텅텅 !')
-
 
     ################################## VECTORING SPEED METHOD ##########################################################
     # def set_snake_speed(self, HandPoints, s_speed):
@@ -607,8 +617,8 @@ class SnakeGameClass:
             dy = m_y - py
 
             # speed 범위: 0~1460
-            if math.hypot(dx, dy) > self.maxspeed : # 146
-                self.speed = self.maxspeed 
+            if math.hypot(dx, dy) > self.maxspeed:  # 146
+                self.speed = self.maxspeed
             elif math.hypot(dx, dy) < self.minspeed:
                 self.speed = self.minspeed
             else:
@@ -729,7 +739,7 @@ class SnakeGameClass:
     # 통신 관련 변수 설정
     def set_socket(self, my_port, opp_ip, opp_port):
         self.sock.bind(('0.0.0.0', int(my_port)))
-        self.sock.settimeout(0.01) # TODO 만약 udp, 서버 선택 오류 시 다시 0.02로
+        self.sock.settimeout(0.01)  # TODO 만약 udp, 서버 선택 오류 시 다시 0.02로
         self.opp_addr = (opp_ip, int(opp_port))
 
     # 데이터 전송
@@ -816,6 +826,7 @@ def index():
 @app.route('/testbed')
 def testbed():
     return render_template("testbed.html")
+
 
 @app.route('/mazerunner')
 def mazerunner():
@@ -910,7 +921,7 @@ def snake():
         global user_move
         global game_over_for_debug
 
-        while True :
+        while True:
             if user_number == 1:
                 cx = 100
                 game.previousHead = (100, 360)
@@ -919,17 +930,17 @@ def snake():
                 cx = 1180
                 game.previousHead = (1180, 360)
                 break
-        
+
         user_move = False
 
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
             hands = detector.findHands(img, flipType=False)
-            img=detector.drawHands(img)
+            img = detector.drawHands(img)
 
             pointIndex = []
-                
+
             if hands and user_move:
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
@@ -945,7 +956,7 @@ def snake():
                 elif user_number == 2:
                     cx -= 5
                     if cx < 830:
-                        cx = 1210    
+                        cx = 1210
                         user_move = True
 
             img = game.update(img, pointIndex)
@@ -954,7 +965,7 @@ def snake():
             _, img_encoded = cv2.imencode('.jpg', img)
             yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
-            if game_over_for_debug :
+            if game_over_for_debug:
                 game_over_for_debug = False
                 break
 
@@ -1028,7 +1039,10 @@ def bot_data_update():
             if bot_data['currentLength'] < 250:
                 break
 
+
 single_game = SnakeGameClass(pathFood)
+
+
 # TEST BED ROUTING
 @app.route('/test')
 def test():
@@ -1037,15 +1051,15 @@ def test():
         global opponent_data
         single_game.global_intialize()
         single_game.testbed_initialize()
-        
-## CONFILIC FLAG HERE
+
+        ## CONFILIC FLAG HERE
         max_time_end = time.time() + 4
         cx, cy = 200, 360
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
             hands = detector.findHands(img, flipType=False)
-            img=detector.drawHands(img)
+            img = detector.drawHands(img)
 
             cx += 1
             pointIndex = [cx, cy]
@@ -1053,7 +1067,7 @@ def test():
             bot_data_update()
             opponent_data['opp_body_node'] = bot_data["bot_body_node"]
             # print(pointIndex)
-            
+
             img = single_game.update(img, pointIndex)
 
             # encode the image as a JPEG string
@@ -1063,15 +1077,15 @@ def test():
 
             if time.time() > max_time_end:
                 break
-        
+
         single_game.previousHead = cx, cy
-## CONFILIC FLAG HERE
+        ## CONFILIC FLAG HERE
 
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
             hands = detector.findHands(img, flipType=False)
-            img=detector.drawHands(img)
+            img = detector.drawHands(img)
 
             pointIndex = []
 
@@ -1108,7 +1122,7 @@ def menu_snake():
 
     menu_game.multi = False
     menu_game.foodOnOff = False
-    menuimg=np.zeros((720,1280,3),dtype=np.uint8)
+    menuimg = np.zeros((720, 1280, 3), dtype=np.uint8)
     menu_game.global_intialize()
     menu_game.menu_initialize()
 
@@ -1117,7 +1131,7 @@ def menu_snake():
             success, img = cap.read()
             img = cv2.flip(img, 1)
             hands = detector.findHands(img, flipType=False)
-            showimg=detector.drawHands(menuimg)
+            showimg = detector.drawHands(menuimg)
             pointIndex = []
 
             if hands:
@@ -1142,20 +1156,20 @@ def create_maze(image_h, image_w, block_rows, block_cols):
     block_h = image_h // block_rows
     block_w = image_w // block_cols
 
-    start = [[],[]]
+    start = [[], []]
     end = [[], []]
     r = 2
 
     for i in range(block_rows):
         for j in range(block_cols):
             if maze.initial_grid[i][j].is_entry_exit == "entry":
-              start = [[j * block_w + 150, i * block_h + 150], [(j+1) * block_w +150, (i+1) * block_h +150]]
-              wall_map[i * block_h +10 : (i+1) * block_h - 10, j * block_w +10 : (j+1) * block_w -10] = 2
-              print(f"start in create_maze: {start}")
+                start = [[j * block_w + 150, i * block_h + 150], [(j + 1) * block_w + 150, (i + 1) * block_h + 150]]
+                wall_map[i * block_h + 10: (i + 1) * block_h - 10, j * block_w + 10: (j + 1) * block_w - 10] = 2
+                print(f"start in create_maze: {start}")
             elif maze.initial_grid[i][j].is_entry_exit == "exit":
-              end = [[j * block_w + 150, i * block_h+ 150], [(j+1) * block_w +150, (i+1) * block_h +150]]
-              wall_map[i * block_h + 10 : (i+1) * block_h -10 , j * block_w + 10 : (j + 1) * block_w - 10] = 3
-              print(f"end in create_maze:{end}")
+                end = [[j * block_w + 150, i * block_h + 150], [(j + 1) * block_w + 150, (i + 1) * block_h + 150]]
+                wall_map[i * block_h + 10: (i + 1) * block_h - 10, j * block_w + 10: (j + 1) * block_w - 10] = 3
+                print(f"end in create_maze:{end}")
             if maze.initial_grid[i][j].walls["top"]:
                 if i == 0:
                     wall_map[i * block_h:i * block_h + r, j * block_w:(j + 1) * block_w] = 1
@@ -1171,21 +1185,22 @@ def create_maze(image_h, image_w, block_rows, block_cols):
                 else:
                     wall_map[i * block_h:(i + 1) * block_h, j * block_w - r:j * block_w + r] = 1
 
-    solution_nodes=maze.solution_path
-    mid_goal_h=maze.solution_path[len(solution_nodes)//2][0][0]
-    mid_goal_x=maze.solution_path[len(solution_nodes)//2][0][1]
+    solution_nodes = maze.solution_path
+    mid_goal_h = maze.solution_path[len(solution_nodes) // 2][0][0]
+    mid_goal_x = maze.solution_path[len(solution_nodes) // 2][0][1]
     # print(len(solution_nodes))
     # print(mid_goal_h)
     # print(mid_goal_x)
-    mid=[[mid_goal_x * block_w + 150, mid_goal_h * block_h + 150], [(mid_goal_x+1) * block_w +150, (mid_goal_h+1) * block_h +150]]
-    
+    mid = [[mid_goal_x * block_w + 150, mid_goal_h * block_h + 150],
+           [(mid_goal_x + 1) * block_w + 150, (mid_goal_h + 1) * block_h + 150]]
+
     return start, mid, end, wall_map
 
 
 @app.route('/maze_play')
 def maze_play():
     def generate():
-        global gameover_flag,game
+        global gameover_flag, game
 
         game.multi = False
         game.maze_initialize()
@@ -1193,9 +1208,9 @@ def maze_play():
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
-            
+
             hands = detector.findHands(img, flipType=False)
-            showimg=detector.drawHands(game.maze_img) # 무조건 findHands 다음
+            showimg = detector.drawHands(game.maze_img)  # 무조건 findHands 다음
 
             pointIndex = []
             if hands:
