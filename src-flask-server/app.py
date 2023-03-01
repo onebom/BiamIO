@@ -1282,7 +1282,7 @@ def maze_play():
 
         game.multi = False
         game.maze_initialize()
-        timer_end = time.time() + 60 # 1분 시간제한
+        timer_end = time.time() + 120 # 1분 시간제한
 
         while True:
             success, img = cap.read()
