@@ -46,9 +46,15 @@
 <audio id="hover-sound">
     <source src="{{ url_for('static', filename= 'bgm/curSelect.wav') }}" type="audio/wav">
 </audio>
-<audio id="bgm" loop>
+
+<audio id="bgm" autoplay loop>
     <source src="{{ url_for('static', filename= 'bgm/menu_bgm.mp3') }}" type="audio/mpeg">
 </audio>
+<script>
+    document.getElementById('bgm').addEventListener('ended', function () {
+        this.currentTime = 0;
+    }, false);
+</script>
 
 <canvas></canvas>
 
@@ -82,10 +88,7 @@
         <h2 id="alarm"></h2>
     </div>
 </section>
-<script>
-    const bgm = document.getElementById('bgm');
-    bgm.play();
-</script>
+
 <script>
     const hoverSound = document.getElementById('hover-sound');
 
