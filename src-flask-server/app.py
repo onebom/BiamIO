@@ -341,7 +341,7 @@ class SnakeGameClass:
         self.passStart = False
         self.passMid = False
         self.maze_img = np.array([0])
-
+        self.dist = 500
         self.gameOver = False
 
         self.menu_type = 0
@@ -606,10 +606,10 @@ class SnakeGameClass:
             self.receive_data_from_opp()
 
         if opp_bodys:
-            pt_dist = ((self.points[-1][1][0]-opp_bodys[-1][1][0])**2+(self.points[-1][1][1]-opp_bodys[-1][1][1])**2)**0.5
+            self.dist = ((self.points[-1][1][0]-opp_bodys[-1][1][0])**2+(self.points[-1][1][1]-opp_bodys[-1][1][1])**2)**0.5
         # 할일: self.multi가 false일 때, pt_dist html에 보내기
         # print(f"point distance: {pt_dist}")
-        socketio.emit('h2h_distance', pt_dist)
+        socketio.emit('h2h_distance', self.dist)
 
         opp_bodys_collsion=opp_bodys
         if bot_flag:
@@ -953,10 +953,11 @@ def set_address(data):
     opp_ip = data['ip_addr']
     opp_port = data['port']
     sid = data['sid']
+    print(f"opponent_address user_number, {data['user_number']}")
     user_number = data['user_number']
 
-    # game.set_socket(MY_PORT, opp_ip, opp_port)
-    #game.test_connect(sid)
+    game.set_socket(MY_PORT, opp_ip, opp_port)
+    game.test_connect(sid)
 
 
 # socketio로 받은 상대방 정보
@@ -982,6 +983,14 @@ def set_food_loc(data):
     game.opp_score = data['opp_score']
     game.foodOnOff = True
 
+# socketio로 받은 먹이 위치와 상대 점수
+@socketio.on('user_match')
+def user_match(data):
+    global user_number
+    user_number = data
+    socketio.emit("set_snake_url")
+
+
 
 ########################################################################################################################
 ######################################## MAIN GAME ROUNTING ############################################################
@@ -992,22 +1001,30 @@ def snake():
         global game
         global user_move, bot_flag
         global game_over_for_debug
+        global user_number
 
         game.multi = True
         bot_flag = False
-
-        while True:
-            if user_number == 1:
-                cx = 100
-                cy = 360
-                game.previousHead = (100, 360)
-                break
-            elif user_number == 2:
-                cx = 1180
-                cy = 360
-                game.previousHead = (1180, 360)
-                break
-
+        
+        print(f"app.py before while, {user_number}")
+        user_number = int(user_number)
+        # while True:
+        if user_number == 1:
+            start_cx = 100
+            start_cy = 360
+            game.previousHead = (100, 360)
+            print(f"app.py user_number, {user_number}")
+            # break
+        elif user_number == 2:
+            start_cx = 1180
+            start_cy = 360
+            game.previousHead = (1180, 360)
+            print(f"app.py user_number, {user_number}")
+            # break
+        else:
+            start_cx = 100
+            start_cy = 100
+                
         user_move = False
 
         while True:
@@ -1022,18 +1039,18 @@ def snake():
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
             if not user_move:
-                pointIndex = [cx, cy]
+                pointIndex = [start_cx, start_cy]
 
             if not user_move:
                 if user_number == 1:
-                    cx += 5
-                    if cx > 450:
-                        cx = 70
+                    start_cx += 5
+                    if start_cx > 350:
+                        start_cx = 70
                         user_move = True
                 elif user_number == 2:
-                    cx -= 5
-                    if cx < 830:
-                        cx = 1210
+                    start_cx -= 5
+                    if start_cx < 930:
+                        start_cx = 1210
                         user_move = True
 
             img = game.update(img, pointIndex)
@@ -1162,7 +1179,6 @@ def test():
 
             if time.time() > max_time_end:
                 user_move=True
-                print(f"headpoint time_end after: {single_game.previousHead}")
                 if gameover_flag:
                     print("game ended")
                     gameover_flag = False
