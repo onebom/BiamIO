@@ -898,7 +898,7 @@ def set_address(data):
     user_number = data['user_number']
 
     game.set_socket(MY_PORT, opp_ip, opp_port)
-    game.test_connect(sid)
+    #game.test_connect(sid)
 
 
 # socketio로 받은 상대방 정보
