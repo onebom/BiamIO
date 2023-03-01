@@ -318,7 +318,7 @@ class SnakeGameClass:
 
         self.speed = 5
         self.minspeed = 10
-        self.maxspeed = math.hypot(1280, 720) / 10
+        self.maxspeed = 50
         self.velocityX = random.choice([-1, 0, 1])
         self.velocityY = random.choice([-1, 1])
 
@@ -357,7 +357,7 @@ class SnakeGameClass:
 
         self.speed = 5
         self.minspeed = 10
-        self.maxspeed = math.hypot(1280, 720) / 10
+        self.maxspeed = 50
         self.velocityX = random.choice([-1, 0, 1])
         self.velocityY = random.choice([-1, 1])
 
@@ -1164,7 +1164,6 @@ def test():
                 pointIndex = [cx, cy]
             else:
                 if hands:
-                    print()
                     lmList = hands[0]['lmList']
                     pointIndex = lmList[8][0:2]
 
