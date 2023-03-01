@@ -505,9 +505,12 @@ class SnakeGameClass:
     def create_maze_image(self):
         img = np.zeros((720, 1280, 3), dtype=np.uint8)
 
-        img[np.where(self.maze_map == 1)] = (0, 0, 255)
-        img[np.where(self.maze_map == 2)] = (0, 255, 255)
-        img[np.where(self.maze_map == 3)] = (255, 0, 255)
+        # White Wall
+        img[np.where(self.maze_map == 1)] = (255, 255, 255)
+        # Start Green
+        img[np.where(self.maze_map == 2)] = (0, 255, 0)
+        # End Red
+        img[np.where(self.maze_map == 3)] = (0, 0, 255)
         return img
 
     # 내 뱀 상황 업데이트 - main에서
