@@ -208,12 +208,24 @@ class HandDetector:
 
         return allHands
 
+    # def drawHands(self, img):
+    #     img2 = img.copy()
+    #     if self.results.multi_hand_landmarks:
+    #         for handType, handLms in zip(self.results.multi_handedness, self.results.multi_hand_landmarks):
+    #             self.mpDraw.draw_landmarks(img2, handLms, self.mpHands.HAND_CONNECTIONS)
+    #     return img2
+
+    # Only Draw Index Finger
     def drawHands(self, img):
         img2 = img.copy()
         if self.results.multi_hand_landmarks:
             for handType, handLms in zip(self.results.multi_handedness, self.results.multi_hand_landmarks):
-                self.mpDraw.draw_landmarks(img2, handLms, self.mpHands.HAND_CONNECTIONS)
+                # Access landmarks of the index finger
+                index_finger_landmarks = handLms.landmark[self.mpHands.HandLandmark.INDEX_FINGER_TIP]
+                # Draw a circle at the index finger tip landmark
+                cv2.circle(img2, (int(index_finger_landmarks.x * img2.shape[1]), int(index_finger_landmarks.y * img2.shape[0])), 27, (255, 0, 255), 3)
         return img2
+
 
     def fingersUp(self, myHand):
         """
