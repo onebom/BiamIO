@@ -556,10 +556,10 @@ class SnakeGameClass:
 
         if self.is_udp:
             self.receive_data_from_opp()
-        
+
         opp_bodys_collsion=opp_bodys
         if bot_flag:
-            opp_bodys_collsion=opp_bodys+self.points
+            opp_bodys_collsion=opp_bodys+self.points[:-3]
             
         if len(self.points) != 0:  # out of range 용 성능 애바면 좀;;
             if self.isCollision(self.points[-1], opp_bodys_collsion):
@@ -1053,7 +1053,7 @@ single_game = SnakeGameClass(pathFood)
 @app.route('/test')
 def test():
     def generate():
-        global bot_data, single_game, gameover_flag, bot_flag
+        global bot_data, single_game, gameover_flag, bot_flag, user_move
         global opponent_data
         single_game.global_intialize()
         single_game.testbed_initialize()
@@ -1061,6 +1061,7 @@ def test():
         max_time_end = time.time() + 4
         cx, cy = 200, 360
         bot_flag=True
+        user_move = False
         
         while True:
             success, img = cap.read()
@@ -1068,8 +1069,13 @@ def test():
             hands = detector.findHands(img, flipType=False)
             img = detector.drawHands(img)
 
-            cx += 1
-            pointIndex = [cx, cy]
+            if not user_move:
+                cx += 1
+                pointIndex = [cx, cy]
+            else:
+                if hands:
+                    lmList = hands[0]['lmList']
+                    pointIndex = lmList[8][0:2]
 
             bot_data_update()
             opponent_data['opp_body_node'] = bot_data["bot_body_node"]
@@ -1083,16 +1089,16 @@ def test():
                    b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
             if time.time() > max_time_end:
-                break
-        
-            if gameover_flag:
-                print("game ended")
-                gameover_flag = False
-                time.sleep(1)
-                socketio.emit('gameover', {'sid': sid})
-                time.sleep(2)
-                break
-            
+                user_move=True
+                print(f"headpoint time_end after: {single_game.previousHead}")
+                if gameover_flag:
+                    print("game ended")
+                    gameover_flag = False
+                    time.sleep(1)
+                    socketio.emit('gameover', {'sid': sid})
+                    time.sleep(2)
+                    break
+
         single_game.previousHead = cx, cy
         bot_flag=False
 
