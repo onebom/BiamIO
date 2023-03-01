@@ -412,7 +412,7 @@ class SnakeGameClass:
             p2_a, p2_b = np.array(u2_pt[0]), np.array(u2_pt[1])
 
             if self.multi:
-                pt_distance = np.cross(p2_a-p1_b, p2_b-p1_b)/np.linalg.norm(p2_a-p1_b)
+                pt_distance = abs(np.cross(p2_a-p1_b, p2_b-p1_b)/np.linalg.norm(p2_a-p1_b))
                 min_distance = min(min_distance, pt_distance)
 
             if self.segmentIntersects(p1_a, p1_b, p2_a, p2_b):
@@ -736,13 +736,15 @@ class SnakeGameClass:
 
     # 뱀이 충돌했을때
     def execute(self):
-        global user_move
         global user_number
+        global user_move
         global game_over_for_debug
         self.points = []  # all points of the snake
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
+        self.score=0
+
         if user_number == 1:
             self.previousHead = 100, 180
         elif user_number == 2:
@@ -987,10 +989,12 @@ def snake():
     def generate():
         global opponent_data
         global game
-        global user_move
+        global user_move, bot_flag
         global game_over_for_debug
 
-        game.multi=True
+        game.multi = True
+        bot_flag = False
+
         while True:
             if user_number == 1:
                 cx = 100
@@ -1167,7 +1171,7 @@ def test():
                     break
 
         single_game.previousHead = cx, cy
-        bot_flag=False
+
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -1285,7 +1289,7 @@ def maze_play():
             remain_time = timer_end - time.time()  # 할일: html에 보내기
             print(f"remain_time: {remain_time}")
 
-            if gameover_flag or (remain_time == 0):
+            if gameover_flag or (remain_time < 1):
                 print("game ended")
                 gameover_flag = False
                 time.sleep(1)
