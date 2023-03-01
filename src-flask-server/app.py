@@ -341,7 +341,7 @@ class SnakeGameClass:
         self.passStart = False
         self.passMid = False
         self.maze_img = np.array([0])
-
+        self.dist = 500
         self.gameOver = False
 
         self.menu_type = 0
@@ -606,10 +606,10 @@ class SnakeGameClass:
             self.receive_data_from_opp()
 
         if opp_bodys:
-            pt_dist = ((self.points[-1][1][0]-opp_bodys[-1][1][0])**2+(self.points[-1][1][1]-opp_bodys[-1][1][1])**2)**0.5
+            self.dist = ((self.points[-1][1][0]-opp_bodys[-1][1][0])**2+(self.points[-1][1][1]-opp_bodys[-1][1][1])**2)**0.5
         # 할일: self.multi가 false일 때, pt_dist html에 보내기
         # print(f"point distance: {pt_dist}")
-        socketio.emit('h2h_distance', pt_dist)
+        socketio.emit('h2h_distance', self.dist)
 
         opp_bodys_collsion=opp_bodys
         if bot_flag:
@@ -1179,7 +1179,6 @@ def test():
 
             if time.time() > max_time_end:
                 user_move=True
-                print(f"headpoint time_end after: {single_game.previousHead}")
                 if gameover_flag:
                     print("game ended")
                     gameover_flag = False
