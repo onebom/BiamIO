@@ -217,17 +217,11 @@
     });
 </script>
 <script>
-    // 서버에서 시간 요청하기
-    server_socket.emit("get_time");
-    // 서버에서 받은 시간 페이지에 적용
-    server_socket.on("time", function (data) {
-        $("#time").html(data["time"]);
-    });
     client_socket.on("NetworkMode", function (data) {
         $("#UDP").text(data["UDP"]);
     });
     client_socket.on("game_data_for_debug", function (data) {
-        $("#score").text(data["score"]);
+        $("#my_score").text(data["score"]);
         $("#fps").text(data["fps"]);
     });
     client_socket.on("finger_cordinate", function (data) {
