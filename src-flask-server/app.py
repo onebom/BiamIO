@@ -318,7 +318,7 @@ class SnakeGameClass:
 
         self.speed = 5
         self.minspeed = 10
-        self.maxspeed = math.hypot(1280, 720) / 10
+        self.maxspeed = 50
         self.velocityX = random.choice([-1, 0, 1])
         self.velocityY = random.choice([-1, 1])
 
@@ -357,7 +357,7 @@ class SnakeGameClass:
 
         self.speed = 5
         self.minspeed = 10
-        self.maxspeed = math.hypot(1280, 720) / 10
+        self.maxspeed = 50
         self.velocityX = random.choice([-1, 0, 1])
         self.velocityY = random.choice([-1, 1])
 
@@ -619,6 +619,8 @@ class SnakeGameClass:
 
         if self.isCollision(self.points[-1], opp_bodys_collsion):
             global user_move
+            global gameover_flag
+            gameover_flag = True
             if user_move:
                 self.execute()
 
@@ -1164,7 +1166,6 @@ def test():
                 pointIndex = [cx, cy]
             else:
                 if hands:
-                    print()
                     lmList = hands[0]['lmList']
                     pointIndex = lmList[8][0:2]
 
@@ -1181,13 +1182,12 @@ def test():
 
             if time.time() > max_time_end:
                 user_move=True
-                if gameover_flag:
-                    print("game ended")
-                    gameover_flag = False
-                    time.sleep(1)
-                    socketio.emit('gameover', {'sid': sid})
-                    time.sleep(2)
-                    break
+            
+            if gameover_flag:
+                print("game ended")
+                gameover_flag = False
+                socketio.emit('gameover')
+                break
 
         single_game.previousHead = cx, cy
 
