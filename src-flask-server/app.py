@@ -998,17 +998,6 @@ def bot_data_update():
     bot_speed = 20
     px, py = bot_data['bot_head_x'], bot_data['bot_head_y']
 
-    if px <= 0 or px >= 1280 or py <= 0 or py >= 720:
-        if px < 0: px = 0
-        if px > 1280: px = 1280
-        if py < 0: py = 0
-        if py > 720: py = 720
-
-        if px == 0 or px == 1280:
-            bot_data['bot_velocityX'] = -bot_data['bot_velocityX']
-        if py == 0 or py == 720:
-            bot_data['bot_velocityY'] = -bot_data['bot_velocityY']
-
     # 1초 마다 방향 바꾸기
     # print(bot_cnt)
     if bot_cnt == 30:
@@ -1025,6 +1014,17 @@ def bot_data_update():
 
     cx = round(px + bot_velocityX * bot_speed)
     cy = round(py + bot_velocityY * bot_speed)
+    
+    if cx < 0 or cx > 1280 or cy < 0 or cy > 720:
+        if cx < 0: cx = 0
+        if cx > 1280: cx = 1280
+        if cy < 0: cy = 0
+        if cy > 720: cy = 720
+
+    if cx == 0 or cx == 1280:
+        bot_data['bot_velocityX'] = -bot_data['bot_velocityX']
+    if cy == 0 or cy == 720:
+        bot_data['bot_velocityY'] = -bot_data['bot_velocityY']
 
     bot_data['bot_head_x'] = cx
     bot_data['bot_head_y'] = cy
