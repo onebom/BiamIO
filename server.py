@@ -160,7 +160,7 @@ def game_over(data):
     emit('gameover_to_clients', {'result':0}) # 나한테
 
 @socketio.on('test_gameover_to_server')
-def game_over(data):
+def game_over():
     emit('gameover_to_clients') # 나한테
 
 if __name__ == "__main__":

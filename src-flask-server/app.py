@@ -619,6 +619,8 @@ class SnakeGameClass:
 
         if self.isCollision(self.points[-1], opp_bodys_collsion):
             global user_move
+            global gameover_flag
+            gameover_flag = True
             if user_move:
                 self.execute()
 
