@@ -605,7 +605,8 @@ class SnakeGameClass:
         if self.is_udp:
             self.receive_data_from_opp()
 
-        pt_dist=math.dist(self.points[-1][1], opp_bodys[-1][1])
+        if opp_bodys:
+            pt_dist = ((self.points[-1][1][0]-opp_bodys[-1][1][0])**2+(self.points[-1][1][1]-opp_bodys[-1][1][1])**2)**0.5
         # 할일: self.multi가 false일 때, pt_dist html에 보내기
         # print(f"point distance: {pt_dist}")
         socketio.emit('h2h_distance', pt_dist)
