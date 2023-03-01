@@ -1052,7 +1052,6 @@ def test():
         single_game.global_intialize()
         single_game.testbed_initialize()
 
-        ## CONFILIC FLAG HERE
         max_time_end = time.time() + 4
         cx, cy = 200, 360
         while True:
