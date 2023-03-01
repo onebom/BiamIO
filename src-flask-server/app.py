@@ -848,7 +848,7 @@ class SnakeGameClass:
         b = 0
         test_code = str(sid)
 
-        for i in range(1):
+        for i in range(50):
             if i % 2 == 0:
                 test_code = str(sid)
             self.sock.sendto(test_code.encode(), self.opp_addr)
@@ -860,7 +860,7 @@ class SnakeGameClass:
             except socket.timeout:
                 a += 1
 
-        if a != 1 and b != 0:
+        if a != 50 and b != 0:
             self.is_udp = False
 
         print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
@@ -955,8 +955,8 @@ def set_address(data):
     print(f"opponent_address user_number, {data['user_number']}")
     user_number = data['user_number']
 
-    # game.set_socket(MY_PORT, opp_ip, opp_port)
-    # game.test_connect(sid)
+    game.set_socket(MY_PORT, opp_ip, opp_port)
+    game.test_connect(sid)
 
 
 # socketio로 받은 상대방 정보
@@ -997,19 +997,19 @@ def snake():
         bot_flag = False
 
         print(f"app.py before while, {user_number}")
-        while True:
-            if user_number == 1:
-                cx = 100
-                cy = 360
-                game.previousHead = (100, 360)
-                print(f"app.py user_number, {user_number}")
-                break
-            elif user_number == 2:
-                cx = 1180
-                cy = 360
-                game.previousHead = (1180, 360)
-                print(f"app.py user_number, {user_number}")
-                break
+        # while True:
+        if user_number == 1:
+            cx = 100
+            cy = 360
+            game.previousHead = (100, 360)
+            print(f"app.py user_number, {user_number}")
+            # break
+        elif user_number == 2:
+            cx = 1180
+            cy = 360
+            game.previousHead = (1180, 360)
+            print(f"app.py user_number, {user_number}")
+            # break
                 
         user_move = False
 
@@ -1030,12 +1030,12 @@ def snake():
             if not user_move:
                 if user_number == 1:
                     cx += 5
-                    if cx > 450:
+                    if cx > 350:
                         cx = 70
                         user_move = True
                 elif user_number == 2:
                     cx -= 5
-                    if cx < 830:
+                    if cx < 930:
                         cx = 1210
                         user_move = True
 
