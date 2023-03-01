@@ -570,7 +570,7 @@ class SnakeGameClass:
 
         iscollision_bool, pt_dist = self.isCollision(self.points[-1], opp_bodys_collsion)
         # 할일: self.multi가 false일 때, pt_dist html에 보내기
-        print(f"point distance: {pt_dist}")
+        # print(f"point distance: {pt_dist}")
 
         if iscollision_bool:
             global user_move
