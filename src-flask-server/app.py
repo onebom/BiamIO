@@ -412,7 +412,7 @@ class SnakeGameClass:
             p2_a, p2_b = np.array(u2_pt[0]), np.array(u2_pt[1])
 
             if self.multi:
-                pt_distance = np.cross(p2_a-p1_b, p2_b-p1_b)/np.linalg.norm(p2_a-p1_b)
+                pt_distance = abs(np.cross(p2_a-p1_b, p2_b-p1_b)/np.linalg.norm(p2_a-p1_b))
                 min_distance = min(min_distance, pt_distance)
 
             if self.segmentIntersects(p1_a, p1_b, p2_a, p2_b):
@@ -736,13 +736,15 @@ class SnakeGameClass:
 
     # 뱀이 충돌했을때
     def execute(self):
-        global user_move
         global user_number
+        global user_move
         global game_over_for_debug
         self.points = []  # all points of the snake
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
+        self.score=0
+
         if user_number == 1:
             self.previousHead = 100, 180
         elif user_number == 2:
