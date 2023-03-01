@@ -513,6 +513,8 @@ class SnakeGameClass:
         img[np.where(self.maze_map == 2)] = (0, 255, 0)
         # End Red
         img[np.where(self.maze_map == 3)] = (0, 0, 255)
+        # mid point
+        # img[np.where(self.maze_map == 4)] = (255, 0, 0)
         return img
 
     # 내 뱀 상황 업데이트 - main에서
@@ -1266,13 +1268,14 @@ def create_maze(image_h, image_w, block_rows, block_cols):
                     wall_map[i * block_h:(i + 1) * block_h, j * block_w - r:j * block_w + r] = 1
 
     solution_nodes = maze.solution_path
-    mid_goal_h = maze.solution_path[len(solution_nodes) // 2][0][0]
-    mid_goal_x = maze.solution_path[len(solution_nodes) // 2][0][1]
+    mid_goal_h = maze.solution_path[-3][0][0] # solution path의 출구로부터 2번쨰 노드
+    mid_goal_w = maze.solution_path[-3][0][1]
     # print(len(solution_nodes))
-    # print(mid_goal_h)
-    # print(mid_goal_x)
-    mid = [[mid_goal_x * block_w + 150, mid_goal_h * block_h + 150],
-           [(mid_goal_x + 1) * block_w + 150, (mid_goal_h + 1) * block_h + 150]]
+    print(mid_goal_h)
+    print(mid_goal_w)
+    mid = [[mid_goal_w * block_w + 150, mid_goal_h * block_h + 150],
+           [(mid_goal_w + 1) * block_w + 150, (mid_goal_h + 1) * block_h + 150]]
+    # wall_map[mid_goal_h * block_h : (mid_goal_h + 1) * block_h , mid_goal_w * block_w :(mid_goal_w + 1) * block_w] = 4
 
     return start, mid, end, wall_map
 
