@@ -140,8 +140,8 @@ def my_port(data):
 
     if len(players_in_room[room_id]) == 2:
         room_of_players[request.sid] = room_id
-        emit('opponent_address', {'ip_addr' : ip_addr, 'port' : port, 'user_number': 1}, broadcast=True, include_self=False, room=room_id)
-        emit('opponent_address', {'ip_addr' : address[room_id][0], 'port' : address[room_id][1], 'user_number': 2}, to=request.sid)
+        # emit('opponent_address', {'ip_addr' : ip_addr, 'port' : port, 'user_number': 1}, broadcast=True, include_self=False, room=room_id)
+        # emit('opponent_address', {'ip_addr' : address[room_id][0], 'port' : address[room_id][1], 'user_number': 2}, to=request.sid)
     else:
         room_of_players[request.sid] = room_id
         address[room_id] = [ip_addr, port]

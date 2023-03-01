@@ -605,19 +605,19 @@ class SnakeGameClass:
         if self.is_udp:
             self.receive_data_from_opp()
 
-        pt_dist=math.dist(self.points[-1][1], opp_bodys[-1][1])
+        # pt_dist=math.dist(self.points[-1][1], opp_bodys[-1][1])
         # 할일: self.multi가 false일 때, pt_dist html에 보내기
         # print(f"point distance: {pt_dist}")
-        socketio.emit('h2h_distance', pt_dist)
+        # socketio.emit('h2h_distance', pt_dist)
 
         opp_bodys_collsion=opp_bodys
         if bot_flag:
             opp_bodys_collsion=opp_bodys+self.points[:-3]
 
-        if self.isCollision(self.points[-1], opp_bodys_collsion):
-            global user_move
-            if user_move:
-                self.execute()
+        # if self.isCollision(self.points[-1], opp_bodys_collsion):
+        #     global user_move
+        #     if user_move:
+        #         self.execute()
 
     ################################## VECTORING SPEED METHOD ##########################################################
     # def set_snake_speed(self, HandPoints, s_speed):
@@ -987,6 +987,7 @@ def set_food_loc(data):
 def user_match(data):
     global user_number
     user_number = data
+    socketio.emit("set_snake_url")
 
 
 
@@ -999,24 +1000,29 @@ def snake():
         global game
         global user_move, bot_flag
         global game_over_for_debug
+        global user_number
 
         game.multi = True
         bot_flag = False
-
+        
         print(f"app.py before while, {user_number}")
+        user_number = int(user_number)
         # while True:
         if user_number == 1:
-            cx = 100
-            cy = 360
+            start_cx = 100
+            start_cy = 360
             game.previousHead = (100, 360)
             print(f"app.py user_number, {user_number}")
             # break
         elif user_number == 2:
-            cx = 1180
-            cy = 360
+            start_cx = 1180
+            start_cy = 360
             game.previousHead = (1180, 360)
             print(f"app.py user_number, {user_number}")
             # break
+        else:
+            start_cx = 100
+            start_cy = 100
                 
         user_move = False
 
@@ -1032,18 +1038,18 @@ def snake():
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
             if not user_move:
-                pointIndex = [cx, cy]
+                pointIndex = [start_cx, start_cy]
 
             if not user_move:
                 if user_number == 1:
-                    cx += 5
-                    if cx > 350:
-                        cx = 70
+                    start_cx += 5
+                    if start_cx > 350:
+                        start_cx = 70
                         user_move = True
                 elif user_number == 2:
-                    cx -= 5
-                    if cx < 930:
-                        cx = 1210
+                    start_cx -= 5
+                    if start_cx < 930:
+                        start_cx = 1210
                         user_move = True
 
             img = game.update(img, pointIndex)
