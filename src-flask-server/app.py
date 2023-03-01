@@ -568,18 +568,14 @@ class SnakeGameClass:
         if bot_flag:
             opp_bodys_collsion=opp_bodys+self.points[:-3]
 
-        if len(self.points) != 0:  # out of range 용 성능 애바면 좀;;
-            iscollision_bool, pt_dist = self.isCollision(self.points[-1], opp_bodys_collsion)
-            # 할일: self.multi가 false일 때, pt_dist html에 보내기
-            print(f"point distance: {pt_dist}")
+        iscollision_bool, pt_dist = self.isCollision(self.points[-1], opp_bodys_collsion)
+        # 할일: self.multi가 false일 때, pt_dist html에 보내기
+        print(f"point distance: {pt_dist}")
 
-            if iscollision_bool:
-                global user_move
-                if user_move:
-                    self.execute()
-        else:
-            # 할일: self.multi가 false일 때, pt_dist 매우 큰값으로 산정 후 html에 보내기
-            print('point가 텅텅 !'s)
+        if iscollision_bool:
+            global user_move
+            if user_move:
+                self.execute()
 
     ################################## VECTORING SPEED METHOD ##########################################################
     # def set_snake_speed(self, HandPoints, s_speed):
@@ -808,7 +804,7 @@ class SnakeGameClass:
                 a += 1
 
         if a != 50 and b != 0:
-            self.is_udp = True
+            self.is_udp = False
 
         print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
         socketio.emit('NetworkMode', {'UDP': self.is_udp})
