@@ -929,13 +929,13 @@ def set_food_loc(data):
 ######################################## MAIN GAME ROUNTING ############################################################
 @app.route('/snake')
 def snake():
-    global opponent_data
-    global game
-    global user_move
-    global game_over_for_debug
-
-    game.multi=True
     def generate():
+        global opponent_data
+        global game
+        global user_move
+        global game_over_for_debug
+
+        game.multi=True
         while True:
             if user_number == 1:
                 cx = 100
