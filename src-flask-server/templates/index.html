@@ -15,26 +15,26 @@
         $(document).ready(function () {
             // Connect to the server
             // var socket = io.connect('http://krafton604.iptime.org');
-            var socket = io.connect('http://dlsrks99.site:8080');
+            var server_socket = io.connect('http://dlsrks99.site:8080');
 
             // Handle reset button click event
             $('#joinButton').click(function (event) {
-                socket.emit('join');
+                server_socket.emit('join');
             });
 
-            socket.on('waiting', function (data) {
+            server_socket.on('waiting', function (data) {
                 console.log("waiting...")
                 $("#isMatched").text("waiting...");
                 $("#alarm").text("user : " + data['sid']);
             });
 
-            socket.on('matched', function (data) {
+            server_socket.on('matched', function (data) {
                 console.log("matched!");
                 $("#isMatched").text("matched!!!");
                 $("#alarm").text("user : " + data['sid'] + " entered room : " + data['room_id']);
             });
 
-            socket.on('start-game', function (data) {
+            server_socket.on('start-game', function (data) {
                 let url = '/enter_snake?room_id=' + data['room_id'] + '&sid=' + data['sid'];
                 window.location.href = url;
             });
@@ -92,7 +92,14 @@
     <h2 id="alarm">USER ID</h2>
 </div>
 
-
+<script>
+    var client_socket = io.connect(
+        "http://" + document.domain + ":" + location.port
+    );
+    client_socket.on('selected_menu_type', function (data) {
+        console.log(data['menu_type'])
+    });
+</script>
 <script>
     const hoverSound = document.getElementById('hover-sound');
 

@@ -516,6 +516,7 @@ class SnakeGameClass:
         self.length_reduction()
 
         menu_type=0
+        # hover event emit 할 필요 TODO
         if 490<=cx<=790:
             if 70<=cy<=170: # menu_type: 1, MULTI PLAY
                 menu_type=1
@@ -779,8 +780,9 @@ class SnakeGameClass:
             if self.menu_type == menu_type:
                 self.menu_time += 1
 
-            if self.menu_time == 5: #5초간 menu bar에 머무른 경우
+            if self.menu_time ==  30: #5초간 menu bar에 머무른 경우
                 # 할일: menu_type(1:multi, 2:single, 3:maze) 사용해서 routing
+                socketio.emit("selected_menu_type", {'menu_type' : menu_type})
                 self.menu_time = 0
                 self.menu_type = 0
 
