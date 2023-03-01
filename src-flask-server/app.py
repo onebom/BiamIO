@@ -73,6 +73,7 @@ pathFood = './src-flask-server/static/food.png'
 
 opponent_data = {}  # 상대 데이터 (현재 손위치, 현재 뱀위치)
 gameover_flag = False  # ^^ 게임오버
+bot_flag=False
 now_my_room = ""  # 현재 내가 있는 방
 now_my_sid = ""  # 현재 나의 sid
 MY_PORT = 0  # socket_bind를 위한 내 포트 번호
@@ -332,17 +333,19 @@ class SnakeGameClass:
         self.is_udp = False
         self.udp_count = 0
         self.foodOnOff = True
-        self.multi = True
+        self.multi = False
 
         self.maze_start = [[], []]
         self.maze_end = [[], []]
         self.maze_map = np.array([])
         self.passStart = False
         self.passMid = False
+        self.maze_img = np.array([0])
 
         self.gameOver = False
 
-        self.maze_img = np.array([0])
+        self.menu_type = 0
+        self.menu_time = 0
 
     def global_intialize(self):
         global user_number
@@ -367,7 +370,7 @@ class SnakeGameClass:
         self.is_udp = False
         self.udp_count = 0
         self.foodOnOff = True
-        self.multi = True
+        self.multi = False
 
         self.maze_start = [[], []]
         self.maze_end = [[], []]
@@ -400,16 +403,23 @@ class SnakeGameClass:
         return ab <= 0 and cd <= 0
 
     def isCollision(self, u1_head_pt, u2_pts):
+        min_distance=100000
         if not u2_pts:
-            return False
-        p1_a, p1_b = u1_head_pt[0], u1_head_pt[1]
+            return False, min_distance
+        p1_a, p1_b = np.array(u1_head_pt[0]), np.array(u1_head_pt[1]) # p1_b: head point
 
         for u2_pt in u2_pts:
-            p2_a, p2_b = u2_pt[0], u2_pt[1]
+            p2_a, p2_b = np.array(u2_pt[0]), np.array(u2_pt[1])
+
+            if self.multi:
+                pt_distance = np.cross(p2_a-p1_b, p2_b-p1_b)/np.linalg.norm(p2_a-p1_b)
+                min_distance = min(min_distance, pt_distance)
+
             if self.segmentIntersects(p1_a, p1_b, p2_a, p2_b):
-                print(p1_a, p1_b, p2_a, p2_b)
-                return True
-        return False
+                # print(p1_a, p1_b, p2_a, p2_b)
+                return True, 0
+
+        return False, min_distance
 
     def maze_collision(self, head_pt, previous_pt):
         head_pt = np.array(head_pt).astype(int)
@@ -503,6 +513,33 @@ class SnakeGameClass:
         img[np.where(self.maze_map == 3)] = (255, 0, 255)
         return img
 
+    # 내 뱀 상황 업데이트 - main에서
+    def my_snake_update_menu(self, HandPoints):
+        px, py = self.previousHead
+        s_speed = 30
+        cx, cy = self.set_snake_speed(HandPoints, s_speed)
+
+        self.points.append([[px, py], [cx, cy]])
+        distance = math.hypot(cx - px, cy - py)
+        self.lengths.append(distance)
+        self.currentLength += distance
+        self.previousHead = cx, cy
+
+        self.length_reduction()
+
+        menu_type=0
+        # hover event emit 할 필요 TODO
+        if 490<=cx<=790:
+            if 70<=cy<=170: # menu_type: 1, MULTI PLAY
+                menu_type=1
+            elif 310<=cy<=410: # menu_type: 2, SINGLE PLAY
+                menu_type=2
+            elif 550<=cy<=650: # menu_type: 3, MAZE RUNNER
+                menu_type=3
+
+        return menu_type
+
+
     # 내 뱀 상황 업데이트 - maze play에서
     def my_snake_update_mazeVer(self, HandPoints):
         px, py = self.previousHead
@@ -543,6 +580,7 @@ class SnakeGameClass:
 
     # 내 뱀 상황 업데이트
     def my_snake_update(self, HandPoints, opp_bodys):
+        global bot_flag
         px, py = self.previousHead
 
         s_speed = 30
@@ -567,13 +605,18 @@ class SnakeGameClass:
         if self.is_udp:
             self.receive_data_from_opp()
 
-        if len(self.points) != 0:  # out of range 용 성능 애바면 좀;;
-            if self.isCollision(self.points[-1], opp_bodys):
-                global user_move
-                if user_move:
-                    self.execute()
-        else:
-            print('point가 텅텅 !')
+        opp_bodys_collsion=opp_bodys
+        if bot_flag:
+            opp_bodys_collsion=opp_bodys+self.points[:-3]
+
+        iscollision_bool, pt_dist = self.isCollision(self.points[-1], opp_bodys_collsion)
+        # 할일: self.multi가 false일 때, pt_dist html에 보내기
+        # print(f"point distance: {pt_dist}")
+
+        if iscollision_bool:
+            global user_move
+            if user_move:
+                self.execute()
 
     ################################## VECTORING SPEED METHOD ##########################################################
     # def set_snake_speed(self, HandPoints, s_speed):
@@ -743,7 +786,20 @@ class SnakeGameClass:
         global gameover_flag, opponent_data
 
         # update and draw own snake
-        self.my_snake_update(HandPoints, [])
+        menu_type=self.my_snake_update_menu(HandPoints)
+
+        if self.menu_type != 0:
+            if self.menu_type == menu_type:
+                self.menu_time += 1
+
+            if self.menu_time ==  30: #5초간 menu bar에 머무른 경우
+                # 할일: menu_type(1:multi, 2:single, 3:maze) 사용해서 routing
+                socketio.emit("selected_menu_type", {'menu_type' : self.menu_type})
+                self.menu_time = 0
+                self.menu_type = 0
+
+        self.menu_type = menu_type
+
         imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
         return imgMain
@@ -802,7 +858,7 @@ class SnakeGameClass:
                 a += 1
 
         if a != 50 and b != 0:
-            self.is_udp = True
+            self.is_udp = False
 
         print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
         socketio.emit('NetworkMode', {'UDP': self.is_udp})
@@ -896,7 +952,7 @@ def set_address(data):
     user_number = data['user_number']
 
     game.set_socket(MY_PORT, opp_ip, opp_port)
-    game.test_connect(sid)
+    #game.test_connect(sid)
 
 
 # socketio로 받은 상대방 정보
@@ -933,13 +989,16 @@ def snake():
         global user_move
         global game_over_for_debug
 
+        game.multi=True
         while True:
             if user_number == 1:
                 cx = 100
+                cy = 360
                 game.previousHead = (100, 360)
                 break
             elif user_number == 2:
                 cx = 1180
+                cy = 360
                 game.previousHead = (1180, 360)
                 break
 
@@ -956,8 +1015,8 @@ def snake():
             if hands and user_move:
                 lmList = hands[0]['lmList']
                 pointIndex = lmList[8][0:2]
-            # if not user_move:
-            #     pointIndex = [cx, cy]
+            if not user_move:
+                pointIndex = [cx, cy]
 
             if not user_move:
                 if user_number == 1:
@@ -1004,17 +1063,6 @@ def bot_data_update():
     bot_speed = 20
     px, py = bot_data['bot_head_x'], bot_data['bot_head_y']
 
-    if px <= 0 or px >= 1280 or py <= 0 or py >= 720:
-        if px < 0: px = 0
-        if px > 1280: px = 1280
-        if py < 0: py = 0
-        if py > 720: py = 720
-
-        if px == 0 or px == 1280:
-            bot_data['bot_velocityX'] = -bot_data['bot_velocityX']
-        if py == 0 or py == 720:
-            bot_data['bot_velocityY'] = -bot_data['bot_velocityY']
-
     # 1초 마다 방향 바꾸기
     # print(bot_cnt)
     if bot_cnt == 30:
@@ -1031,6 +1079,17 @@ def bot_data_update():
 
     cx = round(px + bot_velocityX * bot_speed)
     cy = round(py + bot_velocityY * bot_speed)
+    
+    if cx < 0 or cx > 1280 or cy < 0 or cy > 720:
+        if cx < 0: cx = 0
+        if cx > 1280: cx = 1280
+        if cy < 0: cy = 0
+        if cy > 720: cy = 720
+
+    if cx == 0 or cx == 1280:
+        bot_data['bot_velocityX'] = -bot_data['bot_velocityX']
+    if cy == 0 or cy == 720:
+        bot_data['bot_velocityY'] = -bot_data['bot_velocityY']
 
     bot_data['bot_head_x'] = cx
     bot_data['bot_head_y'] = cy
@@ -1059,21 +1118,30 @@ single_game = SnakeGameClass(pathFood)
 @app.route('/test')
 def test():
     def generate():
-        global bot_data, single_game, gameover_flag
+        global bot_data, single_game, gameover_flag, bot_flag, user_move
         global opponent_data
         single_game.global_intialize()
         single_game.testbed_initialize()
 
         max_time_end = time.time() + 4
         cx, cy = 200, 360
+        bot_flag=True
+        user_move = False
+        
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
             hands = detector.findHands(img, flipType=False)
             img = detector.drawHands(img)
 
-            cx += 1
-            pointIndex = [cx, cy]
+            if not user_move:
+                cx += 1
+                pointIndex = [cx, cy]
+            else:
+                if hands:
+                    print()
+                    lmList = hands[0]['lmList']
+                    pointIndex = lmList[8][0:2]
 
             bot_data_update()
             opponent_data['opp_body_node'] = bot_data["bot_body_node"]
@@ -1081,47 +1149,24 @@ def test():
 
             img = single_game.update(img, pointIndex)
 
-            # encode the image as a JPEG string
+            # encode the image as a JPEG string∂
             _, img_encoded = cv2.imencode('.jpg', img)
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
             if time.time() > max_time_end:
-                break
+                user_move=True
+                print(f"headpoint time_end after: {single_game.previousHead}")
+                if gameover_flag:
+                    print("game ended")
+                    gameover_flag = False
+                    time.sleep(1)
+                    socketio.emit('gameover', {'sid': sid})
+                    time.sleep(2)
+                    break
 
         single_game.previousHead = cx, cy
-        ## CONFILIC FLAG HERE
-
-        while True:
-            success, img = cap.read()
-            img = cv2.flip(img, 1)
-            hands = detector.findHands(img, flipType=False)
-            img = detector.drawHands(img)
-
-            pointIndex = []
-
-            if hands:
-                lmList = hands[0]['lmList']
-                pointIndex = lmList[8][0:2]
-
-            bot_data_update()
-            opponent_data['opp_body_node'] = bot_data["bot_body_node"]
-            # print(pointIndex)
-
-            img = single_game.update(img, pointIndex)
-
-            # encode the image as a JPEG string
-            _, img_encoded = cv2.imencode('.jpg', img)
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
-
-            if gameover_flag:
-                print("game ended")
-                gameover_flag = False
-                time.sleep(1)
-                socketio.emit('gameover', {'sid': sid})
-                time.sleep(2)
-                break
+        bot_flag=False
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -1176,11 +1221,11 @@ def create_maze(image_h, image_w, block_rows, block_cols):
             if maze.initial_grid[i][j].is_entry_exit == "entry":
                 start = [[j * block_w + 150, i * block_h + 150], [(j + 1) * block_w + 150, (i + 1) * block_h + 150]]
                 wall_map[i * block_h + 10: (i + 1) * block_h - 10, j * block_w + 10: (j + 1) * block_w - 10] = 2
-                print(f"start in create_maze: {start}")
+                # print(f"start in create_maze: {start}")
             elif maze.initial_grid[i][j].is_entry_exit == "exit":
                 end = [[j * block_w + 150, i * block_h + 150], [(j + 1) * block_w + 150, (i + 1) * block_h + 150]]
                 wall_map[i * block_h + 10: (i + 1) * block_h - 10, j * block_w + 10: (j + 1) * block_w - 10] = 3
-                print(f"end in create_maze:{end}")
+                # print(f"end in create_maze:{end}")
             if maze.initial_grid[i][j].walls["top"]:
                 if i == 0:
                     wall_map[i * block_h:i * block_h + r, j * block_w:(j + 1) * block_w] = 1
@@ -1215,6 +1260,7 @@ def maze_play():
 
         game.multi = False
         game.maze_initialize()
+        timer_end = time.time() + 60 # 1분 시간제한
 
         while True:
             success, img = cap.read()
@@ -1235,7 +1281,10 @@ def maze_play():
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
-            if gameover_flag:
+            remain_time = timer_end - time.time()  # 할일: html에 보내기
+            print(f"remain_time: {remain_time}")
+
+            if gameover_flag or (remain_time == 0):
                 print("game ended")
                 gameover_flag = False
                 time.sleep(1)
