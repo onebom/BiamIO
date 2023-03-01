@@ -84,10 +84,14 @@
                 <a href="{{ url_for('mazerunner') }}" class="menu3">Maze Runner</a>
             </div>
         </div>
-        <h2 id="isMatched"></h2>
-        <h2 id="alarm"></h2>
     </div>
 </section>
+
+<div class="match-debug" style="z-index: 20; position: absolute; left: 320px; bottom: 15px;">
+    <h2 id="isMatched">Matching Status</h2>
+    <h2 id="alarm">USER ID</h2>
+</div>
+
 
 <script>
     const hoverSound = document.getElementById('hover-sound');
