@@ -1074,6 +1074,7 @@ def test():
                 pointIndex = [cx, cy]
             else:
                 if hands:
+                    print()
                     lmList = hands[0]['lmList']
                     pointIndex = lmList[8][0:2]
 
