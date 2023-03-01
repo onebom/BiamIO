@@ -499,6 +499,32 @@ class SnakeGameClass:
         img[np.where(self.maze_map == 3)] = (255, 0, 255)
         return img
 
+    # 내 뱀 상황 업데이트 - main에서
+    def my_snake_update_menu(self, HandPoints):
+        px, py = self.previousHead
+        s_speed = 30
+        cx, cy = self.set_snake_speed(HandPoints, s_speed)
+
+        self.points.append([[px, py], [cx, cy]])
+        distance = math.hypot(cx - px, cy - py)
+        self.lengths.append(distance)
+        self.currentLength += distance
+        self.previousHead = cx, cy
+
+        self.length_reduction()
+
+        if 490<=cx<=790:
+            if 70<=cy<=170: # menu_type: 1, MULTI PLAY
+                menu_type=1
+            elif 310<=cy<=410: # menu_type: 2, SINGLE PLAY
+                menu_type=2
+            elif 550<=cy<=650: # menu_type: 3, MAZE RUNNER
+                menu_type=3
+
+
+
+
+
     # 내 뱀 상황 업데이트 - maze play에서
     def my_snake_update_mazeVer(self, HandPoints):
         px, py = self.previousHead
@@ -749,10 +775,10 @@ class SnakeGameClass:
         global gameover_flag, opponent_data
 
         # update and draw own snake
-        self.my_snake_update(HandPoints, [])
+        menu_type, menu_time=self.my_snake_update_menu(HandPoints)
         imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
 
-        return imgMain
+        return imgMain, menu_type, menu_time
 
     # 통신 관련 변수 설정
     def set_socket(self, my_port, opp_ip, opp_port):
