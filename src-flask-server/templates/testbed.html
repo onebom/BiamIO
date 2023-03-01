@@ -81,9 +81,12 @@
             <p>상대 점수 :&nbsp;</p>
             <p id="opp_score">0</p>
         </div>
-        <div class="timer" style="visibility: hidden;">
+        <div class="timer">
             <p>남은 시간 :&nbsp;</p>
-            <p></p>
+            <p id="test_min">0</p>
+            <p>분</p>
+            <p id="test_sec">0</p>
+            <p>초</p>
         </div>
     </div>
     <div class="gamesection-container">
@@ -177,6 +180,11 @@
         "http://" + document.domain + ":" + location.port
     );
     var server_socket = io.connect("http://dlsrks99.site:8080");
+
+    client_socket.on("test_timer", function (data) {
+        $("#test_min").text(data["minutes"]);
+        $("#test_sec").text(data["seconds"]);
+    });
 
     client_socket.on("game_data_for_debug", function (data) {
         $("#my_score").text(data["score"]);

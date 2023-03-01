@@ -362,6 +362,7 @@ class SnakeGameClass:
 
         self.hFood, self.wFood, _ = self.imgFood.shape
         self.foodPoint = 640, 360
+        self.foodtimeLimit = 0
 
         self.score = 0
         self.opp_score = 0
@@ -453,12 +454,21 @@ class SnakeGameClass:
         self.points = []
 
     def testbed_initialize(self):
+        global bot_data
         self.previousHead = (0, 360)
         self.velocityX = 0
         self.velocityY = 0
         self.points = []
         self.foodOnOff = True
         self.multi = False
+
+        bot_data = {'bot_head_x': 1000,
+                    'bot_head_y': 360,
+                    'bot_body_node': [],
+                    'currentLength': 0,
+                    'lengths': [],
+                    'bot_velocityX': random.choice([-1, 1]),
+                    'bot_velocityY': random.choice([-1, 1])}
 
     def draw_snakes(self, imgMain, points, score, isMe):
 
@@ -739,8 +749,9 @@ class SnakeGameClass:
 
             if self.multi:
                 self.foodOnOff = False
-                socketio.emit('user_ate_food', {'score': self.score})
+                socketio.emit('user_ate_fosod', {'score': self.score})
             else:
+                single_game.foodtimeLimit=time.time()+11
                 self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
 
     # 뱀이 충돌했을때
@@ -1086,7 +1097,7 @@ bot_cnt = 0
 def bot_data_update():
     global bot_data, bot_cnt
 
-    bot_speed = 20
+    bot_speed = 10
     px, py = bot_data['bot_head_x'], bot_data['bot_head_y']
 
     # 1초 마다 방향 바꾸기
@@ -1153,7 +1164,8 @@ def test():
         cx, cy = 200, 360
         bot_flag=True
         user_move = False
-        
+        single_game.foodtimeLimit = time.time() + 15 # 10초 제한(앞 5초는 카운트)
+
         while True:
             success, img = cap.read()
             img = cv2.flip(img, 1)
@@ -1180,9 +1192,15 @@ def test():
                    b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
             if time.time() > max_time_end:
-                user_move=True
-            
-            if gameover_flag:
+                user_move = True
+
+            remain_time = 0
+            if user_move:
+                remain_time = int(single_game.foodtimeLimit - time.time())  # 할일: html에 보내기
+                # print(f"remain_time: {remain_time}")
+                socketio.emit('test_timer', {"minutes": remain_time//60, "seconds": remain_time % 60})
+
+            if gameover_flag or (remain_time < 1 and user_move):
                 print("game ended")
                 gameover_flag = False
                 socketio.emit('gameover')
