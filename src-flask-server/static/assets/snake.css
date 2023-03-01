@@ -161,7 +161,7 @@ p {
   /*animation: rotate var(--speed) var(--easing) alternate infinite;*/
   /*background-image: linear-gradient(rgba(55, 235, 169, 0.85), #5b37eb);*/
   /*background-color: rgb(255,0,0);*/
-  background-color: rgb(0, 255, 0);
+  background-color: rgb(255, 0, 0);
   z-index: -1;
   transition: all 0.5s ease-out;
 }

@@ -36,8 +36,8 @@ class Maze(object):
         self.num_rows = num_rows
         self.id = id
         self.grid_size = num_rows*num_cols
-        self.entry_coor = self._pick_random_entry_exit(None)
-        self.exit_coor = self._pick_random_entry_exit(self.entry_coor)
+        self.entry_coor, self.entry_type = self._pick_random_entry_exit(None, None)
+        self.exit_coor, self.exit_type = self._pick_random_entry_exit(self.entry_coor, self.entry_type)
         self.generation_path = []
         self.solution_path = None
         self.initial_grid = self.generate_grid()
@@ -159,7 +159,7 @@ class Maze(object):
         else:
             return None
 
-    def _pick_random_entry_exit(self, used_entry_exit=None):
+    def _pick_random_entry_exit(self, used_entry_exit=None, used_rng_side=None):
         """Function that picks random coordinates along the maze boundary to represent either
         the entry or exit point of the maze. Makes sure they are not at the same place.
 
@@ -170,24 +170,32 @@ class Maze(object):
 
         """
         rng_entry_exit = used_entry_exit    # Initialize with used value
+        rng_side = used_rng_side
 
         # Try until unused location along boundary is found.
-        while rng_entry_exit == used_entry_exit:
-            rng_side = random.randint(0, 3)
+        while True:
+            if used_rng_side:
+                if (used_rng_side % 2 == rng_side % 2) and (used_rng_side != rng_side):
+                    break
+            else:
+                if rng_entry_exit == used_entry_exit:
+                    break
+            rng_side = random.randint(1, 4)
 
-            if (rng_side == 0):     # Top side
+
+            if (rng_side == 1):     # Top side
                 rng_entry_exit = (0, random.randint(0, self.num_cols-1))
 
             elif (rng_side == 2):   # Right side
                 rng_entry_exit = (self.num_rows-1, random.randint(0, self.num_cols-1))
 
-            elif (rng_side == 1):   # Bottom side
+            elif (rng_side == 3):   # Bottom side
                 rng_entry_exit = (random.randint(0, self.num_rows-1), self.num_cols-1)
 
-            elif (rng_side == 3):   # Left side
+            elif (rng_side == 4):   # Left side
                 rng_entry_exit = (random.randint(0, self.num_rows-1), 0)
 
-        return rng_entry_exit       # Return entry/exit that is different from exit/entry
+        return rng_entry_exit, rng_side       # Return entry/exit that is different from exit/entry
 
     def generate_maze(self, algorithm, start_coor = (0, 0)):
         """This takes the internal grid object and removes walls between cells using the
