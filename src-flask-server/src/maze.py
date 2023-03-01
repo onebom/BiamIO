@@ -184,7 +184,7 @@ class Maze(object):
 
 
             if (rng_side == 1):     # Top side
-                rng_entry_exit = (0, random.randint(0, self.num_cols-1))
+                rng_entry_exit = (random.randint(0, self.num_rows-1), 0)
 
             elif (rng_side == 2):   # Right side
                 rng_entry_exit = (self.num_rows-1, random.randint(0, self.num_cols-1))
@@ -193,7 +193,8 @@ class Maze(object):
                 rng_entry_exit = (random.randint(0, self.num_rows-1), self.num_cols-1)
 
             elif (rng_side == 4):   # Left side
-                rng_entry_exit = (random.randint(0, self.num_rows-1), 0)
+                rng_entry_exit = (0, random.randint(0, self.num_cols-1))
+
 
         print(rng_side,":",rng_entry_exit)
         return rng_entry_exit, rng_side       # Return entry/exit that is different from exit/entry
