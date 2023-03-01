@@ -109,13 +109,13 @@ def send_data_bot(data):
     emit('bot_data', {'bot_head_x' : head_x, 'bot_head_y' : head_y, 'bot_body_node' : body_node, 'bot_score' : score, 'bot_room_id' : room_id}, broadcast=True, include_self=False)
     # emit('opp_data', {'opp_head_x' : head_x, 'opp_head_y' : head_y, 'opp_body_node' : body_node, 'opp_score' : score, 'opp_room_id' : room_id, 'opp_sid' : sid}, broadcast=True)
 
-# 서버와 통신 테스트용
-@socketio.on('get_time')
-def get_time():
-    while True:
-        current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        socketio.emit('time', {'time': current_time})
-        socketio.sleep(1)
+# 서버와 통신 테스트용 TODO 시간 관련해서 필요하면 필요
+# @socketio.on('get_time')
+# def get_time():
+#     while True:
+#         current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+#         socketio.emit('time', {'time': current_time})
+#         socketio.sleep(1)
 
 # 서버에서 현재 자신의 포트 받아오기
 # < sock.bind() 작업에서 포트 번호 지정을 위해 필요 >
