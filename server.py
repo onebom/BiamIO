@@ -72,11 +72,11 @@ def handle_join():
         # sid에게 들어갈 방 알려줌
 
         # 매칭 잡힌 사실 index 페이지에 보내줌
-        emit('matched', {'room_id' : room_id, 'sid' : user1}, to=user1)
-        emit('matched', {'room_id' : room_id, 'sid' : user2}, to=user2)
+        emit('matched', {'room_id' : room_id, 'sid' : 1}, to=user1)
+        emit('matched', {'room_id' : room_id, 'sid' : 2}, to=user2)
         # 매칭완료
-        emit('start-game', {'room_id' : room_id, 'sid' : user1}, to=user1)
-        emit('start-game', {'room_id' : room_id, 'sid' : user2}, to=user2)
+        emit('start-game', {'room_id' : room_id, 'sid' : 1}, to=user1)
+        emit('start-game', {'room_id' : room_id, 'sid' : 2}, to=user2)
     else:
         emit('waiting', {'sid' : request.sid}, to=request.sid)
 
@@ -140,8 +140,8 @@ def my_port(data):
 
     if len(players_in_room[room_id]) == 2:
         room_of_players[request.sid] = room_id
-        emit('opponent_address', {'ip_addr' : ip_addr, 'port' : port, 'user_number': 1}, broadcast=True, include_self=False, room=room_id)
-        emit('opponent_address', {'ip_addr' : address[room_id][0], 'port' : address[room_id][1], 'user_number': 2}, to=request.sid)
+        # emit('opponent_address', {'ip_addr' : ip_addr, 'port' : port, 'user_number': 1}, broadcast=True, include_self=False, room=room_id)
+        # emit('opponent_address', {'ip_addr' : address[room_id][0], 'port' : address[room_id][1], 'user_number': 2}, to=request.sid)
     else:
         room_of_players[request.sid] = room_id
         address[room_id] = [ip_addr, port]
