@@ -372,6 +372,7 @@ class SnakeGameClass:
         self.foodOnOff = True
         self.multi = False
 
+        self.timer_end=0
         self.maze_start = [[], []]
         self.maze_end = [[], []]
         self.maze_map = np.array([])
@@ -441,9 +442,10 @@ class SnakeGameClass:
         self.velocityX = 0
         self.velocityY = 0
         self.points = []
-        self.maxspeed = 30
+        self.maxspeed = 100
         self.passStart = False
         self.passMid = False
+        self.timer_end = time.time() + 120
 
     def menu_initialize(self):
         self.previousHead = (0, 360)
@@ -1282,7 +1284,7 @@ def maze_play():
 
         game.multi = False
         game.maze_initialize()
-        timer_end = time.time() + 120 # 1분 시간제한
+        game.timer_end = time.time() + 120 # 2분 시간제한
 
         while True:
             success, img = cap.read()
@@ -1303,7 +1305,7 @@ def maze_play():
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
-            remain_time = int(timer_end - time.time())  # 할일: html에 보내기
+            remain_time = int(game.timer_end - time.time())  # 할일: html에 보내기
             # print(f"remain_time: {remain_time}")
             socketio.emit('maze_timer', {"minutes": remain_time//60, "seconds": remain_time % 60})
 
