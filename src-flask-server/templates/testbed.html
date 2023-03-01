@@ -83,9 +83,7 @@
         </div>
         <div class="timer">
             <p>남은 시간 :&nbsp;</p>
-            <p id="test_min">0</p>
-            <p>분</p>
-            <p id="test_sec">0</p>
+            <p id="test_timer">0</p>
             <p>초</p>
         </div>
     </div>
@@ -182,8 +180,7 @@
     var server_socket = io.connect("http://dlsrks99.site:8080");
 
     client_socket.on("test_timer", function (data) {
-        $("#test_min").text(data["minutes"]);
-        $("#test_sec").text(data["seconds"]);
+        $("#test_timer").text(data["seconds"]);
     });
 
     client_socket.on("game_data_for_debug", function (data) {

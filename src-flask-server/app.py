@@ -1198,7 +1198,7 @@ def test():
             if user_move:
                 remain_time = int(single_game.foodtimeLimit - time.time())  # 할일: html에 보내기
                 # print(f"remain_time: {remain_time}")
-                socketio.emit('test_timer', {"minutes": remain_time//60, "seconds": remain_time % 60})
+                socketio.emit('test_timer', {"seconds": remain_time})
 
             if gameover_flag or (remain_time < 1 and user_move):
                 print("game ended")
