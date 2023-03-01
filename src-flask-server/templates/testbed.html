@@ -140,15 +140,16 @@
 <script>
     const ambient = document.querySelector('.ambient');
 
-    setInterval(() => {
-        if (ambient.style.backgroundColor === 'rgb(0, 255, 0)') {
-            ambient.style.backgroundColor = 'rgb(255, 0, 0)';
-        } else if (ambient.style.backgroundColor === 'rgb(255, 0, 0)') {
-            ambient.style.backgroundColor = 'rgb(0, 0, 255)';
-        } else {
-            ambient.style.backgroundColor = 'rgb(0, 255, 0)';
-        }
-    }, 1000);
+    var distance = 0;
+
+    client_socket.on("distance", function (data) {
+        distance = data;
+        // update the color
+        var red = Math.round(255 * (510 - distance) / 510);
+        var green = Math.round(255 * distance / 510);
+        var color = "rgb(" + red + ", " + green + ", 0)";
+        document.getElementById("ambient").style.backgroundColor = color;
+    });
 </script>
 <script>
     const accordions = document.querySelectorAll('.draggable');

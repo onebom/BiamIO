@@ -154,8 +154,8 @@ p {
   height: 720px;
   position: absolute;
   --size: 1000px;
-  --speed: 50s;
-  --easing: cubic-bezier(0.8, 0.2, 0.2, 0.8);
+  /*--speed: 50s;*/
+  /*--easing: cubic-bezier(0.8, 0.2, 0.2, 0.8);*/
   filter: blur(calc(var(--size) / 5));
   /*background-image: linear-gradient(rgba(55, 235, 169, 0.85), #5b37eb);*/
   /*animation: rotate var(--speed) var(--easing) alternate infinite;*/
