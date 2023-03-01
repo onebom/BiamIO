@@ -782,7 +782,7 @@ class SnakeGameClass:
 
             if self.menu_time ==  30: #5초간 menu bar에 머무른 경우
                 # 할일: menu_type(1:multi, 2:single, 3:maze) 사용해서 routing
-                socketio.emit("selected_menu_type", {'menu_type' : menu_type})
+                socketio.emit("selected_menu_type", {'menu_type' : self.menu_type})
                 self.menu_time = 0
                 self.menu_type = 0
 

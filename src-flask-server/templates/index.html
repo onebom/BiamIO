@@ -80,8 +80,8 @@
         <div class="menu-container">
             <div class="menu">
                 <a href="#" class="menu1" id="joinButton">Multi Play</a>
-                <a href="{{ url_for('testbed') }}" class="menu2">Single Play</a>
-                <a href="{{ url_for('mazerunner') }}" class="menu3">Maze Runner</a>
+                <a href="{{ url_for('testbed') }}" class="menu2" id="singleButton">Single Play</a>
+                <a href="{{ url_for('mazerunner') }}" class="menu3" id="mazeButton">Maze Runner</a>
             </div>
         </div>
     </div>
@@ -98,6 +98,15 @@
     );
     client_socket.on('selected_menu_type', function (data) {
         console.log(data['menu_type'])
+        if (data['menu_type'] == 1) {
+            document.getElementById('joinButton').click();
+        }
+        if (data['menu_type'] == 2) {
+            document.getElementById('singleButton').click();
+        }
+        if (data['menu_type'] == 3) {
+            document.getElementById('mazeButton').click();
+        }
     });
 </script>
 <script>
