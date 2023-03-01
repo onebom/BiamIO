@@ -194,7 +194,7 @@
     );
     var server_socket = io.connect("http://dlsrks99.site:8080");
 
-    client_socket.on("game_data", function (data) {
+    client_socket.on("game_data_for_debug", function (data) {
         $("#my_score").text(data["score"]);
         $("#fps").text(data["fps"]);
     });
