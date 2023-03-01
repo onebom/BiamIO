@@ -54,13 +54,16 @@
         </svg>
     </div>
 </div>
+
 <script>
+    const signalSound = new Audio("{{ url_for('static', filename= 'bgm/countdown.mp3') }}");
     const demo = document.querySelector('.demo');
     const counttext = document.getElementById("ready-start");
     function changeText() {
         counttext.textContent = 'START';
+        signalSound.play()
     }
-    setTimeout(changeText, 2000);
+    setTimeout(changeText, 1000);
     setTimeout(function() {
         demo.classList.add('hidden');
     }, 4000);
