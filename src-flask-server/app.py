@@ -321,7 +321,7 @@ class SnakeGameClass:
         self.is_udp = False
         self.udp_count = 0
         self.foodOnOff = True
-        self.multi = True
+        self.multi = False
 
         self.maze_start = [[], []]
         self.maze_end = [[], []]
@@ -356,7 +356,7 @@ class SnakeGameClass:
         self.is_udp = False
         self.udp_count = 0
         self.foodOnOff = True
-        self.multi = True
+        self.multi = False
 
         self.maze_start = [[], []]
         self.maze_end = [[], []]
@@ -389,16 +389,23 @@ class SnakeGameClass:
         return ab <= 0 and cd <= 0
 
     def isCollision(self, u1_head_pt, u2_pts):
+        min_distance=100000
         if not u2_pts:
-            return False
-        p1_a, p1_b = u1_head_pt[0], u1_head_pt[1]
+            return False, min_distance
+        p1_a, p1_b = np.array(u1_head_pt[0]), np.array(u1_head_pt[1]) # p1_b: head point
 
         for u2_pt in u2_pts:
-            p2_a, p2_b = u2_pt[0], u2_pt[1]
+            p2_a, p2_b = np.array(u2_pt[0]), np.array(u2_pt[1])
+
+            if self.multi:
+                pt_distance = np.cross(p2_a-p1_b, p2_b-p1_b)/np.linalg.norm(p2_a-p1_b)
+                min_distance = min(min_distance, pt_distance)
+
             if self.segmentIntersects(p1_a, p1_b, p2_a, p2_b):
                 # print(p1_a, p1_b, p2_a, p2_b)
-                return True
-        return False
+                return True, 0
+
+        return False, min_distance
 
     def maze_collision(self, head_pt, previous_pt):
         head_pt = np.array(head_pt).astype(int)
@@ -560,14 +567,19 @@ class SnakeGameClass:
         opp_bodys_collsion=opp_bodys
         if bot_flag:
             opp_bodys_collsion=opp_bodys+self.points[:-3]
-            
+
         if len(self.points) != 0:  # out of range 용 성능 애바면 좀;;
-            if self.isCollision(self.points[-1], opp_bodys_collsion):
+            iscollision_bool, pt_dist = self.isCollision(self.points[-1], opp_bodys_collsion)
+            # 할일: self.multi가 false일 때, pt_dist html에 보내기
+            print(f"point distance: {pt_dist}")
+
+            if iscollision_bool:
                 global user_move
                 if user_move:
                     self.execute()
         else:
-            print('point가 텅텅 !')
+            # 할일: self.multi가 false일 때, pt_dist 매우 큰값으로 산정 후 html에 보내기
+            print('point가 텅텅 !'s)
 
     ################################## VECTORING SPEED METHOD ##########################################################
     # def set_snake_speed(self, HandPoints, s_speed):
@@ -921,12 +933,13 @@ def set_food_loc(data):
 ######################################## MAIN GAME ROUNTING ############################################################
 @app.route('/snake')
 def snake():
-    def generate():
-        global opponent_data
-        global game
-        global user_move
-        global game_over_for_debug
+    global opponent_data
+    global game
+    global user_move
+    global game_over_for_debug
 
+    game.multi=True
+    def generate():
         while True:
             if user_number == 1:
                 cx = 100
@@ -1216,9 +1229,10 @@ def maze_play():
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
-            time_remaining = timer_end - time.time()  # [TODO] html에 보내기
+            remain_time = timer_end - time.time()  # 할일: html에 보내기
+            print(f"remain_time: {remain_time}")
 
-            if gameover_flag or (time_remaining == 0):
+            if gameover_flag or (remain_time == 0):
                 print("game ended")
                 gameover_flag = False
                 time.sleep(1)
