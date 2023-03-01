@@ -72,11 +72,11 @@ def handle_join():
         # sid에게 들어갈 방 알려줌
 
         # 매칭 잡힌 사실 index 페이지에 보내줌
-        emit('matched', {'room_id' : room_id, 'sid' : user1}, to=user1)
-        emit('matched', {'room_id' : room_id, 'sid' : user2}, to=user2)
+        emit('matched', {'room_id' : room_id, 'sid' : 1}, to=user1)
+        emit('matched', {'room_id' : room_id, 'sid' : 2}, to=user2)
         # 매칭완료
-        emit('start-game', {'room_id' : room_id, 'sid' : user1}, to=user1)
-        emit('start-game', {'room_id' : room_id, 'sid' : user2}, to=user2)
+        emit('start-game', {'room_id' : room_id, 'sid' : 1}, to=user1)
+        emit('start-game', {'room_id' : room_id, 'sid' : 2}, to=user2)
     else:
         emit('waiting', {'sid' : request.sid}, to=request.sid)
 

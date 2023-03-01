@@ -982,6 +982,13 @@ def set_food_loc(data):
     game.opp_score = data['opp_score']
     game.foodOnOff = True
 
+# socketio로 받은 먹이 위치와 상대 점수
+@socketio.on('user_match')
+def user_match(data):
+    global user_number
+    user_number = data
+
+
 
 ########################################################################################################################
 ######################################## MAIN GAME ROUNTING ############################################################
