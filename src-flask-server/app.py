@@ -749,7 +749,7 @@ class SnakeGameClass:
 
             if self.multi:
                 self.foodOnOff = False
-                socketio.emit('user_ate_fosod', {'score': self.score})
+                socketio.emit('user_ate_food', {'score': self.score})
             else:
                 single_game.foodtimeLimit=time.time()+11
                 self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
