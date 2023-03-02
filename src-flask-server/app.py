@@ -1059,12 +1059,12 @@ def snake():
                 if user_number == 1:
                     start_cx += 5
                     if start_cx > 350:
-                        start_cx = 70
+                        game.previousHead = (350, 360)
                         user_move = True
                 elif user_number == 2:
                     start_cx -= 5
                     if start_cx < 930:
-                        start_cx = 1210
+                        game.previousHead = (930, 360)
                         user_move = True
 
             img = game.update(img, pointIndex)
