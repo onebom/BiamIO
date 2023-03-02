@@ -25,7 +25,7 @@ escape_count = {}
 # server test page
 @app.route("/")
 def index():
-    return render_template("servertime.html")
+    return render_template("index.html")
 
 # socketio로 서버가 웹페이지와 연결된 경우
 @socketio.on('connect')
