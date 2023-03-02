@@ -318,7 +318,7 @@ class SnakeGameClass:
 
         self.speed = 5
         self.minspeed = 10
-        self.maxspeed = 50
+        self.maxspeed = math.hypot(1280, 720)/10
         self.velocityX = random.choice([-1, 0, 1])
         self.velocityY = random.choice([-1, 1])
 
@@ -356,7 +356,7 @@ class SnakeGameClass:
 
         self.speed = 5
         self.minspeed = 10
-        self.maxspeed = 50
+        self.maxspeed = math.hypot(1280, 720)/10
         self.velocityX = random.choice([-1, 0, 1])
         self.velocityY = random.choice([-1, 1])
 
@@ -442,7 +442,7 @@ class SnakeGameClass:
         self.velocityX = 0
         self.velocityY = 0
         self.points = []
-        self.maxspeed = 50
+        self.maxspeed = math.hypot(1280, 720)/10
         self.passStart = False
         self.passMid = False
         self.timer_end = time.time() + 120
