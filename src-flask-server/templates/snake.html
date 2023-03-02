@@ -179,21 +179,49 @@
         </div>
     </div>
 </section>
+
+{#<script>#}
+{#    const ambient = document.querySelector('.ambient');#}
+{##}
+{#    var h2h_distance = 0;#}
+{##}
+{#    client_socket.on("h2h_distance", function (data) {#}
+{#        h2h_distance = data;#}
+{#        console.log(data)#}
+{#        // update the color#}
+{#        var red = Math.round(255 * (510 - h2h_distance) / 510);#}
+{#        var green = Math.round(255 * h2h_distance / 510);#}
+{#        var color = "rgb(" + red + ", " + green + ", 0)";#}
+{#        ambient.style.backgroundColor = color;#}
+{#    });#}
+{#</script>#}
+
 <script>
     const ambient = document.querySelector('.ambient');
 
     var h2h_distance = 0;
 
+    // 1280x720 해상도의 16등분 공간의 대각선 길이
+    var danger_distance = 367;
+
+    var caution_distance = danger_distance * 1.25;
+
+
     client_socket.on("h2h_distance", function (data) {
         h2h_distance = data;
-        console.log(data)
-        // update the color
-        var red = Math.round(255 * (510 - h2h_distance) / 510);
-        var green = Math.round(255 * h2h_distance / 510);
-        var color = "rgb(" + red + ", " + green + ", 0)";
+
+        if (h2h_distance > caution_distance ) {
+            var color = "rgb(" + 0 + ", " + 255 + ", 0)";
+        } else if ( h2h_distance > danger_distance) {
+            var color = "rgb(" + 255 + ", " + 255 + ", 0)";
+        } else {
+            var color = "rgb(" + 255 + ", " + 0 + ", 0)";
+        }
+
         ambient.style.backgroundColor = color;
     });
 </script>
+
 <script>
     const accordions = document.querySelectorAll('.draggable');
 
