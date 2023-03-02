@@ -442,7 +442,7 @@ class SnakeGameClass:
         self.velocityX = 0
         self.velocityY = 0
         self.points = []
-        self.maxspeed = 100
+        self.maxspeed = 50
         self.passStart = False
         self.passMid = False
         self.timer_end = time.time() + 120
