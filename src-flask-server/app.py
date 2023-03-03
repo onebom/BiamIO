@@ -224,7 +224,7 @@ class HandDetector:
                 index_finger_landmarks = handLms.landmark[self.mpHands.HandLandmark.INDEX_FINGER_TIP]
                 # Draw a circle at the index finger tip landmark
                 cv2.circle(img2, (
-                int(index_finger_landmarks.x * img2.shape[1]), int(index_finger_landmarks.y * img2.shape[0])), 27,
+                    int(index_finger_landmarks.x * img2.shape[1]), int(index_finger_landmarks.y * img2.shape[0])), 27,
                            (255, 0, 255), 3)
         return img2
 
@@ -623,7 +623,7 @@ class SnakeGameClass:
 
         if opp_bodys:
             self.dist = ((self.points[-1][1][0] - opp_bodys[-1][1][0]) ** 2 + (
-                        self.points[-1][1][1] - opp_bodys[-1][1][1]) ** 2) ** 0.5
+                    self.points[-1][1][1] - opp_bodys[-1][1][1]) ** 2) ** 0.5
         # 할일: self.multi가 false일 때, pt_dist html에 보내기
         # print(f"point distance: {pt_dist}")
         socketio.emit('h2h_distance', self.dist)
@@ -797,6 +797,9 @@ class SnakeGameClass:
         imgMain = self.draw_Food(imgMain)
         # 1 이면 내 뱀
         imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
+        # ---head와 handsPoint 점선으로 잇기---
+        for p in np.linspace(self.previousHead, HandPoints, 10):
+            cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
 
         return imgMain
 
