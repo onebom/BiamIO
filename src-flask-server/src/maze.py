@@ -1,4 +1,3 @@
-
 import random
 import math
 import time
@@ -23,7 +22,7 @@ class Maze(object):
         grid (list): A copy of initial_grid (possible this is un-needed)
         """
 
-    def __init__(self, num_rows, num_cols, id=0, algorithm = "dfs_backtrack"):
+    def __init__(self, num_rows, num_cols, id=0, algorithm="dfs_backtrack"):
         """Creates a gird of Cell objects that are neighbors to each other.
 
             Args:
@@ -35,7 +34,7 @@ class Maze(object):
         self.num_cols = num_cols
         self.num_rows = num_rows
         self.id = id
-        self.grid_size = num_rows*num_cols
+        self.grid_size = num_rows * num_cols
         self.entry_coor, self.entry_type = self._pick_random_entry_exit(None, None)
         self.exit_coor, self.exit_type = self._pick_random_entry_exit(self.entry_coor, self.entry_type)
         self.generation_path = []
@@ -84,16 +83,16 @@ class Maze(object):
             if row >= 0 and row < self.num_rows and col >= 0 and col < self.num_cols:
                 neighbours.append((row, col))
 
-        check_neighbour(cell_row-1, cell_col)     # Top neighbour
-        check_neighbour(cell_row, cell_col+1)     # Right neighbour
-        check_neighbour(cell_row+1, cell_col)     # Bottom neighbour
-        check_neighbour(cell_row, cell_col-1)     # Left neighbour
+        check_neighbour(cell_row - 1, cell_col)  # Top neighbour
+        check_neighbour(cell_row, cell_col + 1)  # Right neighbour
+        check_neighbour(cell_row + 1, cell_col)  # Bottom neighbour
+        check_neighbour(cell_row, cell_col - 1)  # Left neighbour
 
         if len(neighbours) > 0:
             return neighbours
 
         else:
-            return None     # None if no unvisited neighbours found
+            return None  # None if no unvisited neighbours found
 
     def _validate_neighbours_generate(self, neighbour_indices):
         """Function that validates whether a neighbour is unvisited or not. When generating
@@ -115,7 +114,7 @@ class Maze(object):
         else:
             return None
 
-    def validate_neighbours_solve(self, neighbour_indices, k, l, k_end, l_end, method = "fancy"):
+    def validate_neighbours_solve(self, neighbour_indices, k, l, k_end, l_end, method="fancy"):
         """Function that validates whether a neighbour is unvisited or not and discards the
         neighbours that are inaccessible due to walls between them and the current cell. The
         function implements two methods for choosing next cell; one is 'brute-force' where one
@@ -169,7 +168,7 @@ class Maze(object):
         Return:
 
         """
-        rng_entry_exit = used_entry_exit    # Initialize with used value
+        rng_entry_exit = used_entry_exit  # Initialize with used value
         rng_side = used_rng_side
 
         # Try until unused location along boundary is found.
@@ -182,24 +181,22 @@ class Maze(object):
                     break
             rng_side = random.randint(1, 4)
 
+            if (rng_side == 1):  # Top side
+                rng_entry_exit = (random.randint(0, self.num_rows - 1), 0)
 
-            if (rng_side == 1):     # Top side
-                rng_entry_exit = (random.randint(0, self.num_rows-1), 0)
+            elif (rng_side == 2):  # Right side
+                rng_entry_exit = (self.num_rows - 1, random.randint(0, self.num_cols - 1))
 
-            elif (rng_side == 2):   # Right side
-                rng_entry_exit = (self.num_rows-1, random.randint(0, self.num_cols-1))
+            elif (rng_side == 3):  # Bottom side
+                rng_entry_exit = (random.randint(0, self.num_rows - 1), self.num_cols - 1)
 
-            elif (rng_side == 3):   # Bottom side
-                rng_entry_exit = (random.randint(0, self.num_rows-1), self.num_cols-1)
+            elif (rng_side == 4):  # Left side
+                rng_entry_exit = (0, random.randint(0, self.num_cols - 1))
 
-            elif (rng_side == 4):   # Left side
-                rng_entry_exit = (0, random.randint(0, self.num_cols-1))
+        print(rng_side, ":", rng_entry_exit)
+        return rng_entry_exit, rng_side  # Return entry/exit that is different from exit/entry
 
-
-        print(rng_side,":",rng_entry_exit)
-        return rng_entry_exit, rng_side       # Return entry/exit that is different from exit/entry
-
-    def generate_maze(self, algorithm, start_coor = (0, 0)):
+    def generate_maze(self, algorithm, start_coor=(0, 0)):
         """This takes the internal grid object and removes walls between cells using the
         depth-first recursive backtracker algorithm.
 

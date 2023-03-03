@@ -20,6 +20,7 @@
 <audio id="bgm" autoplay loop>
     <source src="{{ url_for('static', filename= 'bgm/snake_single.mp3') }}" type="audio/mpeg">
 </audio>
+
 <script>
     document.getElementById('bgm').addEventListener('ended', function () {
         this.currentTime = 0;
@@ -50,7 +51,7 @@
                Q25,44 34.4,27.4
                l7,-7 a16,16 0 0,1 22.6,22.6 l-30,30 l35,0 L69,73
                a20,10 0 0,1 20,10 a17,17 0 0,1 -34,0 L55,83
-               l0,-61 L40,28" />
+               l0,-61 L40,28"/>
         </svg>
     </div>
 </div>
@@ -59,18 +60,20 @@
     const signalSound = new Audio("{{ url_for('static', filename= 'bgm/countdown.mp3') }}");
     const demo = document.querySelector('.demo');
     const counttext = document.getElementById("ready-start");
+
     function changeText() {
         counttext.textContent = 'START';
         signalSound.play()
     }
+
     setTimeout(changeText, 1000);
-    setTimeout(function() {
+    setTimeout(function () {
         demo.classList.add('hidden');
     }, 4000);
 </script>
 
-
 <canvas></canvas>
+
 <section class="wrapper">
     <div class="hud-top">
         <div class="myscore">
@@ -173,6 +176,7 @@
         });
     });
 </script>
+
 <script>
     var client_socket = io.connect(
         "http://" + document.domain + ":" + location.port
@@ -208,7 +212,7 @@
             text: "Try again!",
             icon: "error",
             confirmButtonText: "OK",
-            timer : 3000
+            timer: 3000
         }).then((result) => {
             window.location.href = "/index";
         });
@@ -245,9 +249,9 @@
     client_socket.on("h2h_distance", function (data) {
         h2h_distance = data;
 
-        if (h2h_distance > caution_distance ) {
+        if (h2h_distance > caution_distance) {
             var color = "rgb(" + 0 + ", " + 255 + ", 0)";
-        } else if ( h2h_distance > danger_distance) {
+        } else if (h2h_distance > danger_distance) {
             var color = "rgb(" + 255 + ", " + 255 + ", 0)";
         } else {
             var color = "rgb(" + 255 + ", " + 0 + ", 0)";

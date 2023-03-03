@@ -50,7 +50,7 @@
             console.log("oppenent_address from server : before url snake")
             $("#snake_video").attr("src", "{{ url_for('snake') }}")
         });
-        client_socket.on('set_snake_url', function() {
+        client_socket.on('set_snake_url', function () {
             $("#snake_video").attr("src", "{{ url_for('snake') }}")
         })
     </script>
@@ -86,16 +86,19 @@
         </svg>
     </div>
 </div>
+
 <script>
     const signalSound = new Audio("{{ url_for('static', filename= 'bgm/countdown.mp3') }}");
     const demo = document.querySelector('.demo');
     const counttext = document.getElementById("ready-start");
+
     function changeText() {
         counttext.textContent = 'START';
         signalSound.play()
     }
+
     setTimeout(changeText, 1000);
-    setTimeout(function() {
+    setTimeout(function () {
         demo.classList.add('hidden');
     }, 4000);
 </script>
@@ -103,6 +106,7 @@
 <audio id="bgm" autoplay loop>
     <source src="{{ url_for('static', filename= 'bgm/snake_dual.mp3') }}" type="audio/mpeg">
 </audio>
+
 <script>
     document.getElementById('bgm').addEventListener('ended', function () {
         this.currentTime = 0;
@@ -210,9 +214,9 @@
     client_socket.on("h2h_distance", function (data) {
         h2h_distance = data;
 
-        if (h2h_distance > caution_distance ) {
+        if (h2h_distance > caution_distance) {
             var color = "rgb(" + 0 + ", " + 255 + ", 0)";
-        } else if ( h2h_distance > danger_distance) {
+        } else if (h2h_distance > danger_distance) {
             var color = "rgb(" + 255 + ", " + 255 + ", 0)";
         } else {
             var color = "rgb(" + 255 + ", " + 0 + ", 0)";
@@ -259,6 +263,7 @@
         });
     });
 </script>
+
 <script>
     client_socket.on("NetworkMode", function (data) {
         $("#UDP").text(data["UDP"]);
@@ -328,7 +333,7 @@
                 text: "당신이 이겼습니다 !",
                 icon: "success",
                 confirmButtonText: "OK",
-                timer : 3000
+                timer: 3000
             }).then((result) => {
                 window.location.href = "/index";
             });
@@ -338,13 +343,14 @@
                 text: "당신이 졌습니다..",
                 icon: "error",
                 confirmButtonText: "OK",
-                timer : 3000
+                timer: 3000
             }).then((result) => {
                 window.location.href = "/index";
             });
         }
     });
 </script>
+
 <script>
     let canvas = document.querySelector('canvas');
     let c = canvas.getContext('2d');

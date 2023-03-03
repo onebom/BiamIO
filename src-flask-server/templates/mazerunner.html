@@ -20,6 +20,7 @@
 <audio id="bgm" autoplay loop>
     <source src="{{ url_for('static', filename= 'bgm/maze_bgm_vol.mp3') }}" type="audio/mpeg">
 </audio>
+
 <script>
     document.getElementById('bgm').addEventListener('ended', function () {
         this.currentTime = 0;
@@ -146,6 +147,7 @@
         });
     });
 </script>
+
 <script>
     var client_socket = io.connect(
         "http://" + document.domain + ":" + location.port
@@ -181,6 +183,7 @@
     });
 
 </script>
+
 <script>
     let canvas = document.querySelector('canvas');
     let c = canvas.getContext('2d');
