@@ -983,7 +983,7 @@ class MultiGameClass:
             coll_bool = self.isCollision(self.points[-1], self.opp_points)
             if coll_bool:
                 if self.skill_flag:
-                    socket.emit("opp_cut_idx", {"cut_idx": coll_bool})
+                    socketio.emit("opp_cut_idx", {"cut_idx": coll_bool})
                     self.skill_flag = False
                 else:
                     self.execute()
