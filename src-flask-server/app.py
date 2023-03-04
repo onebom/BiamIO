@@ -329,6 +329,8 @@ class SnakeGameClass:
         self.foodPoint = 640, 360
 
         self.score = 0
+        self.bestScore = 0
+        
         self.opp_score = 0
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.opp_addr = ()
@@ -463,7 +465,7 @@ class SnakeGameClass:
         self.points = []
         self.foodOnOff = True
         self.multi = False
-
+        
         bot_data = {'bot_head_x': 1000,
                     'bot_head_y': 360,
                     'bot_body_node': [],
@@ -753,6 +755,10 @@ class SnakeGameClass:
                 self.foodOnOff = False
                 socketio.emit('user_ate_food', {'score': self.score})
             else:
+                if self.score > self.bestScore:
+                    self.bestScore = self.score
+                    socketio.emit('bestScore', {'bestScore' : self.bestScore})
+
                 single_game.foodtimeLimit = time.time() + 11
                 self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
 
@@ -1226,6 +1232,7 @@ class MultiGameClass:
 
 game = SnakeGameClass(pathFood)
 multi = MultiGameClass(pathFood)
+single_game = SnakeGameClass(pathFood)
 
 # Defualt Root Routing for Flask Server Check
 @api.resource('/')
@@ -1244,7 +1251,14 @@ def index():
 
 @app.route('/testbed')
 def testbed():
-    return render_template("testbed.html")
+    global single_game
+
+    single_game = SnakeGameClass(pathFood)
+    with open("./src-flask-server/static/bestScore.txt", "r") as f:
+        myBestScore = int(f.read())
+    single_game.bestScore = myBestScore
+    print(f"bestScore : {single_game.bestScore}")
+    return render_template("testbed.html", best_score = single_game.bestScore)
 
 
 @app.route('/mazerunner')
@@ -1333,11 +1347,19 @@ def set_start():
     global start
     start = True
 
+
 @socketio.on('cutted_idx')
 def set_cutted_idx(data):
     global multi
     multi.cut_idx = data['cutted_idx']
     multi.skill_length_reduction()
+
+
+@socketio.on("save_best")
+def save_best(data):
+    with open("./src-flask-server/static/bestScore.txt", "w") as f:
+        # Write the new contents to the file
+        f.write(data)
 
 
 ########################################################################################################################
@@ -1479,9 +1501,6 @@ def bot_data_update():
                 break
 
 
-single_game = SnakeGameClass(pathFood)
-
-
 # TEST BED ROUTING
 @app.route('/test')
 def test():
@@ -1490,7 +1509,6 @@ def test():
         global opponent_data
         single_game.global_intialize()
         single_game.testbed_initialize()
-
         max_time_end = time.time() + 4
         cx, cy = 200, 360
         bot_flag = True
