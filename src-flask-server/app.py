@@ -1395,7 +1395,7 @@ def snake():
 
             if multi.skill_flag:
                 skill_cnt += 1
-            if skill_cnt % 30 == 0:
+            if skill_cnt % 60 == 0:
                 multi.skill_flag = False
                 skill_cnt = 0
 
