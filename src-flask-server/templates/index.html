@@ -13,32 +13,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
     <script>
         $(document).ready(function () {
-            // Connect to the server
-            // var socket = io.connect('http://krafton604.iptime.org');
-            var server_socket = io.connect('http://dlsrks99.site:8080');
+        // Connect to the server
+        // var socket = io.connect('http://krafton604.iptime.org');
+        var server_socket = io.connect('http://dlsrks99.site:8080');
 
-            // Handle reset button click event
-            $('#joinButton').click(function (event) {
-                server_socket.emit('join');
-            });
-
-            server_socket.on('waiting', function (data) {
-                console.log("waiting...")
-                $("#isMatched").text("waiting...");
-                $("#alarm").text("user : " + data['sid']);
-            });
-
-            server_socket.on('matched', function (data) {
-                console.log("matched!");
-                $("#isMatched").text("matched!!!");
-                $("#alarm").text("user : " + data['sid'] + " entered room : " + data['room_id']);
-            });
-
-            server_socket.on('start-game', function (data) {
-                let url = '/enter_snake?room_id=' + data['room_id'] + '&sid=' + data['sid'];
-                window.location.href = url;
-            });
+        // Handle reset button click event
+        $('#joinButton').click(function (event) {
+            server_socket.emit('join');
         });
+
+        server_socket.on('waiting', function (data) {
+            console.log("waiting...")
+            $("#isMatched").text("waiting...");
+        });
+
+        server_socket.on('matched', function (data) {
+            console.log("matched!");
+            $("#isMatched").text("matched!!!");
+            $("#alarm").text("user : " + data['user_number'] + " entered room : " + data['room_id']);
+        });
+
+        server_socket.on('start-game', function (data) {
+            let url = '/enter_snake?room_id=' + data['room_id'] + '&user_num=' + data['user_number'];
+            window.location.href = url;
+        });
+    });
     </script>
 </head>
 
