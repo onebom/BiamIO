@@ -830,7 +830,7 @@ class SnakeGameClass:
     # 통신 관련 변수 설정
     def set_socket(self, my_port, opp_ip, opp_port):
         self.sock.bind(('0.0.0.0', int(my_port)))
-        self.sock.settimeout(0.01)  # TODO 만약 udp, 서버 선택 오류 시 다시 0.02로
+        self.sock.settimeout(0.02)  # TODO 만약 udp, 서버 선택 오류 시 다시 0.02로
         self.opp_addr = (opp_ip, int(opp_port))
 
     # 데이터 전송
@@ -932,7 +932,7 @@ class MultiGameClass:
     # 통신 관련 변수 설정
     def set_socket(self, my_port, opp_ip, opp_port):
         self.sock.bind(('0.0.0.0', int(my_port)))
-        self.sock.settimeout(0.01)  # TODO 만약 udp, 서버 선택 오류 시 다시 0.02로
+        self.sock.settimeout(0.02)  # TODO 만약 udp, 서버 선택 오류 시 다시 0.02로
         self.opp_addr = (opp_ip, int(opp_port))
 
     # udp로 통신할지 말지
@@ -1395,9 +1395,9 @@ def snake():
 
             if multi.skill_flag:
                 skill_cnt += 1
-            if skill_cnt % 60 == 0:
-                multi.skill_flag = False
-                skill_cnt = 0
+                if skill_cnt % 60 == 0:
+                    multi.skill_flag = False
+                    skill_cnt = 0
 
             img = multi.update(img, pointIndex)
 
