@@ -20,6 +20,7 @@ waiting_players = []  # 매칭 잡은 유저 목록
 room_of_players = {}  # 해당 sid에 할당된 룸
 players_in_room = {}  # 해당 room에 존재하는 sid들
 address = {}  # 먼저 방에 들어온 사람 주소 (전송을 위해 저장)
+user_ready = {}
 escape_count = {}
 
 
@@ -42,6 +43,12 @@ def test_connect():
 def test_disconnect():
     global room_of_players
     global players_in_room
+    global waiting_user_idx
+    global waiting_players
+
+    if request.sid in waiting_players:
+        waiting_players.remove(request.sid)
+        waiting_user_idx -= 1
 
     if request.sid in room_of_players:
         room_id = room_of_players[request.sid]
@@ -76,13 +83,23 @@ def handle_join():
         # sid에게 들어갈 방 알려줌
 
         # 매칭 잡힌 사실 index 페이지에 보내줌
-        emit('matched', {'room_id': room_id, 'sid': 1}, to=user1)
-        emit('matched', {'room_id': room_id, 'sid': 2}, to=user2)
+        emit('matched', {'room_id': room_id, 'user_number': 1}, to=user1)
+        emit('matched', {'room_id': room_id, 'user_number': 2}, to=user2)
         # 매칭완료
-        emit('start-game', {'room_id': room_id, 'sid': 1}, to=user1)
-        emit('start-game', {'room_id': room_id, 'sid': 2}, to=user2)
+        emit('start-game', {'room_id': room_id, 'user_number': 1}, to=user1)
+        emit('start-game', {'room_id': room_id, 'user_number': 2}, to=user2)
     else:
         emit('waiting', {'sid': request.sid}, to=request.sid)
+
+@socketio.on('user_ready')
+def game_start(data):
+    global user_ready
+    room_id = data['room_id']
+
+    if room_id not in user_ready:
+        user_ready[room_id] = 0
+    else:
+        emit('game_start', room=room_id)
 
 
 # 서버가 상대의 위치 전송
@@ -149,8 +166,8 @@ def my_port(data):
 
     if len(players_in_room[room_id]) == 2:
         room_of_players[request.sid] = room_id
-        # emit('opponent_address', {'ip_addr' : ip_addr, 'port' : port, 'user_number': 1}, broadcast=True, include_self=False, room=room_id)
-        # emit('opponent_address', {'ip_addr' : address[room_id][0], 'port' : address[room_id][1], 'user_number': 2}, to=request.sid)
+        emit('opponent_address', {'ip_addr' : ip_addr, 'port' : port, 'user_number': 1}, broadcast=True, include_self=False, room=room_id)
+        emit('opponent_address', {'ip_addr' : address[room_id][0], 'port' : address[room_id][1], 'user_number': 2}, to=request.sid)
     else:
         room_of_players[request.sid] = room_id
         address[room_id] = [ip_addr, port]
