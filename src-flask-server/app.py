@@ -915,6 +915,7 @@ class MultiGameClass:
         self.opp_score = 0
         self.opp_points = []
         self.dist = 500
+        self.cut_idx = 0
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.opp_addr = ()
@@ -926,6 +927,7 @@ class MultiGameClass:
         self.user_move = False
         self.check_collision = False
         self.gen = True
+        self.skill_flag = False
 
     # 통신 관련 변수 설정
     def set_socket(self, my_port, opp_ip, opp_port):
@@ -978,8 +980,13 @@ class MultiGameClass:
         self.send_data_to_opp()
 
         if self.check_collision:
-            if self.isCollision(self.points[-1], self.opp_points):
-                self.execute()
+            coll_bool = self.isCollision(self.points[-1], self.opp_points)
+            if coll_bool:
+                if self.skill_flag:
+                    socket.emit("opp_cut_idx", {"cut_idx": coll_bool})
+                    self.skill_flag = False
+                else:
+                    self.execute()
 
         return imgMain
     
@@ -1079,6 +1086,9 @@ class MultiGameClass:
             self.foodOnOff = False
             socketio.emit('user_ate_food', {'score': self.score})
 
+            if self.score % 10 == 0 or self.score != 0:
+                self.skill_flag = True
+
     # 먹이 그려주기
     def draw_Food(self, imgMain):
         rx, ry = self.foodPoint
@@ -1176,19 +1186,28 @@ class MultiGameClass:
     # 충돌 판단
     def isCollision(self, u1_head_pt, u2_pts):
         if not u2_pts:
-            return False
+            return 0
         # p1_a, p1_b = np.array(u1_head_pt[0]), np.array(u1_head_pt[1]) # p1_b: head point
         p1_a, p1_b = u1_head_pt[0], u1_head_pt[1]
 
-        for u2_pt in u2_pts:
+        for idx, u2_pt in enumerate(u2_pts):
             # p2_a, p2_b = np.array(u2_pt[0]), np.array(u2_pt[1])
             p2_a, p2_b = u2_pt[0], u2_pt[1]
 
             if self.segmentIntersects(p1_a, p1_b, p2_a, p2_b):
                 # print(p1_a, p1_b, p2_a, p2_b)
-                return True
+                return idx
 
-        return False
+        return 0
+    
+    # skill 사용 시 충돌 idx 자르기
+    def skill_length_reduction(self):
+        for i in range(self.cut_idx):
+            self.currentLength -= self.lengths[i]
+
+        self.allowedLength = self.currentLength 
+        self.lengths = self.lengths[self.cut_idx:]
+        self.points = self.points[self.cut_idx:]
 
     # 뱀이 충돌했을때
     def execute(self):
@@ -1314,6 +1333,12 @@ def set_start():
     global start
     start = True
 
+@socketio.on('cutted_idx')
+def set_cutted_idx(data):
+    global multi
+    multi.cut_idx = data['cutted_idx']
+    multi.skill_length_reduction()
+
 
 ########################################################################################################################
 ######################################## MAIN GAME ROUNTING ############################################################
@@ -1322,6 +1347,7 @@ def snake():
     def generate():
         global multi
         global start
+        skill_cnt = 0
 
         if multi.user_number == 1:
             start_cx = 100
@@ -1366,6 +1392,12 @@ def snake():
                         start_cx = 1210
                         multi.user_move = True
                         multi.check_collision = True
+
+            if multi.skill_flag:
+                skill_cnt += 1
+            if skill_cnt % 30 == 0:
+                multi.skill_flag = False
+                skill_cnt = 0
 
             img = multi.update(img, pointIndex)
 

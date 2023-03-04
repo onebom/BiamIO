@@ -292,6 +292,12 @@
         $("#food_x").text(data["food_x"]);
         $("#food_y").text(data["food_y"]);
     });
+    client_socket.on("opp_cut_idx", function (data) {
+        server_socket.emit('skill_cutting_idx', {'cut_idx': data["cut_idx"], 'room_id': room_id});
+    });
+    server_socket.on("skill_cutted_idx", function (data) {
+        client_socket.emit("cutted_idx", { 'cutted_idx': data['cutted_idx'] });
+      });
     // 로컬에서 보낸 내 위치 서버에게 보내기
     client_socket.on("game_data", function (data) {
         $("#body_node").text(data["body_node"]);

@@ -181,6 +181,11 @@ def provide_food_data(data):
     emit('ate_user_opp', {'foodPoint': foodPoint, 'opp_score': data['score']}, room=data['room_id'], include_self=False)
 
 
+@socketio.on('skill_cutting_idx')
+def skill_cutting_idx(data):
+    emit('skill_cutted_idx', {'cutted_idx': data["cut_idx"]}, room=data['room_id'], include_self=False)
+
+
 @socketio.on('gameover_to_server')
 def game_over(data):
     # 이겻는가 0 : false, 1 : true
