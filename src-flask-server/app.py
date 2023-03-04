@@ -979,7 +979,7 @@ class MultiGameClass:
 
         self.send_data_to_opp()
 
-        if self.check_collision:
+        if self.check_collision and self.points:
             coll_bool = self.isCollision(self.points[-1], self.opp_points)
             if coll_bool:
                 if self.skill_flag:
