@@ -20,6 +20,7 @@
 <audio id="bgm" autoplay loop>
     <source src="{{ url_for('static', filename= 'bgm/maze_bgm_vol.mp3') }}" type="audio/mpeg">
 </audio>
+
 <script>
     document.getElementById('bgm').addEventListener('ended', function () {
         this.currentTime = 0;
@@ -108,6 +109,7 @@
         }
     }, 1000);
 </script>
+
 <script>
     const accordions = document.querySelectorAll('.draggable');
 
@@ -145,6 +147,7 @@
         });
     });
 </script>
+
 <script>
     var client_socket = io.connect(
         "http://" + document.domain + ":" + location.port
@@ -180,6 +183,7 @@
     });
 
 </script>
+
 <script>
     let canvas = document.querySelector('canvas');
     let c = canvas.getContext('2d');
@@ -201,7 +205,7 @@
 
         this.draw = () => {
             c.beginPath();
-            c.lineWidth = 3;
+            c.lineWidth = 5;
             c.strokeStyle = `rgba(255, 0, 255, ${this.opacity})`;
             c.moveTo(0, this.y);
             c.lineTo(canvas.width, this.y);
@@ -232,7 +236,7 @@
 
         this.draw = () => {
             c.beginPath();
-            c.lineWidth = 3;
+            c.lineWidth = 5;
             c.strokeStyle = grad;
             c.moveTo(canvas.width / 2, 200);
             c.lineTo(this.x, canvas.height);
@@ -270,6 +274,7 @@
     animate();
 </script>
 </main>
+
 <script src="{{ url_for ('static', filename = 'assets/bootstrap/js/bootstrap.min.js') }}"></script>
 </body>
 </html>

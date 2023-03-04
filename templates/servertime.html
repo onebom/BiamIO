@@ -1,23 +1,9 @@
 <!doctype html>
 <html>
 <head>
-    <title>Server Time</title>
-    <script src="//code.jquery.com/jquery-1.12.4.min.js"></script>
-    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
-    <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>-->
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>Biam.IO Server</title>
 </head>
 <body>
-<h1>Server Time</h1>
-<div id="time"></div>
-<script>
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
-    socket.on('connect', function() {
-        socket.emit('get_time');
-    });
-    socket.on('time', function(data) {
-        $('#time').html(data['time']);
-    });
-</script>
+<h1>Biam.IO Server Working OK</h1>
 </body>
 </html>

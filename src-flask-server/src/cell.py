@@ -1,4 +1,3 @@
-
 class Cell(object):
     """Class for representing a cell in a 2D grid.
 
@@ -11,6 +10,7 @@ class Cell(object):
             walls (list):
             neighbours (list):
     """
+
     def __init__(self, row, col):
         self.row = row
         self.col = col

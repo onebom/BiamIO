@@ -24,8 +24,9 @@ log.info('pythonExePath', pythonExePath, 'packaged mode?', guessPackaged())
 
 let numAttempts = 0
 const maxAttemptsAllowed = 6
+
 function checkFlask(cb) {  // cb is the function which will load the main window content etc.
-    request('http://localhost:5000/', { json: true }, (err, res, body) => {
+    request('http://localhost:5000/', {json: true}, (err, res, body) => {
         // if (numAttempts < maxAttemptsAllowed) err = 'no flask'  // uncomment to simulate slow flask startup
         if (err) {
             if (numAttempts > 1)  // only warn after one retry, cos will usually need one retry anyway
@@ -35,18 +36,16 @@ function checkFlask(cb) {  // cb is the function which will load the main window
                 console.log(`Could not communicate with flask server ${err} 🆘 - gave up.`)
                 // Call the callback even in the case of failure, so that always have something loaded in mainwindow render page
                 if (cb)
-                    cb()            }
-            else
+                    cb()
+            } else
                 setTimeout(function () {
                     checkFlask(cb)
                 }, 500);
-        }
-        else if (res.statusCode != 200) {
+        } else if (res.statusCode != 200) {
             console.log(`Wrong response code from flask server ${res.statusCode} ${body} ⁉️⁉️⁉️ ⚠️`)
             if (cb)
                 cb()
-        }
-        else {
+        } else {
             console.log('Communication with flask server is OK 🎉')
             // Call the callback even in the case of failure, so that always have something loaded in mainwindow render page
             if (cb)
@@ -92,39 +91,40 @@ file quit
   before quit
 */
 function killFlask(app) {
-  
-    if (subpy) {
-    
-    console.log('kill', subpy.pid)
-    kill(subpy.pid, 'SIGKILL', function(err) {
-        console.log('done killing flask')
-        
-        // App quit() logic
-        
-        mainWindow = null  
-        app.quit();
-          
-                
-    });
 
-    }
-    else {
+    if (subpy) {
+
+        console.log('kill', subpy.pid)
+        kill(subpy.pid, 'SIGKILL', function (err) {
+            console.log('done killing flask')
+
+            // App quit() logic
+
+            mainWindow = null
+            app.quit();
+
+
+        });
+
+    } else {
         // App quit() logic
-        
-        mainWindow = null  
+
+        mainWindow = null
         app.quit();
-          
+
     }
 
 }
-  
+
 
 function closeMainWindow() {
     mainWindow.close();  // close window, which will then trigger 'window-all-closed'
 }
+
 function setMainWindow(_mainWindow) {
     mainWindow = _mainWindow
 }
+
 function getMainWindow(_mainWindow) {
     return mainWindow
 }

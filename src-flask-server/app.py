@@ -73,7 +73,7 @@ pathFood = './src-flask-server/static/food.png'
 
 opponent_data = {}  # 상대 데이터 (현재 손위치, 현재 뱀위치)
 gameover_flag = False  # ^^ 게임오버
-bot_flag=False
+bot_flag = False
 now_my_room = ""  # 현재 내가 있는 방
 now_my_sid = ""  # 현재 나의 sid
 MY_PORT = 0  # socket_bind를 위한 내 포트 번호
@@ -223,9 +223,10 @@ class HandDetector:
                 # Access landmarks of the index finger
                 index_finger_landmarks = handLms.landmark[self.mpHands.HandLandmark.INDEX_FINGER_TIP]
                 # Draw a circle at the index finger tip landmark
-                cv2.circle(img2, (int(index_finger_landmarks.x * img2.shape[1]), int(index_finger_landmarks.y * img2.shape[0])), 27, (255, 0, 255), 3)
+                cv2.circle(img2, (
+                    int(index_finger_landmarks.x * img2.shape[1]), int(index_finger_landmarks.y * img2.shape[0])), 27,
+                           (255, 0, 255), 3)
         return img2
-
 
     def fingersUp(self, myHand):
         """
@@ -318,7 +319,7 @@ class SnakeGameClass:
 
         self.speed = 5
         self.minspeed = 10
-        self.maxspeed = 50
+        self.maxspeed = math.hypot(1280, 720) / 10
         self.velocityX = random.choice([-1, 0, 1])
         self.velocityY = random.choice([-1, 1])
 
@@ -356,7 +357,7 @@ class SnakeGameClass:
 
         self.speed = 5
         self.minspeed = 10
-        self.maxspeed = 50
+        self.maxspeed = math.hypot(1280, 720) / 10
         self.velocityX = random.choice([-1, 0, 1])
         self.velocityY = random.choice([-1, 1])
 
@@ -372,7 +373,7 @@ class SnakeGameClass:
         self.foodOnOff = True
         self.multi = False
 
-        self.timer_end=0
+        self.timer_end = 0
         self.maze_start = [[], []]
         self.maze_end = [[], []]
         self.maze_map = np.array([])
@@ -442,7 +443,7 @@ class SnakeGameClass:
         self.velocityX = 0
         self.velocityY = 0
         self.points = []
-        self.maxspeed = 50
+        self.maxspeed = math.hypot(1280, 720) / 10
         self.passStart = False
         self.passMid = False
         self.timer_end = time.time() + 120
@@ -540,18 +541,17 @@ class SnakeGameClass:
 
         self.length_reduction()
 
-        menu_type=0
+        menu_type = 0
         # hover event emit 할 필요 TODO
-        if 490<=cx<=790:
-            if 70<=cy<=170: # menu_type: 1, MULTI PLAY
-                menu_type=1
-            elif 310<=cy<=410: # menu_type: 2, SINGLE PLAY
-                menu_type=2
-            elif 550<=cy<=650: # menu_type: 3, MAZE RUNNER
-                menu_type=3
+        if 490 <= cx <= 790:
+            if 70 <= cy <= 170:  # menu_type: 1, MULTI PLAY
+                menu_type = 1
+            elif 310 <= cy <= 410:  # menu_type: 2, SINGLE PLAY
+                menu_type = 2
+            elif 550 <= cy <= 650:  # menu_type: 3, MAZE RUNNER
+                menu_type = 3
 
         return menu_type
-
 
     # 내 뱀 상황 업데이트 - maze play에서
     def my_snake_update_mazeVer(self, HandPoints):
@@ -622,14 +622,15 @@ class SnakeGameClass:
             self.receive_data_from_opp()
 
         if opp_bodys:
-            self.dist = ((self.points[-1][1][0]-opp_bodys[-1][1][0])**2+(self.points[-1][1][1]-opp_bodys[-1][1][1])**2)**0.5
+            self.dist = ((self.points[-1][1][0] - opp_bodys[-1][1][0]) ** 2 + (
+                    self.points[-1][1][1] - opp_bodys[-1][1][1]) ** 2) ** 0.5
         # 할일: self.multi가 false일 때, pt_dist html에 보내기
         # print(f"point distance: {pt_dist}")
         socketio.emit('h2h_distance', self.dist)
 
-        opp_bodys_collsion=opp_bodys
+        opp_bodys_collsion = opp_bodys
         if bot_flag:
-            opp_bodys_collsion=opp_bodys+self.points[:-3]
+            opp_bodys_collsion = opp_bodys + self.points[:-3]
 
         if self.isCollision(self.points[-1], opp_bodys_collsion):
             global user_move
@@ -751,7 +752,7 @@ class SnakeGameClass:
                 self.foodOnOff = False
                 socketio.emit('user_ate_food', {'score': self.score})
             else:
-                single_game.foodtimeLimit=time.time()+11
+                single_game.foodtimeLimit = time.time() + 11
                 self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
 
     # 뱀이 충돌했을때
@@ -763,7 +764,7 @@ class SnakeGameClass:
         self.lengths = []  # distance between each point
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
-        self.score=0
+        self.score = 0
 
         if user_number == 1:
             self.previousHead = 100, 180
@@ -796,6 +797,9 @@ class SnakeGameClass:
         imgMain = self.draw_Food(imgMain)
         # 1 이면 내 뱀
         imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
+        # ---head와 handsPoint 점선으로 잇기---
+        for p in np.linspace(self.previousHead, HandPoints, 10):
+            cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
 
         return imgMain
 
@@ -804,15 +808,15 @@ class SnakeGameClass:
         global gameover_flag, opponent_data
 
         # update and draw own snake
-        menu_type=self.my_snake_update_menu(HandPoints)
+        menu_type = self.my_snake_update_menu(HandPoints)
 
         if self.menu_type != 0:
             if self.menu_type == menu_type:
                 self.menu_time += 1
 
-            if self.menu_time ==  30: #5초간 menu bar에 머무른 경우
+            if self.menu_time == 30:  # 5초간 menu bar에 머무른 경우
                 # 할일: menu_type(1:multi, 2:single, 3:maze) 사용해서 routing
-                socketio.emit("selected_menu_type", {'menu_type' : self.menu_type})
+                socketio.emit("selected_menu_type", {'menu_type': self.menu_type})
                 self.menu_time = 0
                 self.menu_type = 0
 
@@ -997,13 +1001,13 @@ def set_food_loc(data):
     game.opp_score = data['opp_score']
     game.foodOnOff = True
 
+
 # socketio로 받은 먹이 위치와 상대 점수
 @socketio.on('user_match')
 def user_match(data):
     global user_number
     user_number = data
     socketio.emit("set_snake_url")
-
 
 
 ########################################################################################################################
@@ -1019,7 +1023,7 @@ def snake():
 
         game.multi = True
         bot_flag = False
-        
+
         print(f"app.py before while, {user_number}")
         user_number = int(user_number)
         # while True:
@@ -1038,7 +1042,7 @@ def snake():
         else:
             start_cx = 100
             start_cy = 100
-                
+
         user_move = False
 
         while True:
@@ -1116,7 +1120,7 @@ def bot_data_update():
 
     cx = round(px + bot_velocityX * bot_speed)
     cy = round(py + bot_velocityY * bot_speed)
-    
+
     if cx < 0 or cx > 1280 or cy < 0 or cy > 720:
         if cx < 0: cx = 0
         if cx > 1280: cx = 1280
@@ -1162,9 +1166,9 @@ def test():
 
         max_time_end = time.time() + 4
         cx, cy = 200, 360
-        bot_flag=True
+        bot_flag = True
         user_move = False
-        single_game.foodtimeLimit = time.time() + 15 # 10초 제한(앞 5초는 카운트)
+        single_game.foodtimeLimit = time.time() + 15  # 10초 제한(앞 5초는 카운트)
 
         while True:
             success, img = cap.read()
@@ -1207,7 +1211,6 @@ def test():
                 break
 
         single_game.previousHead = cx, cy
-
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -1283,7 +1286,7 @@ def create_maze(image_h, image_w, block_rows, block_cols):
                     wall_map[i * block_h:(i + 1) * block_h, j * block_w - r:j * block_w + r] = 1
 
     solution_nodes = maze.solution_path
-    mid_goal_h = maze.solution_path[-3][0][0] # solution path의 출구로부터 2번쨰 노드
+    mid_goal_h = maze.solution_path[-3][0][0]  # solution path의 출구로부터 2번쨰 노드
     mid_goal_w = maze.solution_path[-3][0][1]
     # print(len(solution_nodes))
     print(mid_goal_h)
@@ -1302,7 +1305,7 @@ def maze_play():
 
         game.multi = False
         game.maze_initialize()
-        game.timer_end = time.time() + 120 # 2분 시간제한
+        game.timer_end = time.time() + 120  # 2분 시간제한
 
         while True:
             success, img = cap.read()
@@ -1325,7 +1328,7 @@ def maze_play():
 
             remain_time = int(game.timer_end - time.time())  # 할일: html에 보내기
             # print(f"remain_time: {remain_time}")
-            socketio.emit('maze_timer', {"minutes": remain_time//60, "seconds": remain_time % 60})
+            socketio.emit('maze_timer', {"minutes": remain_time // 60, "seconds": remain_time % 60})
             print(remain_time)
             if remain_time < 1:
                 print("game ended")

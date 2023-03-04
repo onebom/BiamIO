@@ -67,7 +67,7 @@ class MazeManager(object):
                 if len(self.mazes) < 1:
                     maze.id = 0
                 else:
-                    maze.id = self.mazes.__len__()+1
+                    maze.id = self.mazes.__len__() + 1
         else:
             return False
         self.mazes.append(maze)
@@ -140,7 +140,7 @@ class MazeManager(object):
         vis = Visualizer(self.get_maze(id), cell_size, self.media_name)
         vis.show_maze_solution()
 
-    def show_solution_animation(self, id, cell_size =1):
+    def show_solution_animation(self, id, cell_size=1):
         """
         Shows the animation of the path that the solver took.
 
@@ -160,7 +160,7 @@ class MazeManager(object):
         Returns:
 
         """
-        return next((maze for maze in self.mazes if maze .id == id), None)
+        return next((maze for maze in self.mazes if maze.id == id), None)
 
     def set_filename(self, filename):
         """
@@ -177,4 +177,4 @@ class MazeManager(object):
         Args:
             enabled (bool): True when quiet mode is on, False when it is off
         """
-        self.quiet_mode=enabled
+        self.quiet_mode = enabled
