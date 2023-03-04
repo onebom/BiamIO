@@ -61,22 +61,6 @@
 
 <body>
 
-<script>
-    const signalSound = new Audio("{{ url_for('static', filename= 'bgm/countdown.mp3') }}");
-    const demo = document.querySelector('.demo');
-    const counttext = document.getElementById("ready-start");
-
-    function changeText() {
-        counttext.textContent = 'START';
-        signalSound.play()
-    }
-
-    setTimeout(changeText, 1000);
-    setTimeout(function () {
-        demo.classList.add('hidden');
-    }, 4000);
-</script>
-
 <audio id="bgm" autoplay loop>
     <source src="{{ url_for('static', filename= 'bgm/snake_dual.mp3') }}" type="audio/mpeg">
 </audio>
