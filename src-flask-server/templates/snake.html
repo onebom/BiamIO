@@ -20,43 +20,35 @@
     <!-- 소켓 통신 관련 부분은 영상을 gen하는 것보다 빨라야 하기 때문에 위쪽에 위치 -->
     <script>
         var client_socket = io.connect(
-            "http://" + document.domain + ":" + location.port
+          "http://" + document.domain + ":" + location.port
         );
         // var server_socket = io.connect("http://krafton604.iptime.org");
         var server_socket = io.connect("http://dlsrks99.site:8080");
-
+    
         let room_id = "{{room_id}}";
-        let sid = "{{sid}}";
-
-        console.log(room_id);
-        console.log(sid);
-
+    
         // 서버와 통신개시 후 포트를 요청
         server_socket.on("connect", function () {
-            server_socket.emit('my_port', {'room_id': room_id});
-            client_socket.emit('user_match', sid)
+          server_socket.emit('my_port', { 'room_id': room_id });
         });
         // 서버에서 받은 나의 포트를 로컬 flask 서버로 전송
         server_socket.on("my_port", function (data) {
-            console.log(data['my_port'])
-            client_socket.emit('my_port', {'my_port': data['my_port']})
+          client_socket.emit('my_port', { 'my_port': data['my_port'] })
         });
         // 서버에서 받은 상대의 주소를 로컬 flask 서버로 전송
         server_socket.on('opponent_address', function (data) {
-            console.log(data['ip_addr'], data['port'])
-            client_socket.emit('opponent_address', {
-                'ip_addr': data['ip_addr'],
-                'port': data['port'],
-                'user_number': data['user_number'],
-                'sid': sid
-            })
-            console.log("oppenent_address from server : before url snake")
-            $("#snake_video").attr("src", "{{ url_for('snake') }}")
+          client_socket.emit('opponent_address', {
+            'ip_addr': data['ip_addr'],
+            'port': data['port']
+          })
         });
-        client_socket.on('set_snake_url', function () {
-            $("#snake_video").attr("src", "{{ url_for('snake') }}")
+        client_socket.on('game_ready', function () {
+          server_socket.emit('user_ready', { 'room_id': room_id })
         })
-    </script>
+        server_socket.on('game_start', function () {
+          client_socket.emit('game_start')
+        })
+      </script>
 </head>
 
 <body>
@@ -91,7 +83,7 @@
     <div class="gamesection-container">
         <div id="ambient" class="ambient"></div>
         <div class="cam-container">
-            <img class="cam-feed" id="snake_video" src="" onload="showImage()">
+            <img class="cam-feed" id="snake_video" src=" {{ url_for('snake') }} " onload="showImage()">
             <script>
                 function showImage() {
                     document.getElementById("snake_video").style.display = "block";
@@ -310,8 +302,8 @@
     });
     // 서버에서 받은 상대 위치 내 로컬에 보내기
     server_socket.on("opp_data", function (data) {
-        $("#opp_body_node").text(data["opp_body_node"]);
-        client_socket.emit("opp_data_transfer", {data: data});
+      $("#opp_body_node").text(data["opp_body_node"]);
+      client_socket.emit("opp_data_transfer", { 'opp_body_node': data['opp_body_node'] });
     });
     // 내가 먹이를 먹은 경우, 서버에게 알리기
     client_socket.on('user_ate_food', function (data) {
