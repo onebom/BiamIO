@@ -431,9 +431,12 @@ class SnakeGameClass:
         line_norm = np.linalg.norm(pt_a - head_pt).astype(int)
         points_on_line = np.linspace(pt_a, head_pt, line_norm)
         for p in points_on_line:
-            # print(p)
-            if self.maze_map[int(p[1]), int(p[0])] == 1:
-                return True
+            try:
+                if self.maze_map[int(p[1]), int(p[0])] == 1:
+                    return True
+            except:
+                pass
+                    
         return False
 
     # maze 초기화
@@ -1228,8 +1231,12 @@ class MultiGameClass:
     def skill_length_reduction(self):
         for i in range(self.cut_idx):
             self.currentLength -= self.lengths[i]
-
-        self.allowedLength = self.currentLength 
+        
+        if self.currentLength  < 100:
+            self.allowedLength = 100
+        else:
+            self.allowedLength = self.currentLength 
+            
         self.lengths = self.lengths[self.cut_idx:]
         self.points = self.points[self.cut_idx:]
 
@@ -1340,9 +1347,10 @@ def set_address(data):
     opp_ip = data['ip_addr']
     opp_port = data['port']
     sid = request.sid
-
-    multi.set_socket(MY_PORT, opp_ip, opp_port)
-    multi.test_connect(sid)
+    
+    socketio.emit('game_ready')
+    # multi.set_socket(MY_PORT, opp_ip, opp_port)
+    # multi.test_connect(sid)
 
 
 # socketio로 받은 상대방 정보
@@ -1391,6 +1399,11 @@ def save_best(data):
         # Write the new contents to the file
         f.write(data)
 
+@socketio.on("gen_break")
+def gen_break():
+    global multi
+    multi.gen = False
+
 
 ########################################################################################################################
 ######################################## MAIN GAME ROUNTING ############################################################
@@ -1421,8 +1434,11 @@ def snake():
             success, img = cap.read()
             img = cv2.flip(img, 1)
 
-            hands = detector.findHands(img, flipType=False)
-            img = detector.drawHands(img)
+            try:            
+                hands = detector.findHands(img, flipType=False)
+                img = detector.drawHands(img)
+            except:
+                hands=[]
 
             pointIndex = []
 
@@ -1672,8 +1688,6 @@ def create_maze(image_h, image_w, block_rows, block_cols):
     mid_goal_h = maze.solution_path[-3][0][0]  # solution path의 출구로부터 2번쨰 노드
     mid_goal_w = maze.solution_path[-3][0][1]
     # print(len(solution_nodes))
-    print(mid_goal_h)
-    print(mid_goal_w)
     mid = [[mid_goal_w * block_w + 150, mid_goal_h * block_h + 150],
            [(mid_goal_w + 1) * block_w + 150, (mid_goal_h + 1) * block_h + 150]]
     # wall_map[mid_goal_h * block_h : (mid_goal_h + 1) * block_h , mid_goal_w * block_w :(mid_goal_w + 1) * block_w] = 4
@@ -1712,7 +1726,6 @@ def maze_play():
             remain_time = int(game.timer_end - time.time())  # 할일: html에 보내기
             # print(f"remain_time: {remain_time}")
             socketio.emit('maze_timer', {"minutes": remain_time // 60, "seconds": remain_time % 60})
-            print(remain_time)
             if remain_time < 1:
                 print("game ended")
                 socketio.emit('gameover')
