@@ -340,7 +340,7 @@
         server_socket.emit("gameover_to_server", {'room_id': room_id});
     });
     server_socket.on("gameover_to_clients", function (data) {
-        // TODO : 승패 판정 로직 다시 짤것
+        client_socket.emit("gen_break");
         if (data['result']) { // 이긴 경우
             Swal.fire({
                 title: "게임 끝!",

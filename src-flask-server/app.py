@@ -1396,6 +1396,11 @@ def save_best(data):
         # Write the new contents to the file
         f.write(data)
 
+@socketio.on("gen_break")
+def gen_break():
+    global multi
+    multi.gen = False
+
 
 ########################################################################################################################
 ######################################## MAIN GAME ROUNTING ############################################################
@@ -1679,8 +1684,8 @@ def create_maze(image_h, image_w, block_rows, block_cols):
     mid_goal_h = maze.solution_path[-3][0][0]  # solution path의 출구로부터 2번쨰 노드
     mid_goal_w = maze.solution_path[-3][0][1]
     # print(len(solution_nodes))
-    print(mid_goal_h)
-    print(mid_goal_w)
+    # print(mid_goal_h)
+    # print(mid_goal_w)
     mid = [[mid_goal_w * block_w + 150, mid_goal_h * block_h + 150],
            [(mid_goal_w + 1) * block_w + 150, (mid_goal_h + 1) * block_h + 150]]
     # wall_map[mid_goal_h * block_h : (mid_goal_h + 1) * block_h , mid_goal_w * block_w :(mid_goal_w + 1) * block_w] = 4
@@ -1719,7 +1724,7 @@ def maze_play():
             remain_time = int(game.timer_end - time.time())  # 할일: html에 보내기
             # print(f"remain_time: {remain_time}")
             socketio.emit('maze_timer', {"minutes": remain_time // 60, "seconds": remain_time % 60})
-            print(remain_time)
+            # print(remain_time)
             if remain_time < 1:
                 print("game ended")
                 socketio.emit('gameover')
