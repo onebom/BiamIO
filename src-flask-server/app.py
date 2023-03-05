@@ -141,7 +141,7 @@ class HandDetector:
     provides bounding box info of the hand found.
     """
 
-    def __init__(self, mode=False, maxHands=1, detectionCon=0.8, minTrackCon=0.5):
+    def __init__(self, mode=False, maxHands=1, detectionCon=0.8, minTrackCon=0.8):
         """
         :param mode: In static mode, detection is done on each image: slower
         :param maxHands: Maximum number of hands to detect
@@ -307,7 +307,7 @@ megenta = (255, 0, 255)  # magenta
 green = (0, 255, 0)  # green
 yellow = (0, 255, 255)  # yellow
 cyan = (255, 255, 0)  # cyan
-detector = HandDetector(detectionCon=0.5, maxHands=1)
+detector = HandDetector(detectionCon=0.8, maxHands=1)
 
 
 class SnakeGameClass:
@@ -453,7 +453,7 @@ class SnakeGameClass:
         self.maxspeed = math.hypot(1280, 720) / 10
         self.passStart = False
         self.passMid = False
-        self.timer_end = time.time() + 120
+        self.timer_end = time.time() + 90
 
     def menu_initialize(self):
         self.previousHead = (0, 360)
@@ -790,6 +790,9 @@ class SnakeGameClass:
     def update_mazeVer(self, imgMain, HandPoints):
         self.my_snake_update_mazeVer(HandPoints)
         imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
+        if HandPoints:
+            for p in np.linspace(self.previousHead, HandPoints, 10):
+                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
 
         return imgMain
 
@@ -809,8 +812,9 @@ class SnakeGameClass:
         # 1 이면 내 뱀
         imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
         # ---head와 handsPoint 점선으로 잇기---
-        for p in np.linspace(self.previousHead, HandPoints, 10):
-            cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
+        if HandPoints:
+            for p in np.linspace(self.previousHead, HandPoints, 10):
+                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
 
         return imgMain
 
