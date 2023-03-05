@@ -13,7 +13,7 @@ def depth_first_recursive_backtracker(maze, start_coor):
     visit_counter = 1  # To count number of visited cells
     visited_cells = list()  # Stack of visited cells for backtracking
 
-    print("\nGenerating the maze with depth-first search...")
+    # print("\nGenerating the maze with depth-first search...")
     time_start = time.time()
 
     while visit_counter < maze.grid_size:  # While there are unvisited cells
@@ -35,8 +35,8 @@ def depth_first_recursive_backtracker(maze, start_coor):
             k_curr, l_curr = visited_cells.pop()  # Pop previous visited cell (backtracking)
             path.append((k_curr, l_curr))  # Add coordinates to part of generation path
 
-    print("Number of moves performed: {}".format(len(path)))
-    print("Execution time for algorithm: {:.4f}".format(time.time() - time_start))
+    # print("Number of moves performed: {}".format(len(path)))
+    # print("Execution time for algorithm: {:.4f}".format(time.time() - time_start))
 
     maze.grid[maze.entry_coor[0]][maze.entry_coor[1]].set_as_entry_exit("entry",
                                                                         maze.num_rows - 1, maze.num_cols - 1)
@@ -91,8 +91,8 @@ def binary_tree(maze, start_coor):
                 maze.grid[i][j].remove_walls(i, j + 1)
                 maze.grid[i][j + 1].remove_walls(i, j)
 
-    print("Number of moves performed: {}".format(maze.num_cols * maze.num_rows))
-    print("Execution time for algorithm: {:.4f}".format(time.time() - time_start))
+    # print("Number of moves performed: {}".format(maze.num_cols * maze.num_rows))
+    # print("Execution time for algorithm: {:.4f}".format(time.time() - time_start))
 
     # choose the entry and exit coordinates
     maze.grid[maze.entry_coor[0]][maze.entry_coor[1]].set_as_entry_exit("entry",
@@ -165,5 +165,5 @@ def binary_tree(maze, start_coor):
         for cell in row:
             cell.visited = False
 
-    print(f"Generating path for maze took {time.time() - begin_time}s.")
+    # print(f"Generating path for maze took {time.time() - begin_time}s.")
     maze.generation_path = path
