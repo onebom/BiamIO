@@ -1228,8 +1228,12 @@ class MultiGameClass:
     def skill_length_reduction(self):
         for i in range(self.cut_idx):
             self.currentLength -= self.lengths[i]
-
-        self.allowedLength = self.currentLength 
+        
+        if self.currentLength  < 30:
+            self.allowedLength = 30
+        else:
+            self.allowedLength = self.currentLength 
+            
         self.lengths = self.lengths[self.cut_idx:]
         self.points = self.points[self.cut_idx:]
 
