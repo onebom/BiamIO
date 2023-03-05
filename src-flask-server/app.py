@@ -1260,10 +1260,20 @@ def testbed():
     global single_game
 
     single_game = SnakeGameClass(pathFood)
-    with open("./src-flask-server/static/bestScore.txt", "r") as f:
-        myBestScore = int(f.read())
+    folder_path = "./src-flask-server/static/"
+    filename = "bestScore.txt"
+    file_path = os.path.join(folder_path, filename)
+
+    myBestScore = 0
+    if os.path.isfile(file_path):  # check if file exists
+        with open(file_path, "r") as f:
+            myBestScore = int(f.read())
+    else:  # create the file if it doesn't exist
+        with open(file_path, "w") as f:
+            f.write("0")
+
     single_game.bestScore = myBestScore
-    print(f"bestScore : {single_game.bestScore}")
+    # print(f"bestScore : {single_game.bestScore}")
     return render_template("testbed.html", best_score = single_game.bestScore)
 
 
