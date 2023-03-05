@@ -1426,7 +1426,7 @@ def snake():
             img = cv2.flip(img, 1)
 
             hands=[]
-            if img:            
+            if success:            
                 hands = detector.findHands(img, flipType=False)
                 img = detector.drawHands(img)
 
