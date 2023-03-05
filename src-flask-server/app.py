@@ -939,6 +939,7 @@ class MultiGameClass:
         self.check_collision = False
         self.gen = True
         self.skill_flag = False
+        self.opp_skill_flag = False
 
     # 통신 관련 변수 설정
     def set_socket(self, my_port, opp_ip, opp_port):
@@ -1022,7 +1023,7 @@ class MultiGameClass:
         if self.foodOnOff:
             self.check_snake_eating(cx, cy)
 
-        if self.opp_points:
+        if self.opp_points and self.points:
             self.dist = ((self.points[-1][1][0] - self.opp_points[-1][1][0]) ** 2 + (
                     self.points[-1][1][1] - self.opp_points[-1][1][1]) ** 2) ** 0.5
         # 할일: self.multi가 false일 때, pt_dist html에 보내기
@@ -1098,7 +1099,7 @@ class MultiGameClass:
             self.foodOnOff = False
             socketio.emit('user_ate_food', {'score': self.score})
 
-            if self.score % 10 == 0 or self.score != 0:
+            if self.score % 5 == 0 and self.score != 0:
                 self.skill_flag = True
 
     # 먹이 그려주기
@@ -1153,7 +1154,18 @@ class MultiGameClass:
         if len(pts.shape) == 3:
             pts = pts[:, 1]
         pts = pts.reshape((-1, 1, 2))
-        cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
+        
+        
+        skill_colored=False
+        if isMe:
+            skill_colored=self.skill_flag
+        else:
+            skill_colored=self.opp_skill_flag
+        
+        if skill_colored:
+            cv2.polylines(imgMain, np.int32([pts]), False, rainbow, 15)
+        else:
+            cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
 
         if points:
             cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
@@ -1354,6 +1366,8 @@ def set_food_loc(data):
     global multi
     multi.foodPoint = data['foodPoint']
     multi.opp_score = data['opp_score']
+    if multi.opp_score % 5 == 0 and multi.opp_score != 0:
+        multi.opp_skill_flag = True
     multi.foodOnOff = True
 
 
@@ -1386,6 +1400,7 @@ def snake():
         global multi
         global start
         skill_cnt = 0
+        opp_skill_cnt = 0
 
         if multi.user_number == 1:
             start_cx = 100
@@ -1436,6 +1451,13 @@ def snake():
                 if skill_cnt % 60 == 0:
                     multi.skill_flag = False
                     skill_cnt = 0
+
+            if multi.opp_skill_flag:
+                opp_skill_cnt += 1
+                if opp_skill_cnt % 60 == 0:
+                    multi.opp_skill_flag = False
+                    opp_skill_cnt = 0
+
 
             img = multi.update(img, pointIndex)
 
