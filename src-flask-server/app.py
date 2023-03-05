@@ -1229,8 +1229,8 @@ class MultiGameClass:
         for i in range(self.cut_idx):
             self.currentLength -= self.lengths[i]
         
-        if self.currentLength  < 30:
-            self.allowedLength = 30
+        if self.currentLength  < 100:
+            self.allowedLength = 100
         else:
             self.allowedLength = self.currentLength 
             
@@ -1425,8 +1425,10 @@ def snake():
             success, img = cap.read()
             img = cv2.flip(img, 1)
 
-            hands = detector.findHands(img, flipType=False)
-            img = detector.drawHands(img)
+            hands=[]
+            if img:            
+                hands = detector.findHands(img, flipType=False)
+                img = detector.drawHands(img)
 
             pointIndex = []
 
