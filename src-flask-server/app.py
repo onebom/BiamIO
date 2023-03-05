@@ -431,9 +431,12 @@ class SnakeGameClass:
         line_norm = np.linalg.norm(pt_a - head_pt).astype(int)
         points_on_line = np.linspace(pt_a, head_pt, line_norm)
         for p in points_on_line:
-            # print(p)
-            if self.maze_map[int(p[1]), int(p[0])] == 1:
-                return True
+            try:
+                if self.maze_map[int(p[1]), int(p[0])] == 1:
+                    return True
+            except:
+                pass
+                    
         return False
 
     # maze 초기화
@@ -1426,10 +1429,11 @@ def snake():
             success, img = cap.read()
             img = cv2.flip(img, 1)
 
-            hands=[]
-            if success:            
+            try:            
                 hands = detector.findHands(img, flipType=False)
                 img = detector.drawHands(img)
+            except:
+                hands=[]
 
             pointIndex = []
 
