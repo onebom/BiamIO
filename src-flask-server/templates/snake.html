@@ -84,11 +84,6 @@
         <div id="ambient" class="ambient"></div>
         <div class="cam-container">
             <img class="cam-feed" id="snake_video" src=" {{ url_for('snake') }} " onload="showImage()">
-            <script>
-                function showImage() {
-                    document.getElementById("snake_video").style.display = "block";
-                }
-            </script>
         </div>
         <div class="cam-alt-container">
             <img class="cam-feed-alt" src="{{ url_for('static', filename= 'images/placeholder.png') }}">
@@ -96,76 +91,81 @@
         <div class="countdown-container">
             <div class="countdown countdown--wide" id="countdown">
                 <div class="countdown__fill" id="ticker"></div>
-                <div class="countdown__digit" id="seconds">0</div>
+                <div class="countdown__digit" id="seconds">READY</div>
             </div>
         </div>
         <script>
             const signalSound = new Audio("{{ url_for('static', filename= 'bgm/countdown.mp3') }}");
             const ct = document.querySelector('.countdown-container');
-            signalSound.play()
-            setTimeout(function () {
-                ct.classList.add('hidden');
-            }, 3500);
-        </script>
-        <script>
-            function Timer(duration, element) {
-                var self = this;
-                this.duration = duration;
-                this.element = element;
-                this.running = false;
 
-                this.els = {
-                    ticker: document.getElementById('ticker'),
-                    seconds: document.getElementById('seconds'),
-                };
-            }
+            function showImage() {
+                document.getElementById("snake_video").style.display = "block";
 
-            Timer.prototype.start = function () {
-                var self = this;
-                var start = null;
-                this.running = true;
-                var remainingSeconds = this.els.seconds.textContent = this.duration / 1000;
+                signalSound.play()
 
-                function draw(now) {
-                    if (!start) start = now;
-                    var diff = now - start;
-                    var newSeconds = Math.ceil((self.duration - diff) / 1000);
+                setTimeout(function () {
+                    ct.classList.add('hidden');
+                }, 3500);
 
-                    if (diff <= self.duration) {
-                        self.els.ticker.style.height = 100 - (diff / self.duration * 100) + '%';
+                function Timer(duration, element) {
+                    var self = this;
+                    this.duration = duration;
+                    this.element = element;
+                    this.running = false;
 
-                        if (newSeconds != remainingSeconds) {
-                            self.els.seconds.textContent = newSeconds;
-                            remainingSeconds = newSeconds;
+                    this.els = {
+                        ticker: document.getElementById('ticker'),
+                        seconds: document.getElementById('seconds'),
+                    };
+                }
+
+                Timer.prototype.start = function () {
+                    var self = this;
+                    var start = null;
+                    this.running = true;
+                    var remainingSeconds = this.els.seconds.textContent = this.duration / 1000;
+
+                    function draw(now) {
+                        if (!start) start = now;
+                        var diff = now - start;
+                        var newSeconds = Math.ceil((self.duration - diff) / 1000);
+
+                        if (diff <= self.duration) {
+                            self.els.ticker.style.height = 100 - (diff / self.duration * 100) + '%';
+
+                            if (newSeconds != remainingSeconds) {
+                                self.els.seconds.textContent = newSeconds;
+                                remainingSeconds = newSeconds;
+                            }
+
+                            self.frameReq = window.requestAnimationFrame(draw);
+                        } else {
+                            //self.running = false;
+                            self.els.seconds.textContent = "GO";
+                            self.els.ticker.style.height = '0%';
+                            self.element.classList.add('countdown--ended');
                         }
+                    };
 
-                        self.frameReq = window.requestAnimationFrame(draw);
-                    } else {
-                        //self.running = false;
-                        self.els.seconds.textContent = "GO";
-                        self.els.ticker.style.height = '0%';
-                        self.element.classList.add('countdown--ended');
-                    }
-                };
+                    self.frameReq = window.requestAnimationFrame(draw);
+                }
 
-                self.frameReq = window.requestAnimationFrame(draw);
+                Timer.prototype.reset = function () {
+                    this.running = false;
+                    window.cancelAnimationFrame(this.frameReq);
+                    this.els.seconds.textContent = this.duration / 1000;
+                    this.els.ticker.style.height = null;
+                    this.element.classList.remove('countdown--ended');
+                }
+
+                Timer.prototype.setDuration = function (duration) {
+                    this.duration = duration;
+                    this.els.seconds.textContent = this.duration / 1000;
+                }
+
+                var timer = new Timer(3000, document.getElementById('countdown'));
+                timer.start();
             }
-
-            Timer.prototype.reset = function () {
-                this.running = false;
-                window.cancelAnimationFrame(this.frameReq);
-                this.els.seconds.textContent = this.duration / 1000;
-                this.els.ticker.style.height = null;
-                this.element.classList.remove('countdown--ended');
-            }
-
-            Timer.prototype.setDuration = function (duration) {
-                this.duration = duration;
-                this.els.seconds.textContent = this.duration / 1000;
-            }
-
-            var timer = new Timer(3000, document.getElementById('countdown'));
-            timer.start();
         </script>
     </div>
     <div class="debug-wrapper" style="visibility: hidden;">
