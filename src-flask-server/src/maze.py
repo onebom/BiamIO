@@ -193,7 +193,6 @@ class Maze(object):
             elif (rng_side == 4):  # Left side
                 rng_entry_exit = (0, random.randint(0, self.num_cols - 1))
 
-        print(rng_side, ":", rng_entry_exit)
         return rng_entry_exit, rng_side  # Return entry/exit that is different from exit/entry
 
     def generate_maze(self, algorithm, start_coor=(0, 0)):

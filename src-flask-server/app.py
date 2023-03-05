@@ -1721,7 +1721,7 @@ def maze_play():
             remain_time = int(game.timer_end - time.time())  # 할일: html에 보내기
             # print(f"remain_time: {remain_time}")
             socketio.emit('maze_timer', {"minutes": remain_time // 60, "seconds": remain_time % 60})
-            print(remain_time)
+
             if remain_time < 1:
                 print("game ended")
                 socketio.emit('gameover')
