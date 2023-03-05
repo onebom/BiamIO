@@ -93,6 +93,7 @@ vfx_2_path = './src-flask-server/static/bgm/eatFood.wav'
 vfx_3_path = './src-flask-server/static/bgm/boost.wav'
 vfx_4_path = './src-flask-server/static/bgm/gameOver.wav'
 vfx_5_path = './src-flask-server/static/bgm/stageWin.wav'
+vfx_6_path = './src-flask-server/static/bgm/warning.wav'
 
 
 def play_bgm():
@@ -1091,8 +1092,8 @@ class MultiGameClass:
         rx, ry = self.foodPoint
         if (rx - (self.wFood // 2) < cx < rx + (self.wFood // 2)) and (
                 ry - (self.hFood // 2) < cy < ry + (self.hFood // 2)):
-            # sfx_thread = threading.Thread(target=play_selected_sfx, args=(vfx_2_path,))
-            # sfx_thread.start()
+            sfx_thread = threading.Thread(target=play_selected_sfx, args=(vfx_2_path,))
+            sfx_thread.start()
             self.allowedLength += 50
             self.score += 1
 
@@ -1101,6 +1102,8 @@ class MultiGameClass:
 
             if self.score % 5 == 0 and self.score != 0:
                 self.skill_flag = True
+                sfx_thread = threading.Thread(target=play_selected_sfx, args=(vfx_3_path,))
+                sfx_thread.start()
 
     # 먹이 그려주기
     def draw_Food(self, imgMain):
@@ -1368,6 +1371,9 @@ def set_food_loc(data):
     multi.opp_score = data['opp_score']
     if multi.opp_score % 5 == 0 and multi.opp_score != 0:
         multi.opp_skill_flag = True
+        sfx_thread = threading.Thread(target=play_selected_sfx, args=(vfx_6_path,))
+        sfx_thread.start()
+
     multi.foodOnOff = True
 
 
