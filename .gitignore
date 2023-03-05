@@ -3,3 +3,4 @@
 *.pyc
 /dist/
 /build
+/src-flask-server/static/bestScore.txt
