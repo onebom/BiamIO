@@ -42,11 +42,16 @@
             <p>최고 점수 :&nbsp;</p>
             <p id="best_score">0</p>
         </div>
-        <div class="timer">
+        <div id = "timer" class="timer">
             <p>남은 시간 :&nbsp;</p>
             <p id="test_timer">0</p>
             <p>초</p>
         </div>
+        <script>
+            var isRed = false;
+            var blinkInterval = null;
+            var warningSound = new Audio("{{ url_for('static', filename= 'bgm/beep.mp3') }}");
+        </script>
     </div>
     <div class="gamesection-container">
         <div id="ambient" class="ambient"></div>
@@ -220,6 +225,23 @@
 
     client_socket.on("test_timer", function (data) {
         $("#test_timer").text(data["seconds"]);
+        if (data["seconds"] < 6) {
+            warningSound.play();
+            if (!blinkInterval) {
+                blinkInterval = setInterval(function () {
+                    if (isRed) {
+                        $("#timer").css("color", "white"); // Change the background color to white
+                    } else {
+                        $("#timer").css("color", "red"); // Change the background color to red
+                    }
+                    isRed = !isRed; // toggle the background color
+                }, 500); // blink every half second
+            }
+        } else {
+            clearInterval(blinkInterval); // clear the interval if the timer is no longer less than 3
+            blinkInterval = null; // reset the interval variable
+            $("#timer").css("color", "white"); // Reset the background color to its default value
+        }
     });
     client_socket.on("game_data_for_debug", function (data) {
         $("#my_score").text(data["score"]);
