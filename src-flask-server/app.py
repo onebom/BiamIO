@@ -560,10 +560,10 @@ class SnakeGameClass:
         menu_type = 0
         # hover event emit 할 필요 TODO
         if 490 <= cx <= 790:
-            if 70 <= cy <= 170:  # menu_type: 1, MULTI PLAY
-                menu_type = 1
-            elif 310 <= cy <= 410:  # menu_type: 2, SINGLE PLAY
+            if 70 <= cy <= 170:  # menu_type: 2, SINGLE PLAY
                 menu_type = 2
+            elif 310 <= cy <= 410:  # menu_type: 1, MULTI PLAY
+                menu_type = 1
             elif 550 <= cy <= 650:  # menu_type: 3, MAZE RUNNER
                 menu_type = 3
 

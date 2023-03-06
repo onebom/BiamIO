@@ -5,7 +5,6 @@
 .draggable {
     display: none;
     position: fixed;
-    top: 150px;
     margin-right: auto;
     margin-left: auto;
     z-index: 100 !important;
