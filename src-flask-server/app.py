@@ -979,11 +979,11 @@ class MultiGameClass:
         test_code = str(sid)
 
         for i in range(50):
-            if i % 2 == 0:
+            if i % 2 == 0 and b != 0:
                 test_code = str(sid)
             self.sock.sendto(test_code.encode(), self.opp_addr)
             try:
-                data, _ = self.sock.recvfrom(600)
+                data, _ = self.sock.recvfrom(100)
                 test_code = data.decode()
                 if test_code == str(sid):
                     b += 1
@@ -992,6 +992,11 @@ class MultiGameClass:
 
         if a != 50 and b != 0:
             self.is_udp = True
+
+        self.sock.settimeout(0.01)
+        for _ in range(100):
+            self.sock.recv(0)
+        self.sock.settimeout(0)
 
         print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
         socketio.emit('NetworkMode', {'UDP': self.is_udp})
@@ -1148,11 +1153,14 @@ class MultiGameClass:
                 self.opp_points = eval(decode_data)
                 self.udp_count = 0
             else:
-                test_code = decode_data
-                self.sock.sendto(test_code.encode(), self.opp_addr)
+                self.udp_count = 0
         except socket.timeout:
             self.udp_count += 1
             if self.udp_count > 25:
+                socketio.emit('opponent_escaped')
+        except BlockingIOError:
+            self.udp_count += 1
+            if self.udp_count > 40:
                 socketio.emit('opponent_escaped')
 
     # 뱀 그려주기
@@ -1372,11 +1380,10 @@ def set_address(data):
 
     opp_ip = data['ip_addr']
     opp_port = data['port']
-    sid = request.sid
+    sid = multi.user_number
     
-    socketio.emit('game_ready')
-    # multi.set_socket(MY_PORT, opp_ip, opp_port)
-    # multi.test_connect(sid)
+    multi.set_socket(MY_PORT, opp_ip, opp_port)
+    multi.test_connect(sid)
 
 
 # socketio로 받은 상대방 정보
