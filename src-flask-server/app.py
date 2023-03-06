@@ -1013,11 +1013,10 @@ class MultiGameClass:
 
         if b != 0:
             self.is_udp = True
-
-        self.sock.settimeout(0.01)
-        for _ in range(50):
-            self.sock.recv(0)
-        self.sock.settimeout(0)
+            self.sock.settimeout(0.01)
+            for _ in range(50):
+                self.sock.recv(0)
+            self.sock.settimeout(0)
 
         print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
         socketio.emit('NetworkMode', {'UDP': self.is_udp})
