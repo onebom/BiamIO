@@ -1,0 +1,42 @@
+@font-face {
+    font-family: 'DungGeunMo';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+.swal2-title {
+    font-size: 68px;
+    font-family: 'Press Start 2P', cursive;
+    text-shadow: -5px -5px 0 black,
+    5px -5px 0 black,
+    -5px 5px 0 black,
+    5px 5px 0 black;
+}
+.swal2-popup {
+    box-shadow: inset 0 0 15px black;
+    background-color: #AAAAAA;
+    color: #00FF00;
+    position: fixed;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    top: 160px;
+    width: 1280px;
+    height: 720px;
+    border-radius: 16px;
+    font-size: 32px;
+    font-family: 'DungGeunMo';
+    z-index: 100 !important;
+    text-shadow: -1px -1px 0 black,
+    1px -1px 0 black,
+    -1px 1px 0 black,
+    1px 1px 0 black;
+
+}
+.swal2-timer-progress-bar {
+    background-color: #00FF00;
+}
+.swal2-loader {
+    border-top-color: #00FF00;
+    border-bottom-color: #00FF00;
+}

@@ -16,6 +16,7 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/testbed.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/sweetalert.css') }}">
 </head>
 
 <body>
@@ -196,10 +197,20 @@
         gameOver.play()
         Swal.fire({
             title: "Game Over!",
-            text: "Starting from the green block, navigate through the maze and reach the red block.",
-            icon: "error",
-            confirmButtonText: "OK",
-            timer: 5000
+            html: "초록색 블럭에서 시작하여 미로를 통과하여 빨간색 블럭에 도착하세요!",
+            imageUrl: "{{ url_for('static', filename= 'single_maze.png') }}",
+            timer: 5000,
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading()
+                const b = Swal.getHtmlContainer().querySelector('b')
+                timerInterval = setInterval(() => {
+                    b.textContent = Swal.getTimerLeft()
+                }, 100)
+            },
+            willClose: () => {
+                clearInterval(timerInterval)
+            }
         }).then((result) => {
             window.location.href = "/index";
         });

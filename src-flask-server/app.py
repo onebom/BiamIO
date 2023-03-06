@@ -348,7 +348,6 @@ class SnakeGameClass:
         self.passMid = False
         self.maze_img = np.array([0])
         self.dist = 500
-        self.maze_wait_flag = True
 
         self.menu_type = 0
         self.menu_time = 0
@@ -457,7 +456,7 @@ class SnakeGameClass:
         self.maxspeed = math.hypot(1280, 720) / 10
         self.passStart = False
         self.passMid = False
-        self.timer_end = time.time() + 90
+        self.timer_end = time.time() + 91
 
     def menu_initialize(self):
         global bot_flag
@@ -1203,7 +1202,7 @@ class MultiGameClass:
         if isMe and handPoints:
             for p in np.linspace(self.previousHead, handPoints, 10):
                 cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
-                
+
         # --- skill flag에 따라 색 바꾸기 --- 
         skill_colored = False
         if isMe:
@@ -1213,15 +1212,14 @@ class MultiGameClass:
 
         if skill_colored:
             cv2.polylines(imgMain, np.int32([pts]), False, rainbow, 15)
-            cv2.arrowedLine(imgMain, np.int32([pts[-2]]), np.int32([pts[-1]]), rainbow, 15) 
-            
+            # cv2.arrowedLine(imgMain, np.int32([pts[-2]]), np.int32([pts[-1]]), rainbow, 15)
+
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
-            if points:
-                cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
-                cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
 
-
+        if points:
+            cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
+            cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
 
         return imgMain
 
@@ -1755,8 +1753,8 @@ def maze_play():
 
         game.multi = False
         game.maze_initialize()
-        if not game.maze_wait_flag:
-            game.timer_end = time.time() + 90  # 1분 30초 시간제한
+
+        game.timer_end = time.time() + 91  # 1분 30초 시간제한
 
         while True:
             success, img = cap.read()
