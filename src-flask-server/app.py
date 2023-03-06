@@ -1448,6 +1448,7 @@ def snake():
     def generate():
         global multi
         global start
+        start = False
         skill_cnt = 0
         opp_skill_cnt = 0
 
