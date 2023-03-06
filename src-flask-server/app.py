@@ -484,6 +484,23 @@ class SnakeGameClass:
                     'bot_velocityX': random.choice([-1, 1]),
                     'bot_velocityY': random.choice([-1, 1])}
 
+    def draw_triangle(self, point, point2):
+        x,y=point
+        x2,y2=point2
+        triangle_size = 30
+        half_triangle_size = int(triangle_size / 2)
+        
+        triangle = [(x, y - half_triangle_size),(x - half_triangle_size, y + half_triangle_size),(x + half_triangle_size, y + half_triangle_size)]
+
+        angle = math.atan2(y2-y,x2-x)
+        r_m = [
+                [math.cos(angle), -math.sin(angle)],
+                [math.sin(angle), math.cos(angle)]
+            ]
+        rotated_triangle = [[vertex[0]*r_m[0][0]+vertex[1]*r_m[0][1], vertex[0]*r_m[1][0]+vertex[1]*r_m[1][1]] for vertex in triangle]
+        triangle_pts = np.array(rotated_triangle, np.int32).reshape((-1,1,2))
+        return triangle_pts
+
     def draw_snakes(self, imgMain, points, handPoints, isMe):
         global bot_flag
 
@@ -525,8 +542,10 @@ class SnakeGameClass:
                 cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
 
         if points:
-            cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
-            cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
+            # cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
+            # cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
+            triangle_pts=self.draw_triangle(points[-1][1],points[-1][0])
+            cv2.fillPoly(imgMain, [triangle_pts], rainbow)
 
         return imgMain
 
@@ -1174,6 +1193,23 @@ class MultiGameClass:
             if self.udp_count > 40:
                 socketio.emit('opponent_escaped')
 
+    def draw_triangle(self, point, point2):
+        x,y=point
+        x2,y2=point2
+        triangle_size = 30
+        half_triangle_size = int(triangle_size / 2)
+        
+        triangle = [(x, y - half_triangle_size),(x - half_triangle_size, y + half_triangle_size),(x + half_triangle_size, y + half_triangle_size)]
+
+        angle = math.atan2(y2-y,x2-x)
+        r_m = [
+                [math.cos(angle), -math.sin(angle)],
+                [math.sin(angle), math.cos(angle)]
+            ]
+        rotated_triangle = [[vertex[0]*r_m[0][0]+vertex[1]*r_m[0][1], vertex[0]*r_m[1][0]+vertex[1]*r_m[1][1]] for vertex in triangle]
+        triangle_pts = np.array(rotated_triangle, np.int32).reshape((-1,1,2))
+        return triangle_pts
+    
     # 뱀 그려주기
     def draw_snakes(self, imgMain, points, handPoints, isMe):
 
@@ -1217,7 +1253,9 @@ class MultiGameClass:
 
         if skill_colored:
             cv2.polylines(imgMain, np.int32([pts]), False, rainbow, 15)
-            cv2.arrowedLine(imgMain, np.int32([pts[-2]]), np.int32([pts[-1]]), rainbow, 15) 
+            triangle_pts=self.draw_triangle(pts[-2],pts[-1])
+            cv2.fillPoly(imgMain, [triangle_pts], rainbow)
+            # cv2.arrowedLine(imgMain, np.int32([pts[-2]]), np.int32([pts[-1]]), rainbow, 15) 
             
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
