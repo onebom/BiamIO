@@ -177,7 +177,7 @@ class Maze(object):
                 if (used_rng_side % 2 == rng_side % 2) and (used_rng_side != rng_side):
                     break
             else:
-                if rng_side != 3 and rng_entry_exit != used_entry_exit:
+                if rng_side == 1:
                     break
             rng_side = random.randint(1, 4)
 

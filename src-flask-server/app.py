@@ -1199,6 +1199,11 @@ class MultiGameClass:
             pts = pts[:, 1]
         pts = pts.reshape((-1, 1, 2))
 
+        # --- head point와 hands point 이어주기 ---
+        if isMe and handPoints:
+            for p in np.linspace(self.previousHead, handPoints, 10):
+                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
+                
         # --- skill flag에 따라 색 바꾸기 --- 
         skill_colored = False
         if isMe:
@@ -1208,17 +1213,15 @@ class MultiGameClass:
 
         if skill_colored:
             cv2.polylines(imgMain, np.int32([pts]), False, rainbow, 15)
+            cv2.arrowedLine(imgMain, np.int32([pts[-2]]), np.int32([pts[-1]]), rainbow, 15) 
+            
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
+            if points:
+                cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
+                cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
 
-        # --- head point와 hands point 이어주기 ---
-        if isMe and handPoints:
-            for p in np.linspace(self.previousHead, handPoints, 10):
-                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
 
-        if points:
-            cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
-            cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
 
         return imgMain
 
