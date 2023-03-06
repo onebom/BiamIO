@@ -1010,7 +1010,6 @@ class MultiGameClass:
                 except socket.timeout:
                     a += 1
         
-
         if b != 0:
             self.is_udp = True
             self.sock.settimeout(0.01)
