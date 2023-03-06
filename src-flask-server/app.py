@@ -795,13 +795,7 @@ class SnakeGameClass:
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
         self.score = 0
-
-        if user_number == 1:
-            self.previousHead = 100, 180
-        elif user_number == 2:
-            self.previousHead = 1180, 540
-        else:
-            self.previousHead = 0, 360
+        self.previousHead = 0, 360
         user_move = False
         game_over_for_debug = True
         socketio.emit('gameover')
