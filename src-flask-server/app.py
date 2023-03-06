@@ -965,13 +965,13 @@ class MultiGameClass:
 
     # udp로 통신할지 말지
     def test_connect(self, sid):
-        a = 0
-        b = 0
+        missing_cnt = 0
+        self_sid_cnt = 0
         test_code = str(sid)
 
         if test_code == "1":
             for i in range(50):
-                if i % 3 == 0 and b == 0:
+                if i % 3 == 0 and self_sid_cnt == 0:
                     test_code = '1'
                 self.sock.sendto(test_code.encode(), self.opp_addr)
                 try:
@@ -979,15 +979,15 @@ class MultiGameClass:
                     test_code = data.decode()
                     if test_code == str(sid):
                         test_code = '2'
-                        b += 1
-                        if b > 3:
+                        self_sid_cnt += 1
+                        if self_sid_cnt > 3:
                             break
                 except socket.timeout:
-                    a += 1
+                    missing_cnt += 1
 
         elif test_code == "2":
             for i in range(50):
-                if i % 3 == 0 and b == 0:
+                if i % 3 == 0 and self_sid_cnt == 0:
                     test_code = '2'
                 self.sock.sendto(test_code.encode(), self.opp_addr)
                 try:
@@ -995,20 +995,22 @@ class MultiGameClass:
                     test_code = data.decode()
                     if test_code == str(sid):
                         test_code = '1'
-                        b += 1
-                        if b > 3:
+                        self_sid_cnt += 1
+                        if self_sid_cnt > 3:
                             break
                 except socket.timeout:
-                    a += 1
+                    missing_cnt += 1
 
-        if b != 0:
+        # 상대로 부터 받은 본인 Player Number 카운터가 1보다 클때 UDP 연결
+        if self_sid_cnt > 1:
             self.is_udp = True
             self.sock.settimeout(0.01)
+            # Flushing socket buffer
             for _ in range(50):
                 self.sock.recv(0)
             self.sock.settimeout(0)
 
-        print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
+        print(f"connection MODE : {self.is_udp} / missing_cnt = {missing_cnt}, self_sid_cnt = {self_sid_cnt}")
         socketio.emit('NetworkMode', {'UDP': self.is_udp})
         socketio.emit('game_ready')
 
