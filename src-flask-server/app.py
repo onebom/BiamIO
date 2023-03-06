@@ -479,6 +479,7 @@ class SnakeGameClass:
                     'bot_velocityY': random.choice([-1, 1])}
 
     def draw_snakes(self, imgMain, points, score, isMe):
+        global bot_flag
 
         bodercolor = cyan
         maincolor = red
@@ -505,7 +506,14 @@ class SnakeGameClass:
         if len(pts.shape) == 3:
             pts = pts[:, 1]
         pts = pts.reshape((-1, 1, 2))
-        cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
+
+        # Single Mod Collision Padding Design
+        if bot_flag and isMe:
+            cv2.polylines(imgMain, np.int32([pts]), False, red, 25)
+            cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
+        else:
+            cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
+
 
         if points:
             cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
@@ -636,6 +644,8 @@ class SnakeGameClass:
         socketio.emit('h2h_distance', self.dist)
 
         opp_bodys_collsion = opp_bodys
+
+        # Single Play Self Collision
         if bot_flag:
             opp_bodys_collsion = opp_bodys + self.points[:-3]
 
@@ -1574,7 +1584,7 @@ def test():
         single_game.global_intialize()
         single_game.testbed_initialize()
         max_time_end = time.time() + 4
-        cx, cy = 200, 360
+        cx, cy = 100, 360
         bot_flag = True
         user_move = False
         single_game.foodtimeLimit = time.time() + 15  # 10초 제한(앞 5초는 카운트)
@@ -1586,7 +1596,7 @@ def test():
             img = detector.drawHands(img)
 
             if not user_move:
-                cx += 1
+                cx += 5
                 pointIndex = [cx, cy]
             else:
                 if hands:
