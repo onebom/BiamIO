@@ -30,7 +30,9 @@
     }, false);
 </script>
 
-<div class = "retrogrid"><canvas></canvas></div>
+<div class="retrogrid">
+    <canvas></canvas>
+</div>
 
 
 <section class="wrapper">
@@ -44,7 +46,7 @@
             <p>BEST :</p>
             <p id="best_score">0</p>
         </div>
-        <div id = "timer" class="timer">
+        <div id="timer" class="timer">
             <p>TIME LEFT :</p>
             <p id="test_timer">00</p>
             <p>s</p>
@@ -219,7 +221,7 @@
 <script>
     let best_score = "{{best_score}}"
     $("#best_score").text(best_score)
-    
+
     var client_socket = io.connect(
         "http://" + document.domain + ":" + location.port
     );

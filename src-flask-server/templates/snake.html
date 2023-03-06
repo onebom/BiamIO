@@ -329,8 +329,8 @@
     server_socket.on('opponent_escaped', function () {
         client_socket.emit("gen_break");
         Swal.fire({
-            title: "Disconnected.",
-            text: "Opponent lefted!!",
+            title: "Player 2 Left!!",
+            text: "Opponent left the game.",
             icon: "error",
             confirmButtonText: "OK",
             timer: 3000
@@ -342,8 +342,8 @@
     client_socket.on('opponent_escaped', function () {
         client_socket.emit("gen_break");
         Swal.fire({
-            title: "Disconnected.",
-            text: "Opponent lefted!!",
+            title: "Player 2 Left!!",
+            text: "Opponent left the game.",
             icon: "error",
             confirmButtonText: "OK",
             timer: 3000
@@ -360,7 +360,7 @@
         if (data['result']) { // 이긴 경우
             Swal.fire({
                 title: "You Win!",
-                {#text: "당신이 이겼습니다 !",#}
+                text: "Congratulation!",
                 icon: "success",
                 confirmButtonText: "OK",
                 timer: 3000
@@ -370,7 +370,7 @@
         } else { // 진 경우
             Swal.fire({
                 title: "You Lost!",
-                {#text: "당신이 졌습니다..",#}
+                text: "Try again...",
                 icon: "error",
                 confirmButtonText: "OK",
                 timer: 3000
