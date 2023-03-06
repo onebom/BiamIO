@@ -978,19 +978,38 @@ class MultiGameClass:
         b = 0
         test_code = str(sid)
 
-        for i in range(50):
-            if i % 2 == 0 and b != 0:
-                test_code = str(sid)
-            self.sock.sendto(test_code.encode(), self.opp_addr)
-            try:
-                data, _ = self.sock.recvfrom(100)
-                test_code = data.decode()
-                if test_code == str(sid):
-                    b += 1
-            except socket.timeout:
-                a += 1
+        if test_code == "1":
+            for i in range(50):
+                if i % 3 == 0 and b == 0:
+                    test_code = '1'
+                self.sock.sendto(test_code.encode(), self.opp_addr)
+                try:
+                    data, _ = self.sock.recvfrom(100)
+                    test_code = data.decode()
+                    if test_code == str(sid):
+                        test_code = '2'
+                        b += 1
+                except socket.timeout:
+                    a += 1
+    
+        elif test_code == "2":
+            for i in range(50):
+                if i % 3 == 0 and b == 0:
+                    test_code = '2'
+                self.sock.sendto(test_code.encode(), self.opp_addr)
+                try:
+                    data, _ = self.sock.recvfrom(100)
+                    test_code = data.decode()
+                    if test_code == str(sid):
+                        test_code = '1'
+                        b += 1
+                        if b > 5:
+                            break
+                except socket.timeout:
+                    a += 1
+        
 
-        if a != 50 and b != 0:
+        if b != 0:
             self.is_udp = True
 
         self.sock.settimeout(0.01)
