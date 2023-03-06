@@ -88,12 +88,13 @@ start = False
 bgm_play_obj = None
 # SETTING BGM PATH
 bgm_path = './src-flask-server/static/bgm/main.wav'
-vfx_1_path = './src-flask-server/static/bgm/curSelect.wav'
-vfx_2_path = './src-flask-server/static/bgm/eatFood.wav'
-vfx_3_path = './src-flask-server/static/bgm/skill.wav'
-vfx_4_path = './src-flask-server/static/bgm/gameOver.wav'
-vfx_5_path = './src-flask-server/static/bgm/gameWin.wav'
-vfx_6_path = './src-flask-server/static/bgm/warning.wav'
+sfx_1_path = './src-flask-server/static/bgm/curSelect.wav'
+sfx_2_path = './src-flask-server/static/bgm/eatFood.wav'
+sfx_3_path = './src-flask-server/static/bgm/skill.wav'
+sfx_4_path = './src-flask-server/static/bgm/gameOver.wav'
+sfx_5_path = './src-flask-server/static/bgm/gameWin.wav'
+sfx_6_path = './src-flask-server/static/bgm/warning.wav'
+sfx_7_path = './src-flask-server/static/bgm/dead.wav'
 
 
 def play_bgm():
@@ -652,6 +653,8 @@ class SnakeGameClass:
         if self.isCollision(self.points[-1], opp_bodys_collsion):
             global user_move
             global gameover_flag
+            sfx_thread = threading.Thread(target=play_selected_sfx, args=(sfx_7_path,))
+            sfx_thread.start()
             gameover_flag = True
             if user_move:
                 self.execute()
@@ -760,7 +763,7 @@ class SnakeGameClass:
         rx, ry = self.foodPoint
         if (rx - (self.wFood // 2) < cx < rx + (self.wFood // 2)) and (
                 ry - (self.hFood // 2) < cy < ry + (self.hFood // 2)):
-            sfx_thread = threading.Thread(target=play_selected_sfx, args=(vfx_2_path,))
+            sfx_thread = threading.Thread(target=play_selected_sfx, args=(sfx_2_path,))
             sfx_thread.start()
             self.allowedLength += 50
             self.score += 1
@@ -1017,6 +1020,8 @@ class MultiGameClass:
                     socketio.emit("opp_cut_idx", {"cut_idx": coll_bool})
                     self.skill_flag = False
                 else:
+                    sfx_thread = threading.Thread(target=play_selected_sfx, args=(sfx_7_path,))
+                    sfx_thread.start()
                     self.execute()
 
         return imgMain
@@ -1109,7 +1114,7 @@ class MultiGameClass:
         rx, ry = self.foodPoint
         if (rx - (self.wFood // 2) < cx < rx + (self.wFood // 2)) and (
                 ry - (self.hFood // 2) < cy < ry + (self.hFood // 2)):
-            sfx_thread = threading.Thread(target=play_selected_sfx, args=(vfx_2_path,))
+            sfx_thread = threading.Thread(target=play_selected_sfx, args=(sfx_2_path,))
             sfx_thread.start()
             self.allowedLength += 50
             self.score += 1
@@ -1119,7 +1124,7 @@ class MultiGameClass:
 
             if self.score % 5 == 0 and self.score != 0:
                 self.skill_flag = True
-                sfx_thread = threading.Thread(target=play_selected_sfx, args=(vfx_3_path,))
+                sfx_thread = threading.Thread(target=play_selected_sfx, args=(sfx_3_path,))
                 sfx_thread.start()
 
     # 먹이 그려주기
@@ -1393,7 +1398,7 @@ def set_food_loc(data):
     multi.opp_score = data['opp_score']
     if multi.opp_score % 5 == 0 and multi.opp_score != 0:
         multi.opp_skill_flag = True
-        sfx_thread = threading.Thread(target=play_selected_sfx, args=(vfx_6_path,))
+        sfx_thread = threading.Thread(target=play_selected_sfx, args=(sfx_6_path,))
         sfx_thread.start()
 
     multi.foodOnOff = True
