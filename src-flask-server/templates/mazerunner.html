@@ -35,9 +35,9 @@
     <div class="hud-top">
         <div class="timer" style="width: 100%;">
             <p>TIME LEFT:&nbsp;</p>
-            <p id="maze_min">0</p>
+            <p id="maze_min">1</p>
             <p>'</p>
-            <p id="maze_sec">0</p>
+            <p id="maze_sec">30</p>
             <p>"</p>
         </div>
     </div>
@@ -90,19 +90,19 @@
     </div>
 </section>
 
-<script>
-    const ambient = document.querySelector('.ambient');
-
-    setInterval(() => {
-        if (ambient.style.backgroundColor === 'rgb(0, 255, 0)') {
-            ambient.style.backgroundColor = 'rgb(255, 0, 0)';
-        } else if (ambient.style.backgroundColor === 'rgb(255, 0, 0)') {
-            ambient.style.backgroundColor = 'rgb(0, 0, 255)';
-        } else {
-            ambient.style.backgroundColor = 'rgb(0, 255, 0)';
-        }
-    }, 1000);
-</script>
+{#<script>#}
+{#    const ambient = document.querySelector('.ambient');#}
+{##}
+{#    setInterval(() => {#}
+{#        if (ambient.style.backgroundColor === 'rgb(0, 255, 0)') {#}
+{#            ambient.style.backgroundColor = 'rgb(255, 0, 0)';#}
+{#        } else if (ambient.style.backgroundColor === 'rgb(255, 0, 0)') {#}
+{#            ambient.style.backgroundColor = 'rgb(0, 0, 255)';#}
+{#        } else {#}
+{#            ambient.style.backgroundColor = 'rgb(0, 255, 0)';#}
+{#        }#}
+{#    }, 1000);#}
+{#</script>#}
 
 <script>
     const accordions = document.querySelectorAll('.draggable');
@@ -149,8 +149,20 @@
     var server_socket = io.connect("http://dlsrks99.site:8080");
 
     client_socket.on("maze_timer", function (data) {
-        $("#maze_min").text(data["minutes"]);
-        $("#maze_sec").text(data["seconds"]);
+        var remain_time= data["remain_time"]
+        var minutes = Math.floor(remain_time / 60);
+        var seconds = remain_time % 60;
+        $("#maze_min").text(minutes);
+        $("#maze_sec").text(seconds);
+        const ambient = document.querySelector('.ambient');
+
+        if (remain_time > 60) {
+            ambient.style.backgroundColor = 'rgb(0, 255, 0)';
+        } else if (remain_time >= 30 && remain_time <= 60) {
+            ambient.style.backgroundColor = 'rgb(255, 255, 0)';
+        } else {
+            ambient.style.backgroundColor = 'rgb(255, 0, 0)';
+        }
     });
 
     client_socket.on("game_data", function (data) {
