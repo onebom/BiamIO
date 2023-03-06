@@ -12,6 +12,9 @@
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
     <script>
+        const modem = new Audio("{{ url_for('static', filename= 'bgm/modem.mp3') }}");
+        const connected_alert = new Audio("{{ url_for('static', filename= 'bgm/connect.mp3') }}");
+
         $(document).ready(function () {
         // Connect to the server
         // var socket = io.connect('http://krafton604.iptime.org');
@@ -23,6 +26,8 @@
         });
 
         server_socket.on('waiting', function (data) {
+            modem.play()
+            $('#matching').css("display","block");
             console.log("waiting...")
             $("#isMatched").text("waiting...");
         });
@@ -91,6 +96,10 @@
 <div class="match-debug" style="z-index: 20; position: absolute; left: 320px; bottom: 15px; visibility: hidden;">
     <h2 id="isMatched">Matching Status</h2>
     <h2 id="alarm">USER ID</h2>
+</div>
+
+<div id = "matching" style="display: none">
+    <img src="{{ url_for('static', filename= 'images/catrolling.gif') }}">
 </div>
 
 <script>

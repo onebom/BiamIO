@@ -146,7 +146,7 @@
 </script>
 
 <script>
-    var warningSound = new Audio("{{ url_for('static', filename= 'bgm/beep.mp3') }}");
+    const warningSound = new Audio("{{ url_for('static', filename= 'bgm/beep.mp3') }}");
 
     var client_socket = io.connect(
         "http://" + document.domain + ":" + location.port
