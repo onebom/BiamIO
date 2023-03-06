@@ -348,6 +348,7 @@ class SnakeGameClass:
         self.passMid = False
         self.maze_img = np.array([0])
         self.dist = 500
+        self.maze_wait_flag=True
 
         self.menu_type = 0
         self.menu_time = 0
@@ -610,8 +611,7 @@ class SnakeGameClass:
         if (end_pt1[0] <= cx <= end_pt2[0]) and (end_pt1[1] <= cy <= end_pt2[1]):
             if self.passStart and self.passMid:
                 self.maze_initialize()
-                # 시간 제한 넣는다면 그것도 다시 돌리기
-                time.sleep(3)
+            
 
     # 내 뱀 상황 업데이트
     def my_snake_update(self, HandPoints, opp_bodys):
@@ -806,7 +806,7 @@ class SnakeGameClass:
     def update_mazeVer(self, imgMain, HandPoints):
         self.my_snake_update_mazeVer(HandPoints)
         imgMain = self.draw_snakes(imgMain, self.points, HandPoints, 1)
-
+        
         return imgMain
 
     # 송출될 프레임 업데이트
@@ -1723,7 +1723,8 @@ def maze_play():
 
         game.multi = False
         game.maze_initialize()
-        game.timer_end = time.time() + 90  # 1분 30초 시간제한
+        if not game.maze_wait_flag:
+            game.timer_end = time.time() + 90  # 1분 30초 시간제한
 
         while True:
             success, img = cap.read()
@@ -1742,7 +1743,7 @@ def maze_play():
             # encode the image as a JPEG string
             _, img_encoded = cv2.imencode('.jpg', showimg)
             yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
+                b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
             remain_time = int(game.timer_end - time.time())  # 할일: html에 보내기
             # print(f"remain_time: {remain_time}")
@@ -1752,6 +1753,7 @@ def maze_play():
                 print("game ended")
                 socketio.emit('gameover')
                 break
+
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
