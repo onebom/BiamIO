@@ -492,7 +492,7 @@ class SnakeGameClass:
         
         triangle = [(x, y - half_triangle_size),(x - half_triangle_size, y + half_triangle_size),(x + half_triangle_size, y + half_triangle_size)]
 
-        angle = math.atan2(y2-y,x2-x)
+        angle = 90*math.pi/180 - math.atan2(y2-y,x2-x)
         r_m = [
                 [math.cos(angle), -math.sin(angle)],
                 [math.sin(angle), math.cos(angle)]
