@@ -68,15 +68,15 @@
 <section class="wrapper">
     <div class="hud-top">
         <div class="myscore">
-            <p>점수 :&nbsp;</p>
+            <p>SCORE :&nbsp;</p>
             <p id="my_score">0</p>
         </div>
         <div class="opponentscore">
-            <p>상대 점수 :&nbsp;</p>
+            <p>P2 SCORE :&nbsp;</p>
             <p id="opp_score">0</p>
         </div>
         <div class="timer" style="visibility: hidden;">
-            <p>남은 시간 :&nbsp;</p>
+            <p>TIME :&nbsp;</p>
             <p></p>
         </div>
     </div>
@@ -343,8 +343,8 @@
         client_socket.emit("gen_break");
         if (data['result']) { // 이긴 경우
             Swal.fire({
-                title: "게임 끝!",
-                text: "당신이 이겼습니다 !",
+                title: "You Win!",
+                {#text: "당신이 이겼습니다 !",#}
                 icon: "success",
                 confirmButtonText: "OK",
                 timer: 3000
@@ -353,8 +353,8 @@
             });
         } else { // 진 경우
             Swal.fire({
-                title: "게임 끝!",
-                text: "당신이 졌습니다..",
+                title: "You Lost!",
+                {#text: "당신이 졌습니다..",#}
                 icon: "error",
                 confirmButtonText: "OK",
                 timer: 3000

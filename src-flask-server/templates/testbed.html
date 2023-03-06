@@ -30,22 +30,24 @@
     }, false);
 </script>
 
-<canvas></canvas>
+<div class = "retrogrid"><canvas></canvas></div>
+
 
 <section class="wrapper">
+
     <div class="hud-top">
         <div class="myscore">
-            <p>점수 :&nbsp;</p>
+            <p>SCORE :</p>
             <p id="my_score">0</p>
         </div>
         <div class="opponentscore">
-            <p>최고 점수 :&nbsp;</p>
+            <p>BEST :</p>
             <p id="best_score">0</p>
         </div>
         <div id = "timer" class="timer">
-            <p>남은 시간 :&nbsp;</p>
-            <p id="test_timer">0</p>
-            <p>초</p>
+            <p>TIME LEFT :</p>
+            <p id="test_timer">00</p>
+            <p>s</p>
         </div>
         <script>
             var isRed = false;
@@ -224,7 +226,8 @@
     var server_socket = io.connect("http://dlsrks99.site:8080");
 
     client_socket.on("test_timer", function (data) {
-        $("#test_timer").text(data["seconds"]);
+        let seconds = data["seconds"].toString().padStart(2, "0"); // Add leading zeros
+        $("#test_timer").text(seconds);
         if (data["seconds"] < 6) {
             warningSound.play();
             if (!blinkInterval) {
@@ -270,8 +273,8 @@
         let current_best = $("#best_score").text();
         client_socket.emit("save_best", current_best)
         Swal.fire({
-            title: "게임 끝!",
-            text: "Try again!",
+            title: "Game Over!",
+            text: "Avoid colliding yourself and other snake's body",
             icon: "error",
             confirmButtonText: "OK",
             timer: 3000

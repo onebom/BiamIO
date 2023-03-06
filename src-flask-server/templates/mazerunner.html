@@ -27,24 +27,16 @@
     }, false);
 </script>
 
-<canvas></canvas>
+<div class = "retrogrid"><canvas></canvas></div>
 
 <section class="wrapper">
     <div class="hud-top">
-        <div class="myscore" style="visibility: hidden;">
-            <p>점수 :&nbsp;</p>
-            <p id="my_score">0</p>
-        </div>
-        <div class="opponentscore" style="visibility: hidden;">
-            <p>상대 점수 :&nbsp;</p>
-            <p id="opp_score">0</p>
-        </div>
-        <div class="timer">
-            <p>남은 시간 :&nbsp;</p>
+        <div class="timer" style="width: 100%;">
+            <p>TIME LEFT:&nbsp;</p>
             <p id="maze_min">0</p>
-            <p>분</p>
+            <p>'</p>
             <p id="maze_sec">0</p>
-            <p>초</p>
+            <p>"</p>
         </div>
     </div>
     <div class="gamesection-container">
@@ -172,11 +164,11 @@
     });
     server_socket.on("gameover_to_clients", function () {
         Swal.fire({
-            title: "게임 끝!",
-            text: "Try again!",
+            title: "Game Over!",
+            text: "Starting from the green block, navigate through the maze and reach the red block.",
             icon: "error",
             confirmButtonText: "OK",
-            timer: 3000
+            timer: 5000
         }).then((result) => {
             window.location.href = "/index";
         });
