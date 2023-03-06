@@ -47,6 +47,49 @@
 </head>
 
 <body>
+<div id = "matching" class="draggable">
+    <div class = "handle" style="z-index: inherit">
+        <img style="z-index: inherit" src="{{ url_for('static', filename= 'images/lan-modem.gif') }}">
+    </div>
+</div>
+<script>
+    const matching_popup = document.querySelectorAll('.draggable');
+
+    // add event listeners to accordion headers
+    matching_popup.forEach(accordion => {
+        const handle = accordion.querySelector('.handle');
+        let isDragging = false;
+        let startPosX, startPosY, currentPosX, currentPosY;
+
+        // handle mousedown event
+        handle.addEventListener('mousedown', event => {
+            event.preventDefault();
+            isDragging = true;
+            startPosX = event.clientX;
+            startPosY = event.clientY;
+            currentPosX = accordion.offsetLeft;
+            currentPosY = accordion.offsetTop;
+            accordion.style.zIndex = 1;
+        });
+
+        // handle mousemove event
+        document.addEventListener('mousemove', event => {
+            if (isDragging) {
+                const deltaX = event.clientX - startPosX;
+                const deltaY = event.clientY - startPosY;
+                accordion.style.left = `${currentPosX + deltaX}px`;
+                accordion.style.top = `${currentPosY + deltaY}px`;
+            }
+        });
+
+        // handle mouseup event
+        document.addEventListener('mouseup', event => {
+            isDragging = false;
+            accordion.style.zIndex = 0;
+        });
+    });
+</script>
+
 <audio id="hover-sound">
     <source src="{{ url_for('static', filename= 'bgm/curSelect.wav') }}" type="audio/wav">
 </audio>
@@ -96,10 +139,6 @@
 <div class="match-debug" style="z-index: 20; position: absolute; left: 320px; bottom: 15px; visibility: hidden;">
     <h2 id="isMatched">Matching Status</h2>
     <h2 id="alarm">USER ID</h2>
-</div>
-
-<div id = "matching" style="display: none">
-    <img src="{{ url_for('static', filename= 'images/catrolling.gif') }}">
 </div>
 
 <script>
