@@ -391,7 +391,7 @@
             gameWin.play()
             Swal.fire({
                 title: "You Win!",
-                html: "Congratulation!",
+                html: "이겼습니다!",
                 imageUrl: "{{ url_for('static', filename= 'game_win.png') }}",
                 timer: 3000,
                 timerProgressBar: true,
@@ -412,7 +412,7 @@
             gameOver.play()
             Swal.fire({
                 title: "You Lost!",
-                html: "Try again...",
+                html: "졌습니다!",
                 imageUrl: "{{ url_for('static', filename= 'game_over.png') }}",
                 timer: 3000,
                 timerProgressBar: true,
