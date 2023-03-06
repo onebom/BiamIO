@@ -146,6 +146,8 @@
 </script>
 
 <script>
+    var warningSound = new Audio("{{ url_for('static', filename= 'bgm/beep.mp3') }}");
+
     var client_socket = io.connect(
         "http://" + document.domain + ":" + location.port
     );
@@ -159,14 +161,25 @@
         $("#maze_sec").text(seconds);
         const ambient = document.querySelector('.ambient');
 
-        if (remain_time > 60) {
-            ambient.style.backgroundColor = 'rgb(0, 255, 0)';
-        } else if (remain_time >= 30 && remain_time <= 60) {
-            ambient.style.backgroundColor = 'rgb(255, 255, 0)';
-        } else {
-            ambient.style.backgroundColor = 'rgb(255, 0, 0)';
+        async function changeAmbientColor() {
+            if (remain_time > 60) {
+                ambient.style.backgroundColor = 'rgb(0, 255, 0)';
+            } else if (remain_time > 30 && remain_time <= 60) {
+                ambient.style.backgroundColor = 'rgb(255, 255, 0)';
+            } else {
+                if (remain_time % 2 == 0) {
+                    ambient.style.backgroundColor = 'rgb(255, 0, 0)';
+                    await warningSound.play().catch(error => console.error(error));
+                } else {
+                    ambient.style.backgroundColor = 'rgb(255, 255, 0)';
+                    await warningSound.play().catch(error => console.error(error));
+                }
+            }
         }
+        changeAmbientColor();
     });
+
+    const gameOver = new Audio("{{ url_for('static', filename= 'bgm/gameOver.mp3') }}");
 
     client_socket.on("game_data", function (data) {
         $("#my_score").text(data["score"]);
@@ -180,6 +193,7 @@
         server_socket.emit("maze_gameover_to_server");
     });
     server_socket.on("gameover_to_clients", function () {
+        gameOver.play()
         Swal.fire({
             title: "Game Over!",
             text: "Starting from the green block, navigate through the maze and reach the red block.",

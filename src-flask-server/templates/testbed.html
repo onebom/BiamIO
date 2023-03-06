@@ -219,6 +219,8 @@
 </script>
 
 <script>
+    const gameOver = new Audio("{{ url_for('static', filename= 'bgm/gameOver.mp3') }}");
+
     let best_score = "{{best_score}}"
     $("#best_score").text(best_score)
 
@@ -274,6 +276,7 @@
     server_socket.on("gameover_to_clients", function () {
         let current_best = $("#best_score").text();
         client_socket.emit("save_best", current_best)
+        gameOver.play()
         Swal.fire({
             title: "Game Over!",
             text: "Avoid colliding yourself and other snake's body. You must eat food every 10 seconds!",

@@ -275,6 +275,11 @@
 </script>
 
 <script>
+
+    const gameWin = new Audio("{{ url_for('static', filename= 'bgm/gameWin.mp3') }}");
+    const gameOver = new Audio("{{ url_for('static', filename= 'bgm/gameOver.mp3') }}");
+    const error_sound = new Audio("{{ url_for('static', filename= 'bgm/error.mp3') }}");
+
     client_socket.on("NetworkMode", function (data) {
         $("#UDP").text(data["UDP"]);
     });
@@ -330,6 +335,7 @@
     // 상대가 탈주한 경우(매칭 중 또는 서버로 게임하던 중)
     server_socket.on('opponent_escaped', function () {
         client_socket.emit("gen_break");
+        error_sound.play()
         Swal.fire({
             title: "Player 2 Left!!",
             text: "Opponent left the game.",
@@ -343,6 +349,7 @@
     // 상대가 탈주한 경우(udp로 게임하던 중)
     client_socket.on('opponent_escaped', function () {
         client_socket.emit("gen_break");
+        error_sound.play()
         Swal.fire({
             title: "Player 2 Left!!",
             text: "Opponent left the game.",
@@ -360,6 +367,7 @@
     server_socket.on("gameover_to_clients", function (data) {
         client_socket.emit("gen_break");
         if (data['result']) { // 이긴 경우
+            gameWin.play()
             Swal.fire({
                 title: "You Win!",
                 text: "Congratulation!",
@@ -370,6 +378,7 @@
                 window.location.href = "/index";
             });
         } else { // 진 경우
+            gameOver.play()
             Swal.fire({
                 title: "You Lost!",
                 text: "Try again...",

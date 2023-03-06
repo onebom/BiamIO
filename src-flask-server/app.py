@@ -90,9 +90,9 @@ bgm_play_obj = None
 bgm_path = './src-flask-server/static/bgm/main.wav'
 vfx_1_path = './src-flask-server/static/bgm/curSelect.wav'
 vfx_2_path = './src-flask-server/static/bgm/eatFood.wav'
-vfx_3_path = './src-flask-server/static/bgm/boost.wav'
+vfx_3_path = './src-flask-server/static/bgm/skill.wav'
 vfx_4_path = './src-flask-server/static/bgm/gameOver.wav'
-vfx_5_path = './src-flask-server/static/bgm/stageWin.wav'
+vfx_5_path = './src-flask-server/static/bgm/gameWin.wav'
 vfx_6_path = './src-flask-server/static/bgm/warning.wav'
 
 
