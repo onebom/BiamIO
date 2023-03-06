@@ -142,7 +142,7 @@ class HandDetector:
     provides bounding box info of the hand found.
     """
 
-    def __init__(self, mode=False, maxHands=1, detectionCon=0.8, minTrackCon=0.8):
+    def __init__(self, mode=False, maxHands=1, detectionCon=0.5, minTrackCon=0.8):
         """
         :param mode: In static mode, detection is done on each image: slower
         :param maxHands: Maximum number of hands to detect
@@ -308,7 +308,7 @@ megenta = (255, 0, 255)  # magenta
 green = (0, 255, 0)  # green
 yellow = (0, 255, 255)  # yellow
 cyan = (255, 255, 0)  # cyan
-detector = HandDetector(detectionCon=0.8, maxHands=1)
+detector = HandDetector(detectionCon=0.5, maxHands=1)
 
 
 class SnakeGameClass:
@@ -332,7 +332,7 @@ class SnakeGameClass:
 
         self.score = 0
         self.bestScore = 0
-        
+
         self.opp_score = 0
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.opp_addr = ()
@@ -348,7 +348,7 @@ class SnakeGameClass:
         self.passMid = False
         self.maze_img = np.array([0])
         self.dist = 500
-        self.maze_wait_flag=True
+        self.maze_wait_flag = True
 
         self.menu_type = 0
         self.menu_time = 0
@@ -439,7 +439,7 @@ class SnakeGameClass:
                     return True
             except:
                 pass
-                    
+
         return False
 
     # maze 초기화
@@ -475,7 +475,7 @@ class SnakeGameClass:
         self.points = []
         self.foodOnOff = True
         self.multi = False
-        
+
         bot_data = {'bot_head_x': 1000,
                     'bot_head_y': 360,
                     'bot_body_node': [],
@@ -615,7 +615,6 @@ class SnakeGameClass:
         if (end_pt1[0] <= cx <= end_pt2[0]) and (end_pt1[1] <= cy <= end_pt2[1]):
             if self.passStart and self.passMid:
                 self.maze_initialize()
-            
 
     # 내 뱀 상황 업데이트
     def my_snake_update(self, HandPoints, opp_bodys):
@@ -781,7 +780,7 @@ class SnakeGameClass:
             else:
                 if self.score > self.bestScore:
                     self.bestScore = self.score
-                    socketio.emit('bestScore', {'bestScore' : self.bestScore})
+                    socketio.emit('bestScore', {'bestScore': self.bestScore})
 
                 single_game.foodtimeLimit = time.time() + 11
                 self.foodPoint = random.randint(100, 1000), random.randint(100, 600)
@@ -810,7 +809,7 @@ class SnakeGameClass:
     def update_mazeVer(self, imgMain, HandPoints):
         self.my_snake_update_mazeVer(HandPoints)
         imgMain = self.draw_snakes(imgMain, self.points, HandPoints, 1)
-        
+
         return imgMain
 
     # 송출될 프레임 업데이트
@@ -851,7 +850,7 @@ class SnakeGameClass:
         self.menu_type = menu_type
 
         imgMain = self.draw_snakes(imgMain, self.points, HandPoints, 1)
-                
+
         return imgMain
 
     # 통신 관련 변수 설정
@@ -919,6 +918,7 @@ class SnakeGameClass:
         opponent_data = {}
         self.sock.close()
 
+
 class MultiGameClass:
     # 생성자, class를 선언하면서 기본 변수들을 설정함
     def __init__(self, pathFood):
@@ -938,7 +938,7 @@ class MultiGameClass:
         self.imgFood = cv2.imread(pathFood, cv2.IMREAD_UNCHANGED)
         self.hFood, self.wFood, _ = self.imgFood.shape
         self.foodPoint = 640, 360
-  
+
         self.opp_score = 0
         self.opp_points = []
         self.dist = 500
@@ -984,7 +984,7 @@ class MultiGameClass:
                             break
                 except socket.timeout:
                     a += 1
-    
+
         elif test_code == "2":
             for i in range(50):
                 if i % 3 == 0 and b == 0:
@@ -1000,7 +1000,7 @@ class MultiGameClass:
                             break
                 except socket.timeout:
                     a += 1
-        
+
         if b != 0:
             self.is_udp = True
             self.sock.settimeout(0.01)
@@ -1044,7 +1044,7 @@ class MultiGameClass:
                     self.execute()
 
         return imgMain
-    
+
     # 내 뱀 상황 업데이트
     def my_snake_update(self, HandPoints):
         px, py = self.previousHead
@@ -1153,7 +1153,7 @@ class MultiGameClass:
         imgMain = cvzone.overlayPNG(imgMain, self.imgFood, (rx - self.wFood // 2, ry - self.hFood // 2))
 
         return imgMain
-    
+
     # 데이터 수신 (udp 통신 일때만 사용)
     def receive_data_from_opp(self):
         try:
@@ -1202,24 +1202,24 @@ class MultiGameClass:
         if len(pts.shape) == 3:
             pts = pts[:, 1]
         pts = pts.reshape((-1, 1, 2))
-        
+
         # --- skill flag에 따라 색 바꾸기 --- 
-        skill_colored=False
+        skill_colored = False
         if isMe:
-            skill_colored=self.skill_flag
+            skill_colored = self.skill_flag
         else:
-            skill_colored=self.opp_skill_flag
-        
+            skill_colored = self.opp_skill_flag
+
         if skill_colored:
             cv2.polylines(imgMain, np.int32([pts]), False, rainbow, 15)
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
-        
+
         # --- head point와 hands point 이어주기 ---
         if isMe and handPoints:
             for p in np.linspace(self.previousHead, handPoints, 10):
                 cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
-        
+
         if points:
             cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
             cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
@@ -1276,17 +1276,17 @@ class MultiGameClass:
                 return idx
 
         return 0
-    
+
     # skill 사용 시 충돌 idx 자르기
     def skill_length_reduction(self):
         for i in range(self.cut_idx):
             self.currentLength -= self.lengths[i]
-        
-        if self.currentLength  < 100:
+
+        if self.currentLength < 100:
             self.allowedLength = 100
         else:
-            self.allowedLength = self.currentLength 
-            
+            self.allowedLength = self.currentLength
+
         self.lengths = self.lengths[self.cut_idx:]
         self.points = self.points[self.cut_idx:]
 
@@ -1308,6 +1308,7 @@ class MultiGameClass:
 game = SnakeGameClass(pathFood)
 multi = MultiGameClass(pathFood)
 single_game = SnakeGameClass(pathFood)
+
 
 # Defualt Root Routing for Flask Server Check
 @api.resource('/')
@@ -1343,7 +1344,7 @@ def testbed():
 
     single_game.bestScore = myBestScore
     # print(f"bestScore : {single_game.bestScore}")
-    return render_template("testbed.html", best_score = single_game.bestScore)
+    return render_template("testbed.html", best_score=single_game.bestScore)
 
 
 @app.route('/mazerunner')
@@ -1397,7 +1398,7 @@ def set_address(data):
     opp_ip = data['ip_addr']
     opp_port = data['port']
     sid = multi.user_number
-    
+
     multi.set_socket(MY_PORT, opp_ip, opp_port)
     multi.test_connect(sid)
 
@@ -1451,6 +1452,7 @@ def save_best(data):
         # Write the new contents to the file
         f.write(data)
 
+
 @socketio.on("gen_break")
 def gen_break():
     global multi
@@ -1487,11 +1489,11 @@ def snake():
             success, img = cap.read()
             img = cv2.flip(img, 1)
 
-            try:            
+            try:
                 hands = detector.findHands(img, flipType=False)
                 img = detector.drawHands(img)
             except:
-                hands=[]
+                hands = []
 
             pointIndex = []
 
@@ -1526,7 +1528,6 @@ def snake():
                 if opp_skill_cnt % 60 == 0:
                     multi.opp_skill_flag = False
                     opp_skill_cnt = 0
-
 
             img = multi.update(img, pointIndex)
 
@@ -1775,17 +1776,16 @@ def maze_play():
             # encode the image as a JPEG string
             _, img_encoded = cv2.imencode('.jpg', showimg)
             yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
+                   b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
             remain_time = int(game.timer_end - time.time())  # 할일: html에 보내기
             # print(f"remain_time: {remain_time}")
             # socketio.emit('maze_timer', {"minutes": remain_time // 60, "seconds": remain_time % 60})
-            socketio.emit('maze_timer', {"remain_time" : remain_time})
+            socketio.emit('maze_timer', {"remain_time": remain_time})
             if remain_time < 1:
                 print("game ended")
                 socketio.emit('gameover')
                 break
-
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
