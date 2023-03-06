@@ -443,6 +443,8 @@ class SnakeGameClass:
 
     # maze 초기화
     def maze_initialize(self):
+        global bot_flag
+        bot_flag = False
         self.maze_start, self.maze_mid, self.maze_end, self.maze_map = create_maze(720 - 300, 1280 - 300, 5, 12)
         self.maze_map = np.pad(self.maze_map, ((150, 150), (150, 150)), 'constant', constant_values=0)
         self.maze_img = self.create_maze_image()
@@ -457,6 +459,8 @@ class SnakeGameClass:
         self.timer_end = time.time() + 90
 
     def menu_initialize(self):
+        global bot_flag
+        bot_flag = False
         self.previousHead = (0, 360)
         self.velocityX = 0
         self.velocityY = 0
