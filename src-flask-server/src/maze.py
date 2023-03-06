@@ -177,21 +177,21 @@ class Maze(object):
                 if (used_rng_side % 2 == rng_side % 2) and (used_rng_side != rng_side):
                     break
             else:
-                if rng_entry_exit != used_entry_exit:
+                if rng_side != 3 and rng_entry_exit != used_entry_exit:
                     break
             rng_side = random.randint(1, 4)
 
-            if (rng_side == 1):  # Top side
+            if (rng_side == 1):  # Left side
                 rng_entry_exit = (random.randint(0, self.num_rows - 1), 0)
 
-            elif (rng_side == 2):  # Right side
-                rng_entry_exit = (self.num_rows - 1, random.randint(0, self.num_cols - 1))
+            elif (rng_side == 2):  # Bottom side
+                rng_entry_exit = (self.num_rows - 1, random.randint(0, self.num_cols - 2))
 
-            elif (rng_side == 3):  # Bottom side
+            elif (rng_side == 3):  # Right side
                 rng_entry_exit = (random.randint(0, self.num_rows - 1), self.num_cols - 1)
 
-            elif (rng_side == 4):  # Left side
-                rng_entry_exit = (0, random.randint(0, self.num_cols - 1))
+            elif (rng_side == 4):  # Top side
+                rng_entry_exit = (0, random.randint(0, self.num_cols - 2))
 
         return rng_entry_exit, rng_side  # Return entry/exit that is different from exit/entry
 
