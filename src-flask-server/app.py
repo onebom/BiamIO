@@ -483,7 +483,7 @@ class SnakeGameClass:
                     'bot_velocityX': random.choice([-1, 1]),
                     'bot_velocityY': random.choice([-1, 1])}
 
-    def draw_snakes(self, imgMain, points, handPoints, isMe):
+    def draw_snakes(self, imgMain, points, HandPoints, isMe):
         global bot_flag
 
         bodercolor = cyan
@@ -519,9 +519,9 @@ class SnakeGameClass:
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
 
-        if isMe and handPoints:
-            for p in np.linspace(self.previousHead, handPoints, 10):
-                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
+        if isMe and HandPoints:
+            for p in np.linspace(self.previousHead, HandPoints, 10):
+                cv2.circle(imgMain, tuple(np.int32(p)), 5, (0, 255, 0), -1)
 
         if points:
             cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
@@ -1023,7 +1023,7 @@ class MultiGameClass:
         # ---head와 handsPoint 점선으로 잇기---
         if HandPoints:
             for p in np.linspace(self.previousHead, HandPoints, 10):
-                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
+                cv2.circle(imgMain, tuple(np.int32(p)), 5, (0, 255, 0), -1)
 
         self.send_data_to_opp()
 
@@ -1170,7 +1170,7 @@ class MultiGameClass:
                 socketio.emit('opponent_escaped')
 
     # 뱀 그려주기
-    def draw_snakes(self, imgMain, points, handPoints, isMe):
+    def draw_snakes(self, imgMain, points, HandPoints, isMe):
 
         bodercolor = cyan
         maincolor = red
@@ -1199,9 +1199,9 @@ class MultiGameClass:
         pts = pts.reshape((-1, 1, 2))
 
         # --- head point와 hands point 이어주기 ---
-        if isMe and handPoints:
-            for p in np.linspace(self.previousHead, handPoints, 10):
-                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
+        if isMe and HandPoints:
+            for p in np.linspace(self.previousHead, HandPoints, 10):
+                cv2.circle(imgMain, tuple(np.int32(p)), 5, (0, 255, 0), -1)
 
         # --- skill flag에 따라 색 바꾸기 --- 
         skill_colored = False
