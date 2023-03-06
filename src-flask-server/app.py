@@ -989,7 +989,7 @@ class MultiGameClass:
                     if test_code == str(sid):
                         test_code = '2'
                         b += 1
-                        if b > 5:
+                        if b > 3:
                             break
                 except socket.timeout:
                     a += 1
@@ -1005,7 +1005,7 @@ class MultiGameClass:
                     if test_code == str(sid):
                         test_code = '1'
                         b += 1
-                        if b > 5:
+                        if b > 3:
                             break
                 except socket.timeout:
                     a += 1
@@ -1015,7 +1015,7 @@ class MultiGameClass:
             self.is_udp = True
 
         self.sock.settimeout(0.01)
-        for _ in range(100):
+        for _ in range(50):
             self.sock.recv(0)
         self.sock.settimeout(0)
 
@@ -1174,6 +1174,7 @@ class MultiGameClass:
                 self.opp_points = eval(decode_data)
                 self.udp_count = 0
             else:
+                print('----------else--------')
                 self.udp_count = 0
         except socket.timeout:
             self.udp_count += 1
