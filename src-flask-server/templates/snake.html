@@ -327,13 +327,29 @@
     })
     // 상대가 탈주한 경우(매칭 중 또는 서버로 게임하던 중)
     server_socket.on('opponent_escaped', function () {
-        alert("상대가 떠났습니다.")
-        window.location.href = '/index'
+        client_socket.emit("gen_break");
+        Swal.fire({
+            title: "Disconnected.",
+            text: "Opponent lefted!!",
+            icon: "error",
+            confirmButtonText: "OK",
+            timer: 3000
+        }).then((result) => {
+            window.location.href = "/index";
+        });
     })
     // 상대가 탈주한 경우(udp로 게임하던 중)
     client_socket.on('opponent_escaped', function () {
-        alert("상대가 떠났습니다.")
-        window.location.href = '/index'
+        client_socket.emit("gen_break");
+        Swal.fire({
+            title: "Disconnected.",
+            text: "Opponent lefted!!",
+            icon: "error",
+            confirmButtonText: "OK",
+            timer: 3000
+        }).then((result) => {
+            window.location.href = "/index";
+        });
     })
     // TODO
     client_socket.on("gameover", function () {
