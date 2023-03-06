@@ -989,6 +989,8 @@ class MultiGameClass:
                     if test_code == str(sid):
                         test_code = '2'
                         b += 1
+                        if b > 5:
+                            break
                 except socket.timeout:
                     a += 1
     
