@@ -348,6 +348,7 @@ class SnakeGameClass:
         self.passMid = False
         self.maze_img = np.array([0])
         self.dist = 500
+        self.maze_wait_flag=True
 
         self.menu_type = 0
         self.menu_time = 0
@@ -483,7 +484,7 @@ class SnakeGameClass:
                     'bot_velocityX': random.choice([-1, 1]),
                     'bot_velocityY': random.choice([-1, 1])}
 
-    def draw_snakes(self, imgMain, points, score, isMe):
+    def draw_snakes(self, imgMain, points, handPoints, isMe):
         global bot_flag
 
         bodercolor = cyan
@@ -519,6 +520,9 @@ class SnakeGameClass:
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
 
+        if isMe and handPoints:
+            for p in np.linspace(self.previousHead, handPoints, 10):
+                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
 
         if points:
             cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
@@ -611,8 +615,7 @@ class SnakeGameClass:
         if (end_pt1[0] <= cx <= end_pt2[0]) and (end_pt1[1] <= cy <= end_pt2[1]):
             if self.passStart and self.passMid:
                 self.maze_initialize()
-                # 시간 제한 넣는다면 그것도 다시 돌리기
-                time.sleep(3)
+            
 
     # 내 뱀 상황 업데이트
     def my_snake_update(self, HandPoints, opp_bodys):
@@ -806,11 +809,8 @@ class SnakeGameClass:
 
     def update_mazeVer(self, imgMain, HandPoints):
         self.my_snake_update_mazeVer(HandPoints)
-        imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
-        if HandPoints:
-            for p in np.linspace(self.previousHead, HandPoints, 10):
-                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
-
+        imgMain = self.draw_snakes(imgMain, self.points, HandPoints, 1)
+        
         return imgMain
 
     # 송출될 프레임 업데이트
@@ -821,17 +821,13 @@ class SnakeGameClass:
         # 0 이면 상대 뱀
         if opponent_data:
             opp_bodys = opponent_data['opp_body_node']
-        imgMain = self.draw_snakes(imgMain, opp_bodys, self.opp_score, 0)
+        imgMain = self.draw_snakes(imgMain, opp_bodys, HandPoints, 0)
 
         # update and draw own snake
         self.my_snake_update(HandPoints, opp_bodys)
         imgMain = self.draw_Food(imgMain)
         # 1 이면 내 뱀
-        imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
-        # ---head와 handsPoint 점선으로 잇기---
-        if HandPoints:
-            for p in np.linspace(self.previousHead, HandPoints, 10):
-                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
+        imgMain = self.draw_snakes(imgMain, self.points, HandPoints, 1)
 
         return imgMain
 
@@ -854,12 +850,7 @@ class SnakeGameClass:
 
         self.menu_type = menu_type
 
-        imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
-
-        # ---head와 handsPoint 점선으로 잇기---
-        if HandPoints:
-            for p in np.linspace(self.previousHead, HandPoints, 10):
-                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
+        imgMain = self.draw_snakes(imgMain, self.points, HandPoints, 1)
                 
         return imgMain
 
@@ -1007,8 +998,8 @@ class MultiGameClass:
         imgMain = self.draw_Food(imgMain)
 
         # 1 이면 내 뱀 / 0 이면 상대 뱀
-        imgMain = self.draw_snakes(imgMain, self.points, self.score, 1)
-        imgMain = self.draw_snakes(imgMain, self.opp_points, self.opp_score, 0)
+        imgMain = self.draw_snakes(imgMain, self.points, HandPoints, 1)
+        imgMain = self.draw_snakes(imgMain, self.opp_points, HandPoints, 0)
 
         # ---head와 handsPoint 점선으로 잇기---
         if HandPoints:
@@ -1156,7 +1147,7 @@ class MultiGameClass:
                 socketio.emit('opponent_escaped')
 
     # 뱀 그려주기
-    def draw_snakes(self, imgMain, points, score, isMe):
+    def draw_snakes(self, imgMain, points, handPoints, isMe):
 
         bodercolor = cyan
         maincolor = red
@@ -1184,7 +1175,7 @@ class MultiGameClass:
             pts = pts[:, 1]
         pts = pts.reshape((-1, 1, 2))
         
-        
+        # --- skill flag에 따라 색 바꾸기 --- 
         skill_colored=False
         if isMe:
             skill_colored=self.skill_flag
@@ -1195,7 +1186,12 @@ class MultiGameClass:
             cv2.polylines(imgMain, np.int32([pts]), False, rainbow, 15)
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
-
+        
+        # --- head point와 hands point 이어주기 ---
+        if isMe and handPoints:
+            for p in np.linspace(self.previousHead, handPoints, 10):
+                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
+        
         if points:
             cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
             cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
@@ -1731,7 +1727,8 @@ def maze_play():
 
         game.multi = False
         game.maze_initialize()
-        game.timer_end = time.time() + 90  # 1분 30초 시간제한
+        if not game.maze_wait_flag:
+            game.timer_end = time.time() + 90  # 1분 30초 시간제한
 
         while True:
             success, img = cap.read()
@@ -1750,7 +1747,7 @@ def maze_play():
             # encode the image as a JPEG string
             _, img_encoded = cv2.imencode('.jpg', showimg)
             yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
+                b'Content-Type: image/jpeg\r\n\r\n' + img_encoded.tobytes() + b'\r\n')
 
             remain_time = int(game.timer_end - time.time())  # 할일: html에 보내기
             # print(f"remain_time: {remain_time}")
@@ -1760,6 +1757,7 @@ def maze_play():
                 print("game ended")
                 socketio.emit('gameover')
                 break
+
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
