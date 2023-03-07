@@ -351,6 +351,7 @@ class SnakeGameClass:
 
         self.menu_type = 0
         self.menu_time = 0
+        self.line_flag = False
 
     def global_intialize(self):
         global user_number
@@ -519,7 +520,7 @@ class SnakeGameClass:
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
 
-        if isMe and HandPoints:
+        if isMe and HandPoints and self.line_flag:
             for p in np.linspace(self.previousHead, HandPoints, 10):
                 cv2.circle(imgMain, tuple(np.int32(p)), 5, (0, 255, 0), -1)
 
@@ -949,6 +950,7 @@ class MultiGameClass:
         self.gen = True
         self.skill_flag = False
         self.opp_skill_flag = False
+        self.line_flag = False
 
     # 통신 관련 변수 설정
     def set_socket(self, my_port, opp_ip, opp_port):
@@ -1213,7 +1215,7 @@ class MultiGameClass:
         pts = pts.reshape((-1, 1, 2))
 
         # --- head point와 hands point 이어주기 ---
-        if isMe and HandPoints:
+        if isMe and HandPoints and self.line_flag:
             for p in np.linspace(self.previousHead, HandPoints, 10):
                 cv2.circle(imgMain, tuple(np.int32(p)), 5, (0, 255, 0), -1)
 
@@ -1523,12 +1525,14 @@ def snake():
                         start_cx = 70
                         multi.user_move = True
                         multi.check_collision = True
+                        multi.line_flag = True
                 elif multi.user_number == 2:
                     start_cx -= 5
                     if start_cx < 930:
                         start_cx = 1210
                         multi.user_move = True
                         multi.check_collision = True
+                        multi.line_flag = True
 
             if multi.skill_flag:
                 skill_cnt += 1
@@ -1663,6 +1667,7 @@ def test():
 
             if time.time() > max_time_end:
                 user_move = True
+                single_game.line_flag = True
 
             remain_time = 0
             if user_move:
