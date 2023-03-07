@@ -944,6 +944,7 @@ class MultiGameClass:
         self.opp_addr = ()
         self.udp_count = 0
         self.user_number = 0
+        self.queue = []
 
         self.is_udp = False
         self.foodOnOff = True
@@ -1150,26 +1151,36 @@ class MultiGameClass:
 
     # 데이터 수신 (udp 통신 일때만 사용)
     def receive_data_from_opp(self):
-        try:
-            data, _ = self.sock.recvfrom(15000)
-            decode_data = data.decode()
-            if decode_data[0] == '[':
-                self.opp_points = eval(decode_data)
+        for _ in range(3):
+            try:
+                data, _ = self.sock.recvfrom(15000)
+                decode_data = data.decode()
+                self.queue.append(decode_data)
                 self.udp_count = 0
-            else:
-                print('----------else--------')
-                self.udp_count = 0
-        except socket.timeout:
-            self.udp_count += 1
-            if self.udp_count > 25:
-                socketio.emit('opponent_escaped')
-        except BlockingIOError:
-            self.udp_count += 1
-            if self.udp_count > 40:
-                socketio.emit('opponent_escaped')
+                
+            except socket.timeout:
+                self.udp_count += 1
+                if self.udp_count > 25:
+                    socketio.emit('opponent_escaped')
+            except BlockingIOError:
+                self.udp_count += 1
+                if self.udp_count > 40:
+                    socketio.emit('opponent_escaped')
 
-        self.sock.recv(0)
-    
+        while True:
+            if len(self.queue) == 0:
+                break
+            elif len(self.queue) > 8:
+                self.queue.pop(0)
+                temp = self.queue.pop(0)
+            else:
+                self.queue.pop(0)
+
+            if temp[0] == '[':
+                self.opp_points = eval(decode_data)
+                break
+                
+            
     def draw_triangle(self, point, point2, size):
         x,y=point
         x2,y2=point2
