@@ -1020,11 +1020,6 @@ class MultiGameClass:
         imgMain = self.draw_snakes(imgMain, self.points, HandPoints, 1)
         imgMain = self.draw_snakes(imgMain, self.opp_points, HandPoints, 0)
 
-        # ---head와 handsPoint 점선으로 잇기---
-        if HandPoints:
-            for p in np.linspace(self.previousHead, HandPoints, 10):
-                cv2.circle(imgMain, tuple(np.int32(p)), 5, (0, 255, 0), -1)
-
         self.send_data_to_opp()
 
         if self.check_collision and self.points:
@@ -1238,10 +1233,9 @@ class MultiGameClass:
 
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
-
-        if points:
-            cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
-            cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
+            if points:
+                cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
+                cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
 
         return imgMain
 
