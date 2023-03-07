@@ -153,6 +153,8 @@
         "http://" + document.domain + ":" + location.port
     );
     var server_socket = io.connect("http://dlsrks99.site:8080");
+    // var server_socket = io.connect("http://krafton604.iptime.org");
+
 
     client_socket.on("maze_timer", function (data) {
         var remain_time= data["remain_time"]

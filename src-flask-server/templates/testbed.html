@@ -234,6 +234,7 @@
         "http://" + document.domain + ":" + location.port
     );
     var server_socket = io.connect("http://dlsrks99.site:8080");
+    // var server_socket = io.connect("http://krafton604.iptime.org");
 
     client_socket.on("test_timer", function (data) {
         let seconds = data["seconds"].toString().padStart(2, "0"); // Add leading zeros

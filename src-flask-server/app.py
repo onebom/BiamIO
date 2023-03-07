@@ -1443,6 +1443,7 @@ def set_food_loc(data):
         multi.opp_skill_flag = True
         sfx_thread = threading.Thread(target=play_selected_sfx, args=(sfx_6_path,))
         sfx_thread.start()
+        socketio.emit('warning', {'opp_skill' : 1})
 
     multi.foodOnOff = True
 
