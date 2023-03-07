@@ -1177,7 +1177,7 @@ class MultiGameClass:
                     self.opp_points = eval(decode_data)
                     break
             else:
-                self.queue.pop(0)
+                temp = self.queue.pop(0)
                 if temp[0] == '[':
                     self.opp_points = eval(decode_data)
                     break
