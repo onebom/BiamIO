@@ -1178,10 +1178,8 @@ class MultiGameClass:
                 [math.sin(angle), math.cos(angle)]
             ]
         rotated_triangle = [[int(vertex[0]*r_m[0][0]+vertex[1]*r_m[0][1]+x), int(vertex[0]*r_m[1][0]+vertex[1]*r_m[1][1]+y)] for vertex in triangle]
-        triangle_pts1 = np.array([rotated_triangle[0],rotated_triangle[1]], np.int32).reshape((-1,1,2))
-        triangle_pts2 = np.array([rotated_triangle[0],rotated_triangle[2]], np.int32).reshape((-1,1,2))
-        
-        return triangle_pts1, triangle_pts2
+        triangle_pts = np.array(rotated_triangle, np.int32).reshape((-1,1,2))
+        return triangle_pts
     
     # 뱀 그려주기
     def draw_snakes(self, imgMain, points, HandPoints, isMe):
@@ -1224,12 +1222,13 @@ class MultiGameClass:
         else:
             skill_colored = self.opp_skill_flag
 
-        if skill_colored:
+        if not skill_colored:
             cv2.polylines(imgMain, np.int32([pts]), False, rainbow, 15)
 
-            triangle_pts1, triangle_pts2=self.draw_triangle(points[-1][1],points[-1][0])
-            cv2.polylines(imgMain, np.int32([triangle_pts1]), False, rainbow, 15)
-            cv2.polylines(imgMain, np.int32([triangle_pts2]), False, rainbow, 15)
+            triangle_pts=self.draw_triangle(points[-1][1],points[-1][0])
+            # cv2.polylines(imgMain, np.int32([triangle_pts1]), False, rainbow, 15)
+            # cv2.polylines(imgMain, np.int32([triangle_pts2]), False, rainbow, 15)
+            cv2.fillPoly(imgMain, [triangle_pts], rainbow)
 
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
