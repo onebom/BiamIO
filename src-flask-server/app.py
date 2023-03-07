@@ -1173,12 +1173,14 @@ class MultiGameClass:
             elif len(self.queue) > 8:
                 self.queue.pop(0)
                 temp = self.queue.pop(0)
+                if temp[0] == '[':
+                    self.opp_points = eval(decode_data)
+                    break
             else:
                 self.queue.pop(0)
-
-            if temp[0] == '[':
-                self.opp_points = eval(decode_data)
-                break
+                if temp[0] == '[':
+                    self.opp_points = eval(decode_data)
+                    break
                 
             
     def draw_triangle(self, point, point2, size):
