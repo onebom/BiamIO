@@ -413,46 +413,53 @@
         client_socket.emit("gen_break");
         if (data['result']) { // 이긴 경우
             gameWin.play()
-            Swal.fire({
-                title: "You Win!",
-                html: "이겼습니다!",
-                imageUrl: "{{ url_for('static', filename= 'game_win.png') }}",
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: () => {
-                    Swal.showLoading()
-                    const b = Swal.getHtmlContainer().querySelector('b')
-                    timerInterval = setInterval(() => {
-                        b.textContent = Swal.getTimerLeft()
-                    }, 100)
-                },
-                willClose: () => {
-                    clearInterval(timerInterval)
-                }
-            }).then((result) => {
-                window.location.href = "/index";
-            });
+            setTimeout(function() {
+                Swal.fire({
+                    title: "You Win!",
+                    html: "이겼습니다!",
+                    imageUrl: "{{ url_for('static', filename= 'game_win.png') }}",
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Swal.showLoading()
+                        const b = Swal.getHtmlContainer().querySelector('b')
+                        timerInterval = setInterval(() => {
+                            b.textContent = Swal.getTimerLeft()
+                        }, 100)
+                    },
+                    willClose: () => {
+                        clearInterval(timerInterval)
+                    }
+                }).then((result) => {
+                    window.location.href = "/index";
+                });
+            }, 2000); // 1 second delay
+
         } else { // 진 경우
             gameOver.play()
-            Swal.fire({
-                title: "You Lost!",
-                html: "졌습니다!",
-                imageUrl: "{{ url_for('static', filename= 'game_over.png') }}",
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: () => {
-                    Swal.showLoading()
-                    const b = Swal.getHtmlContainer().querySelector('b')
-                    timerInterval = setInterval(() => {
-                        b.textContent = Swal.getTimerLeft()
-                    }, 100)
-                },
-                willClose: () => {
-                    clearInterval(timerInterval)
-                }
-            }).then((result) => {
-                window.location.href = "/index";
-            });
+
+            setTimeout(function() {
+                Swal.fire({
+                    title: "You Lost!",
+                    html: "졌습니다!",
+                    imageUrl: "{{ url_for('static', filename= 'game_over.png') }}",
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Swal.showLoading()
+                        const b = Swal.getHtmlContainer().querySelector('b')
+                        timerInterval = setInterval(() => {
+                            b.textContent = Swal.getTimerLeft()
+                        }, 100)
+                    },
+                    willClose: () => {
+                        clearInterval(timerInterval)
+                    }
+                }).then((result) => {
+                    window.location.href = "/index";
+                });
+            }, 2000); // 1 second delay
+
         }
     });
 </script>
