@@ -345,9 +345,7 @@
     })
     client_socket.on("warning", function (data) {
         isOppskill = data["opp_skill"]
-        console.log(isOppskill)
         if (isOppskill === 1) {
-            console.log("if entered")
             // Show HTML element
             document.getElementById("skillwarning-msg").style.display = "block"
 
