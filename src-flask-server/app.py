@@ -457,6 +457,7 @@ class SnakeGameClass:
         self.maxspeed = math.hypot(1280, 720) / 10
         self.passStart = False
         self.passMid = False
+        self.line_flag = True
         self.timer_end = time.time() + 91
 
     def menu_initialize(self):
@@ -465,6 +466,7 @@ class SnakeGameClass:
         self.previousHead = (0, 360)
         self.velocityX = 0
         self.velocityY = 0
+        self.line_flag = True
         self.points = []
 
     def testbed_initialize(self):
