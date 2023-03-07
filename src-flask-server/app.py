@@ -1164,10 +1164,10 @@ class MultiGameClass:
             if self.udp_count > 40:
                 socketio.emit('opponent_escaped')
     
-    def draw_triangle(self, point, point2):
+    def draw_triangle(self, point, point2, size):
         x,y=point
         x2,y2=point2
-        triangle_size = 30
+        triangle_size = size
         half_triangle_size = int(triangle_size / 2)
         
         triangle = [(0, 0 - half_triangle_size),(0 - half_triangle_size, 0 + half_triangle_size),(0 + half_triangle_size, 0 + half_triangle_size)]
@@ -1222,13 +1222,15 @@ class MultiGameClass:
         else:
             skill_colored = self.opp_skill_flag
 
-        if not skill_colored:
+        if skill_colored:
             cv2.polylines(imgMain, np.int32([pts]), False, rainbow, 15)
 
-            triangle_pts=self.draw_triangle(points[-1][1],points[-1][0])
+            triangle_pts=self.draw_triangle(points[-1][1],points[-1][0], 50)
+            triangle_pts_back=self.draw_triangle(points[-1][1],points[-1][0], 35)
             # cv2.polylines(imgMain, np.int32([triangle_pts1]), False, rainbow, 15)
             # cv2.polylines(imgMain, np.int32([triangle_pts2]), False, rainbow, 15)
-            cv2.fillPoly(imgMain, [triangle_pts], rainbow)
+            cv2.fillPoly(imgMain, [triangle_pts], megenta)
+            cv2.fillPoly(imgMain, [triangle_pts_back], rainbow)
 
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
