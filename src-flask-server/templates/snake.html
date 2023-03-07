@@ -16,6 +16,7 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/snake.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/sweetalert.css') }}">
 
     <!-- 소켓 통신 관련 부분은 영상을 gen하는 것보다 빨라야 하기 때문에 위쪽에 위치 -->
     <script>
@@ -338,10 +339,20 @@
         error_sound.play()
         Swal.fire({
             title: "Player 2 Left!!",
-            text: "Opponent left the game.",
-            icon: "error",
-            confirmButtonText: "OK",
-            timer: 3000
+            html: "상대가 게임을 떠났습니다.",
+            imageUrl: "{{ url_for('static', filename= 'player_left.png') }}",
+            timer: 5000,
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading()
+                const b = Swal.getHtmlContainer().querySelector('b')
+                timerInterval = setInterval(() => {
+                    b.textContent = Swal.getTimerLeft()
+                }, 100)
+            },
+            willClose: () => {
+                clearInterval(timerInterval)
+            }
         }).then((result) => {
             window.location.href = "/index";
         });
@@ -352,10 +363,20 @@
         error_sound.play()
         Swal.fire({
             title: "Player 2 Left!!",
-            text: "Opponent left the game.",
-            icon: "error",
-            confirmButtonText: "OK",
-            timer: 3000
+            html: "상대가 게임을 떠났습니다.",
+            imageUrl: "{{ url_for('static', filename= 'player_left.png') }}",
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading()
+                const b = Swal.getHtmlContainer().querySelector('b')
+                timerInterval = setInterval(() => {
+                    b.textContent = Swal.getTimerLeft()
+                }, 100)
+            },
+            willClose: () => {
+                clearInterval(timerInterval)
+            }
         }).then((result) => {
             window.location.href = "/index";
         });
@@ -370,10 +391,20 @@
             gameWin.play()
             Swal.fire({
                 title: "You Win!",
-                text: "Congratulation!",
-                icon: "success",
-                confirmButtonText: "OK",
-                timer: 3000
+                html: "이겼습니다!",
+                imageUrl: "{{ url_for('static', filename= 'game_win.png') }}",
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading()
+                    const b = Swal.getHtmlContainer().querySelector('b')
+                    timerInterval = setInterval(() => {
+                        b.textContent = Swal.getTimerLeft()
+                    }, 100)
+                },
+                willClose: () => {
+                    clearInterval(timerInterval)
+                }
             }).then((result) => {
                 window.location.href = "/index";
             });
@@ -381,10 +412,20 @@
             gameOver.play()
             Swal.fire({
                 title: "You Lost!",
-                text: "Try again...",
-                icon: "error",
-                confirmButtonText: "OK",
-                timer: 3000
+                html: "졌습니다!",
+                imageUrl: "{{ url_for('static', filename= 'game_over.png') }}",
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading()
+                    const b = Swal.getHtmlContainer().querySelector('b')
+                    timerInterval = setInterval(() => {
+                        b.textContent = Swal.getTimerLeft()
+                    }, 100)
+                },
+                willClose: () => {
+                    clearInterval(timerInterval)
+                }
             }).then((result) => {
                 window.location.href = "/index";
             });

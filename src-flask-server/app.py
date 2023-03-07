@@ -348,7 +348,6 @@ class SnakeGameClass:
         self.passMid = False
         self.maze_img = np.array([0])
         self.dist = 500
-        self.maze_wait_flag = True
 
         self.menu_type = 0
         self.menu_time = 0
@@ -457,7 +456,7 @@ class SnakeGameClass:
         self.maxspeed = math.hypot(1280, 720) / 10
         self.passStart = False
         self.passMid = False
-        self.timer_end = time.time() + 90
+        self.timer_end = time.time() + 91
 
     def menu_initialize(self):
         global bot_flag
@@ -484,7 +483,7 @@ class SnakeGameClass:
                     'bot_velocityX': random.choice([-1, 1]),
                     'bot_velocityY': random.choice([-1, 1])}
 
-    def draw_snakes(self, imgMain, points, handPoints, isMe):
+    def draw_snakes(self, imgMain, points, HandPoints, isMe):
         global bot_flag
 
         bodercolor = cyan
@@ -520,9 +519,9 @@ class SnakeGameClass:
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
 
-        if isMe and handPoints:
-            for p in np.linspace(self.previousHead, handPoints, 10):
-                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
+        if isMe and HandPoints:
+            for p in np.linspace(self.previousHead, HandPoints, 10):
+                cv2.circle(imgMain, tuple(np.int32(p)), 5, (0, 255, 0), -1)
 
         if points:
             cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
@@ -795,13 +794,7 @@ class SnakeGameClass:
         self.currentLength = 0  # total length of the snake
         self.allowedLength = 150  # total allowed Length
         self.score = 0
-
-        if user_number == 1:
-            self.previousHead = 100, 180
-        elif user_number == 2:
-            self.previousHead = 1180, 540
-        else:
-            self.previousHead = 0, 360
+        self.previousHead = 0, 360
         user_move = False
         game_over_for_debug = True
         socketio.emit('gameover')
@@ -965,13 +958,13 @@ class MultiGameClass:
 
     # udp로 통신할지 말지
     def test_connect(self, sid):
-        a = 0
-        b = 0
+        missing_cnt = 0
+        self_sid_cnt = 0
         test_code = str(sid)
 
         if test_code == "1":
             for i in range(50):
-                if i % 3 == 0 and b == 0:
+                if i % 3 == 0 and self_sid_cnt == 0:
                     test_code = '1'
                 self.sock.sendto(test_code.encode(), self.opp_addr)
                 try:
@@ -979,15 +972,15 @@ class MultiGameClass:
                     test_code = data.decode()
                     if test_code == str(sid):
                         test_code = '2'
-                        b += 1
-                        if b > 3:
+                        self_sid_cnt += 1
+                        if self_sid_cnt > 3:
                             break
                 except socket.timeout:
-                    a += 1
+                    missing_cnt += 1
 
         elif test_code == "2":
             for i in range(50):
-                if i % 3 == 0 and b == 0:
+                if i % 3 == 0 and self_sid_cnt == 0:
                     test_code = '2'
                 self.sock.sendto(test_code.encode(), self.opp_addr)
                 try:
@@ -995,20 +988,22 @@ class MultiGameClass:
                     test_code = data.decode()
                     if test_code == str(sid):
                         test_code = '1'
-                        b += 1
-                        if b > 3:
+                        self_sid_cnt += 1
+                        if self_sid_cnt > 3:
                             break
                 except socket.timeout:
-                    a += 1
+                    missing_cnt += 1
 
-        if b != 0:
+        # 상대로 부터 받은 본인 Player Number 카운터가 1보다 클때 UDP 연결
+        if self_sid_cnt > 1:
             self.is_udp = True
             self.sock.settimeout(0.01)
+            # Flushing socket buffer
             for _ in range(50):
                 self.sock.recv(0)
             self.sock.settimeout(0)
 
-        print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
+        print(f"connection MODE : {self.is_udp} / missing_cnt = {missing_cnt}, self_sid_cnt = {self_sid_cnt}")
         socketio.emit('NetworkMode', {'UDP': self.is_udp})
         socketio.emit('game_ready')
 
@@ -1028,7 +1023,7 @@ class MultiGameClass:
         # ---head와 handsPoint 점선으로 잇기---
         if HandPoints:
             for p in np.linspace(self.previousHead, HandPoints, 10):
-                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
+                cv2.circle(imgMain, tuple(np.int32(p)), 5, (0, 255, 0), -1)
 
         self.send_data_to_opp()
 
@@ -1194,7 +1189,7 @@ class MultiGameClass:
         return triangle_pts1, triangle_pts2
     
     # 뱀 그려주기
-    def draw_snakes(self, imgMain, points, handPoints, isMe):
+    def draw_snakes(self, imgMain, points, HandPoints, isMe):
 
         bodercolor = cyan
         maincolor = red
@@ -1223,10 +1218,10 @@ class MultiGameClass:
         pts = pts.reshape((-1, 1, 2))
 
         # --- head point와 hands point 이어주기 ---
-        if isMe and handPoints:
-            for p in np.linspace(self.previousHead, handPoints, 10):
-                cv2.circle(imgMain, tuple(np.int32(p)), 2, (255, 0, 255), -1)
-                
+        if isMe and HandPoints:
+            for p in np.linspace(self.previousHead, HandPoints, 10):
+                cv2.circle(imgMain, tuple(np.int32(p)), 5, (0, 255, 0), -1)
+
         # --- skill flag에 따라 색 바꾸기 --- 
         skill_colored = False
         if isMe:
@@ -1240,14 +1235,13 @@ class MultiGameClass:
             triangle_pts1, triangle_pts2=self.draw_triangle(points[-1][1],points[-1][0])
             cv2.polylines(imgMain, np.int32([triangle_pts1]), False, rainbow, 15)
             cv2.polylines(imgMain, np.int32([triangle_pts2]), False, rainbow, 15)
-            
+
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
-            if points:
-                cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
-                cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
 
-
+        if points:
+            cv2.circle(imgMain, points[-1][1], 20, bodercolor, cv2.FILLED)
+            cv2.circle(imgMain, points[-1][1], 15, rainbow, cv2.FILLED)
 
         return imgMain
 
@@ -1781,8 +1775,8 @@ def maze_play():
 
         game.multi = False
         game.maze_initialize()
-        if not game.maze_wait_flag:
-            game.timer_end = time.time() + 90  # 1분 30초 시간제한
+
+        game.timer_end = time.time() + 91  # 1분 30초 시간제한
 
         while True:
             success, img = cap.read()

@@ -92,12 +92,6 @@ p {
     font-family: 'Press Start 2P', cursive;
 }
 
-.swal2-popup {
-    font-family: 'Press Start 2P', cursive;
-    z-index: 100;
-}
-
-
 .myscore {
     width: 33%;
     display: inline-block;
