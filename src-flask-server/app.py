@@ -1167,6 +1167,8 @@ class MultiGameClass:
             self.udp_count += 1
             if self.udp_count > 40:
                 socketio.emit('opponent_escaped')
+
+        self.sock.recv(0)
     
     def draw_triangle(self, point, point2, size):
         x,y=point
