@@ -1001,7 +1001,7 @@ class MultiGameClass:
 
         # 상대로 부터 받은 본인 Player Number 카운터가 1보다 클때 UDP 연결
         if self_sid_cnt > 1:
-            self.is_udp = True
+            self.is_udp = False
             self.sock.settimeout(0.01)
             # Flushing socket buffer
             for _ in range(50):
