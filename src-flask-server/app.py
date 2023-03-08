@@ -1434,8 +1434,9 @@ def set_address(data):
     opp_port = data['port']
     sid = multi.user_number
 
-    multi.set_socket(MY_PORT, opp_ip, opp_port)
-    multi.test_connect(sid)
+    socketio.emit('game_ready')
+    # multi.set_socket(MY_PORT, opp_ip, opp_port)
+    # multi.test_connect(sid)
 
 
 # socketio로 받은 상대방 정보
