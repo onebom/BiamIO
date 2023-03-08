@@ -457,6 +457,7 @@ class SnakeGameClass:
         self.maxspeed = math.hypot(1280, 720) / 10
         self.passStart = False
         self.passMid = False
+        self.line_flag = True
         self.timer_end = time.time() + 91
 
     def menu_initialize(self):
@@ -465,6 +466,7 @@ class SnakeGameClass:
         self.previousHead = (0, 360)
         self.velocityX = 0
         self.velocityY = 0
+        self.line_flag = True
         self.points = []
 
     def testbed_initialize(self):
@@ -942,6 +944,7 @@ class MultiGameClass:
         self.opp_addr = ()
         self.udp_count = 0
         self.user_number = 0
+        self.queue = []
 
         self.is_udp = False
         self.foodOnOff = True
@@ -1148,28 +1151,42 @@ class MultiGameClass:
 
     # 데이터 수신 (udp 통신 일때만 사용)
     def receive_data_from_opp(self):
-        try:
-            data, _ = self.sock.recvfrom(15000)
-            decode_data = data.decode()
-            if decode_data[0] == '[':
-                self.opp_points = eval(decode_data)
+        for _ in range(3):
+            try:
+                data, _ = self.sock.recvfrom(15000)
+                decode_data = data.decode()
+                self.queue.append(decode_data)
                 self.udp_count = 0
+                
+            except socket.timeout:
+                self.udp_count += 1
+                if self.udp_count > 25:
+                    socketio.emit('opponent_escaped')
+            except BlockingIOError:
+                self.udp_count += 1
+                if self.udp_count > 40:
+                    socketio.emit('opponent_escaped')
+
+        while True:
+            if len(self.queue) == 0:
+                break
+            elif len(self.queue) > 8:
+                self.queue.pop(0)
+                temp = self.queue.pop(0)
+                if temp[0] == '[':
+                    self.opp_points = eval(temp)
+                    break
             else:
-                print('----------else--------')
-                self.udp_count = 0
-        except socket.timeout:
-            self.udp_count += 1
-            if self.udp_count > 25:
-                socketio.emit('opponent_escaped')
-        except BlockingIOError:
-            self.udp_count += 1
-            if self.udp_count > 40:
-                socketio.emit('opponent_escaped')
-    
-    def draw_triangle(self, point, point2):
+                temp = self.queue.pop(0)
+                if temp[0] == '[':
+                    self.opp_points = eval(temp)
+                    break
+                
+            
+    def draw_triangle(self, point, point2, size):
         x,y=point
         x2,y2=point2
-        triangle_size = 30
+        triangle_size = size
         half_triangle_size = int(triangle_size / 2)
         
         triangle = [(0, 0 - half_triangle_size),(0 - half_triangle_size, 0 + half_triangle_size),(0 + half_triangle_size, 0 + half_triangle_size)]
@@ -1180,10 +1197,8 @@ class MultiGameClass:
                 [math.sin(angle), math.cos(angle)]
             ]
         rotated_triangle = [[int(vertex[0]*r_m[0][0]+vertex[1]*r_m[0][1]+x), int(vertex[0]*r_m[1][0]+vertex[1]*r_m[1][1]+y)] for vertex in triangle]
-        triangle_pts1 = np.array([rotated_triangle[0],rotated_triangle[1]], np.int32).reshape((-1,1,2))
-        triangle_pts2 = np.array([rotated_triangle[0],rotated_triangle[2]], np.int32).reshape((-1,1,2))
-        
-        return triangle_pts1, triangle_pts2
+        triangle_pts = np.array(rotated_triangle, np.int32).reshape((-1,1,2))
+        return triangle_pts
     
     # 뱀 그려주기
     def draw_snakes(self, imgMain, points, HandPoints, isMe):
@@ -1229,9 +1244,12 @@ class MultiGameClass:
         if skill_colored:
             cv2.polylines(imgMain, np.int32([pts]), False, rainbow, 15)
 
-            triangle_pts1, triangle_pts2=self.draw_triangle(points[-1][1],points[-1][0])
-            cv2.polylines(imgMain, np.int32([triangle_pts1]), False, rainbow, 15)
-            cv2.polylines(imgMain, np.int32([triangle_pts2]), False, rainbow, 15)
+            triangle_pts=self.draw_triangle(points[-1][1],points[-1][0], 50)
+            triangle_pts_back=self.draw_triangle(points[-1][1],points[-1][0], 35)
+            # cv2.polylines(imgMain, np.int32([triangle_pts1]), False, rainbow, 15)
+            # cv2.polylines(imgMain, np.int32([triangle_pts2]), False, rainbow, 15)
+            cv2.fillPoly(imgMain, [triangle_pts], megenta)
+            cv2.fillPoly(imgMain, [triangle_pts_back], rainbow)
 
         else:
             cv2.polylines(imgMain, np.int32([pts]), False, maincolor, 15)
@@ -1310,6 +1328,8 @@ class MultiGameClass:
         self.check_collision = False
         self.user_move = False
         self.gen = False
+        # 상대에게 게임오버 플래그 보내기 전 슬립줘서 상대 화면에도 박은게 보이게 하는 Sleep
+        time.sleep(1)
         socketio.emit('gameover')
 
     # 소멸자 소켓 bind 해제
@@ -1443,6 +1463,7 @@ def set_food_loc(data):
         multi.opp_skill_flag = True
         sfx_thread = threading.Thread(target=play_selected_sfx, args=(sfx_6_path,))
         sfx_thread.start()
+        socketio.emit('warning', {'opp_skill' : 1})
 
     multi.foodOnOff = True
 

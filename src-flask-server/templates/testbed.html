@@ -234,6 +234,7 @@
         "http://" + document.domain + ":" + location.port
     );
     var server_socket = io.connect("http://dlsrks99.site:8080");
+    // var server_socket = io.connect("http://krafton604.iptime.org");
 
     client_socket.on("test_timer", function (data) {
         let seconds = data["seconds"].toString().padStart(2, "0"); // Add leading zeros
@@ -283,25 +284,27 @@
         let current_best = $("#best_score").text();
         client_socket.emit("save_best", current_best)
         gameOver.play()
-        Swal.fire({
-            title: "Game Over!",
-            html: "자신과 상대 뱀의 몸통에 부딪히지 않고<br>10초 이내에 먹이를 찾아 먹어야 합니다!",
-            imageUrl: "{{ url_for('static', filename= 'single_maze.png') }}",
-            timer: 5000,
-            timerProgressBar: true,
-            didOpen: () => {
-                Swal.showLoading()
-                const b = Swal.getHtmlContainer().querySelector('b')
-                timerInterval = setInterval(() => {
-                    b.textContent = Swal.getTimerLeft()
-                }, 100)
-            },
-            willClose: () => {
-                clearInterval(timerInterval)
-            }
-        }).then((result) => {
-            window.location.href = "/index";
-        });
+        setTimeout(function() {
+            Swal.fire({
+                title: "Game Over!",
+                html: "자신과 상대 뱀의 몸통에 부딪히지 않고<br>10초 이내에 먹이를 찾아 먹어야 합니다!",
+                imageUrl: "{{ url_for('static', filename= 'single_maze.png') }}",
+                timer: 5000,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading()
+                    const b = Swal.getHtmlContainer().querySelector('b')
+                    timerInterval = setInterval(() => {
+                        b.textContent = Swal.getTimerLeft()
+                    }, 100)
+                },
+                willClose: () => {
+                    clearInterval(timerInterval)
+                }
+            }).then((result) => {
+                window.location.href = "/index";
+            });
+        }, 2000); // 1 second delay
     });
 </script>
 

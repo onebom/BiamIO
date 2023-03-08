@@ -13,6 +13,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css'>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome-animation/0.2.1/font-awesome-animation.min.css'>
+
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename= 'assets/snake.css') }}">
@@ -66,6 +69,13 @@
 
 <div class="retrogrid">
     <canvas></canvas>
+</div>
+
+<div id = "skillwarning-msg" class="col-sm-12">
+    <div class="alert fade alert-simple alert-warning text-left font__family-montserrat font__size-16 font__weight-light brk-library-rendered rendered show" role="alert" data-brk-library="component__alert">
+        <i class="start-icon fa fa-exclamation-triangle faa-flash animated"></i>
+        <strong class="font__weight-semibold">주의!</strong> 상대방이 스킬 발동 중입니다! 2초동안 충돌을 피하세요!!
+    </div>
 </div>
 
 <section class="wrapper">
@@ -333,6 +343,18 @@
         $("#opp_score").text(data["opp_score"]);
         client_socket.emit('set_food_location_score', {'foodPoint': data['foodPoint'], 'opp_score': data['opp_score']});
     })
+    client_socket.on("warning", function (data) {
+        isOppskill = data["opp_skill"]
+        if (isOppskill === 1) {
+            // Show HTML element
+            document.getElementById("skillwarning-msg").style.display = "block"
+
+            // Hide HTML element after 2 seconds
+            setTimeout(function () {
+                document.getElementById("skillwarning-msg").style.display = "none"
+            }, 2000)
+        }
+    })
     // 상대가 탈주한 경우(매칭 중 또는 서버로 게임하던 중)
     server_socket.on('opponent_escaped', function () {
         client_socket.emit("gen_break");
@@ -389,46 +411,52 @@
         client_socket.emit("gen_break");
         if (data['result']) { // 이긴 경우
             gameWin.play()
-            Swal.fire({
-                title: "You Win!",
-                html: "이겼습니다!",
-                imageUrl: "{{ url_for('static', filename= 'game_win.png') }}",
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: () => {
-                    Swal.showLoading()
-                    const b = Swal.getHtmlContainer().querySelector('b')
-                    timerInterval = setInterval(() => {
-                        b.textContent = Swal.getTimerLeft()
-                    }, 100)
-                },
-                willClose: () => {
-                    clearInterval(timerInterval)
-                }
-            }).then((result) => {
-                window.location.href = "/index";
-            });
+            setTimeout(function() {
+                Swal.fire({
+                    title: "You Win!",
+                    html: "이겼습니다!",
+                    imageUrl: "{{ url_for('static', filename= 'game_win.png') }}",
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Swal.showLoading()
+                        const b = Swal.getHtmlContainer().querySelector('b')
+                        timerInterval = setInterval(() => {
+                            b.textContent = Swal.getTimerLeft()
+                        }, 100)
+                    },
+                    willClose: () => {
+                        clearInterval(timerInterval)
+                    }
+                }).then((result) => {
+                    window.location.href = "/index";
+                });
+            }, 2000); // 1 second delay
+
         } else { // 진 경우
             gameOver.play()
-            Swal.fire({
-                title: "You Lost!",
-                html: "졌습니다!",
-                imageUrl: "{{ url_for('static', filename= 'game_over.png') }}",
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: () => {
-                    Swal.showLoading()
-                    const b = Swal.getHtmlContainer().querySelector('b')
-                    timerInterval = setInterval(() => {
-                        b.textContent = Swal.getTimerLeft()
-                    }, 100)
-                },
-                willClose: () => {
-                    clearInterval(timerInterval)
-                }
-            }).then((result) => {
-                window.location.href = "/index";
-            });
+
+            setTimeout(function() {
+                Swal.fire({
+                    title: "You Lost!",
+                    html: "졌습니다!",
+                    imageUrl: "{{ url_for('static', filename= 'game_over.png') }}",
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Swal.showLoading()
+                        const b = Swal.getHtmlContainer().querySelector('b')
+                        timerInterval = setInterval(() => {
+                            b.textContent = Swal.getTimerLeft()
+                        }, 100)
+                    },
+                    willClose: () => {
+                        clearInterval(timerInterval)
+                    }
+                }).then((result) => {
+                    window.location.href = "/index";
+                });
+            }, 2000); // 1 second delay
         }
     });
 </script>
