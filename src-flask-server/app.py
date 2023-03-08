@@ -792,12 +792,12 @@ class SnakeGameClass:
         global user_number
         global user_move
         global game_over_for_debug
-        self.points = []  # all points of the snake
-        self.lengths = []  # distance between each point
-        self.currentLength = 0  # total length of the snake
-        self.allowedLength = 150  # total allowed Length
-        self.score = 0
-        self.previousHead = 0, 360
+        # self.points = []  # all points of the snake
+        # self.lengths = []  # distance between each point
+        # self.currentLength = 0  # total length of the snake
+        # self.allowedLength = 150  # total allowed Length
+        # self.score = 0
+        # self.previousHead = 0, 360
         user_move = False
         game_over_for_debug = True
         socketio.emit('gameover')
@@ -1001,7 +1001,7 @@ class MultiGameClass:
 
         # 상대로 부터 받은 본인 Player Number 카운터가 1보다 클때 UDP 연결
         if self_sid_cnt > 1:
-            self.is_udp = True
+            self.is_udp = False
             self.sock.settimeout(0.01)
             # Flushing socket buffer
             for _ in range(50):
@@ -1434,8 +1434,9 @@ def set_address(data):
     opp_port = data['port']
     sid = multi.user_number
 
-    multi.set_socket(MY_PORT, opp_ip, opp_port)
-    multi.test_connect(sid)
+    socketio.emit('game_ready')
+    # multi.set_socket(MY_PORT, opp_ip, opp_port)
+    # multi.test_connect(sid)
 
 
 # socketio로 받은 상대방 정보
@@ -1480,6 +1481,7 @@ def set_cutted_idx(data):
     global multi
     multi.cut_idx = data['cutted_idx']
     multi.skill_length_reduction()
+    multi.opp_skill_flag=False
 
 
 @socketio.on("save_best")
@@ -1557,13 +1559,13 @@ def snake():
 
             if multi.skill_flag:
                 skill_cnt += 1
-                if skill_cnt % 60 == 0:
+                if skill_cnt % 120 == 0:
                     multi.skill_flag = False
                     skill_cnt = 0
 
             if multi.opp_skill_flag:
                 opp_skill_cnt += 1
-                if opp_skill_cnt % 60 == 0:
+                if opp_skill_cnt % 120 == 0:
                     multi.opp_skill_flag = False
                     opp_skill_cnt = 0
 
@@ -1701,8 +1703,6 @@ def test():
                 gameover_flag = False
                 socketio.emit('gameover')
                 break
-
-        single_game.previousHead = cx, cy
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
