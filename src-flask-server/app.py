@@ -1481,6 +1481,7 @@ def set_cutted_idx(data):
     global multi
     multi.cut_idx = data['cutted_idx']
     multi.skill_length_reduction()
+    multi.opp_skill_flag=False
 
 
 @socketio.on("save_best")
