@@ -1558,13 +1558,13 @@ def snake():
 
             if multi.skill_flag:
                 skill_cnt += 1
-                if skill_cnt % 60 == 0:
+                if skill_cnt % 120 == 0:
                     multi.skill_flag = False
                     skill_cnt = 0
 
             if multi.opp_skill_flag:
                 opp_skill_cnt += 1
-                if opp_skill_cnt % 60 == 0:
+                if opp_skill_cnt % 120 == 0:
                     multi.opp_skill_flag = False
                     opp_skill_cnt = 0
 
