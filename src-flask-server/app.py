@@ -1329,7 +1329,7 @@ class MultiGameClass:
         self.user_move = False
         self.gen = False
         # 상대에게 게임오버 플래그 보내기 전 슬립줘서 상대 화면에도 박은게 보이게 하는 Sleep
-        time.sleep(1)
+        # time.sleep(0.25)
         socketio.emit('gameover')
 
     # 소멸자 소켓 bind 해제
