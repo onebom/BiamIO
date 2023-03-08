@@ -1001,6 +1001,7 @@ class MultiGameClass:
 
         # 상대로 부터 받은 본인 Player Number 카운터가 1보다 클때 UDP 연결
         if self_sid_cnt > 1:
+            # 시연 위해 UDP 연결 비활성화
             self.is_udp = False
             self.sock.settimeout(0.01)
             # Flushing socket buffer
@@ -1434,6 +1435,7 @@ def set_address(data):
     opp_port = data['port']
     sid = multi.user_number
 
+    # 시연 위해 UDP 연결 비활성화하고 바로 Game Ready Emit
     socketio.emit('game_ready')
     # multi.set_socket(MY_PORT, opp_ip, opp_port)
     # multi.test_connect(sid)
