@@ -792,12 +792,12 @@ class SnakeGameClass:
         global user_number
         global user_move
         global game_over_for_debug
-        self.points = []  # all points of the snake
-        self.lengths = []  # distance between each point
-        self.currentLength = 0  # total length of the snake
-        self.allowedLength = 150  # total allowed Length
-        self.score = 0
-        self.previousHead = 0, 360
+        # self.points = []  # all points of the snake
+        # self.lengths = []  # distance between each point
+        # self.currentLength = 0  # total length of the snake
+        # self.allowedLength = 150  # total allowed Length
+        # self.score = 0
+        # self.previousHead = 0, 360
         user_move = False
         game_over_for_debug = True
         socketio.emit('gameover')
@@ -1702,8 +1702,6 @@ def test():
                 gameover_flag = False
                 socketio.emit('gameover')
                 break
-
-        single_game.previousHead = cx, cy
 
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
