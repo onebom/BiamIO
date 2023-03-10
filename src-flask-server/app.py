@@ -25,14 +25,13 @@ from flask import Flask, render_template, Response, request, redirect, url_for, 
 from flask_socketio import SocketIO, emit, join_room
 import socket
 from engineio.payload import Payload
+from io import StringIO
 
 from src.maze_manager import MazeManager
 
 import simpleaudio as sa
 import threading
 import signal
-
-# import pprint
 
 ########################################################################################################################
 ################################## SETTING GOLBAL VARIABLES ############################################################
@@ -51,6 +50,8 @@ print(sys.version, flush=True)
 # pprint.pprint(dict(os.environ), width = 1)
 
 base_dir = '.'
+current_dir = os.path.abspath(os.path.dirname(__file__))
+
 if hasattr(sys, '_MEIPASS'):
     print('detected bundled mode', sys._MEIPASS)
     base_dir = os.path.join(sys._MEIPASS)
@@ -69,7 +70,7 @@ CORS(app, origins='http://localhost:5000')
 api = Api(app)
 
 # Setting Path to food.png
-pathFood = './src-flask-server/static/food.png'
+pathFood = os.path.join(current_dir, 'static', 'food.png')
 
 opponent_data = {}  # 상대 데이터 (현재 손위치, 현재 뱀위치)
 gameover_flag = False  # ^^ 게임오버
@@ -87,14 +88,14 @@ start = False
 # Global Flag for BGM status
 bgm_play_obj = None
 # SETTING BGM PATH
-bgm_path = './src-flask-server/static/bgm/main.wav'
-sfx_1_path = './src-flask-server/static/bgm/curSelect.wav'
-sfx_2_path = './src-flask-server/static/bgm/eatFood.wav'
-sfx_3_path = './src-flask-server/static/bgm/skill.wav'
-sfx_4_path = './src-flask-server/static/bgm/gameOver.wav'
-sfx_5_path = './src-flask-server/static/bgm/gameWin.wav'
-sfx_6_path = './src-flask-server/static/bgm/warning.wav'
-sfx_7_path = './src-flask-server/static/bgm/dead.wav'
+bgm_path = os.path.join(current_dir, 'static', 'bgm','main.wav')
+sfx_1_path = os.path.join(current_dir, 'static', 'bgm','curSelect.wav') 
+sfx_2_path = os.path.join(current_dir, 'static', 'bgm','eatFood.wav') 
+sfx_3_path = os.path.join(current_dir, 'static', 'bgm','skill.wav')
+sfx_4_path = os.path.join(current_dir, 'static', 'bgm','gameOver.wav')  
+sfx_5_path = os.path.join(current_dir, 'static', 'bgm','gameWin.wav') 
+sfx_6_path = os.path.join(current_dir, 'static', 'bgm','warning.wav') 
+sfx_7_path = os.path.join(current_dir, 'static', 'bgm','dead.wav') 
 
 
 def play_bgm():
@@ -310,7 +311,6 @@ yellow = (0, 255, 255)  # yellow
 cyan = (255, 255, 0)  # cyan
 detector = HandDetector(detectionCon=0.5, maxHands=1)
 
-
 class SnakeGameClass:
     # 생성자, class를 선언하면서 기본 변수들을 설정함
     def __init__(self, pathFood):
@@ -334,7 +334,6 @@ class SnakeGameClass:
         self.bestScore = 0
 
         self.opp_score = 0
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.opp_addr = ()
         self.is_udp = False
         self.udp_count = 0
@@ -639,11 +638,7 @@ class SnakeGameClass:
         if self.foodOnOff:
             self.check_snake_eating(cx, cy)
 
-        self.send_data_to_opp()
         self.send_data_to_html()
-
-        if self.is_udp:
-            self.receive_data_from_opp()
 
         if opp_bodys:
             self.dist = ((self.points[-1][1][0] - opp_bodys[-1][1][0]) ** 2 + (
@@ -849,71 +844,8 @@ class SnakeGameClass:
 
         return imgMain
 
-    # 통신 관련 변수 설정
-    def set_socket(self, my_port, opp_ip, opp_port):
-        self.sock.bind(('0.0.0.0', int(my_port)))
-        self.sock.settimeout(0.02)  # TODO 만약 udp, 서버 선택 오류 시 다시 0.02로
-        self.opp_addr = (opp_ip, int(opp_port))
-
-    # 데이터 전송
-    def send_data_to_opp(self):
-        if self.is_udp:
-            data_set = str(self.points)
-            self.sock.sendto(data_set.encode(), self.opp_addr)
-        else:
-            socketio.emit('game_data', {'body_node': self.points})
-
     def send_data_to_html(self):
         socketio.emit('game_data_for_debug', {'score': self.score, 'fps': fps})
-
-    # 데이터 수신 (udp 통신 일때만 사용)
-    def receive_data_from_opp(self):
-        global opponent_data
-
-        try:
-            data, _ = self.sock.recvfrom(15000)
-            decode_data = data.decode()
-            if decode_data[0] == '[':
-                opponent_data['opp_body_node'] = eval(decode_data)
-                self.udp_count = 0
-            else:
-                test_code = decode_data
-                self.sock.sendto(test_code.encode(), self.opp_addr)
-        except socket.timeout:
-            self.udp_count += 1
-            if self.udp_count > 25:
-                socketio.emit('opponent_escaped')
-
-    # udp로 통신할지 말지
-    def test_connect(self, sid):
-        a = 0
-        b = 0
-        test_code = str(sid)
-
-        for i in range(50):
-            if i % 2 == 0:
-                test_code = str(sid)
-            self.sock.sendto(test_code.encode(), self.opp_addr)
-            try:
-                data, _ = self.sock.recvfrom(600)
-                test_code = data.decode()
-                if test_code == str(sid):
-                    b += 1
-            except socket.timeout:
-                a += 1
-
-        if a != 50 and b != 0:
-            self.is_udp = False
-
-        print(f"connection MODE : {self.is_udp} / a = {a}, b = {b}")
-        socketio.emit('NetworkMode', {'UDP': self.is_udp})
-
-    # 소멸자 소켓 bind 해제
-    def __del__(self):
-        global opponent_data
-        opponent_data = {}
-        self.sock.close()
-
 
 class MultiGameClass:
     # 생성자, class를 선언하면서 기본 변수들을 설정함
@@ -1366,7 +1298,7 @@ def testbed():
     global single_game
 
     single_game = SnakeGameClass(pathFood)
-    folder_path = "./src-flask-server/static/"
+    folder_path =os.path.join(current_dir, 'static')
     filename = "bestScore.txt"
     file_path = os.path.join(folder_path, filename)
 
@@ -1488,7 +1420,7 @@ def set_cutted_idx(data):
 
 @socketio.on("save_best")
 def save_best(data):
-    with open("./src-flask-server/static/bestScore.txt", "w") as f:
+    with open(os.path.join(current_dir, 'static', 'bestScore.txt'), "w") as f:
         # Write the new contents to the file
         f.write(data)
 
