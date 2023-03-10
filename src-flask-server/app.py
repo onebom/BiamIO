@@ -931,8 +931,10 @@ class MultiGameClass:
                 except socket.timeout:
                     missing_cnt += 1
 
+        self.con_cnt = (missing_cnt // 3) + 1
+
         # 상대로 부터 받은 본인 Player Number 카운터가 1보다 클때 UDP 연결
-        if self_sid_cnt > 1:
+        if self_sid_cnt > 1 and missing_cnt < 26:
             # 시연 위해 UDP 연결 비활성화
             self.is_udp = False
             self.sock.settimeout(0.01)
@@ -1084,7 +1086,7 @@ class MultiGameClass:
 
     # 데이터 수신 (udp 통신 일때만 사용)
     def receive_data_from_opp(self):
-        for _ in range(3):
+        for _ in range(self.con_cnt):
             try:
                 data, _ = self.sock.recvfrom(15000)
                 decode_data = data.decode()
@@ -1100,20 +1102,18 @@ class MultiGameClass:
                 if self.udp_count > 40:
                     socketio.emit('opponent_escaped')
 
-        while True:
-            if len(self.queue) == 0:
-                break
-            elif len(self.queue) > 8:
+        if len(self.queue) == 0:
+            pass
+        elif len(self.queue) > 4:
+            for _ in range(len(self.queue) // 4):
                 self.queue.pop(0)
-                temp = self.queue.pop(0)
-                if temp[0] == '[':
-                    self.opp_points = eval(temp)
-                    break
-            else:
-                temp = self.queue.pop(0)
-                if temp[0] == '[':
-                    self.opp_points = eval(temp)
-                    break
+            temp = self.queue.pop(0)
+            if temp[0] == '[':
+                self.opp_points = eval(temp)
+        else:
+            temp = self.queue.pop(0)
+            if temp[0] == '[':
+                self.opp_points = eval(temp)
                 
             
     def draw_triangle(self, point, point2, size):
