@@ -1441,6 +1441,7 @@ def snake():
         start = False
         skill_cnt = 0
         opp_skill_cnt = 0
+        skill_duration = 85
 
         if multi.user_number == 1:
             start_cx = 100
@@ -1493,13 +1494,13 @@ def snake():
 
             if multi.skill_flag:
                 skill_cnt += 1
-                if skill_cnt % 120 == 0:
+                if skill_cnt % skill_duration == 0:
                     multi.skill_flag = False
                     skill_cnt = 0
 
             if multi.opp_skill_flag:
                 opp_skill_cnt += 1
-                if opp_skill_cnt % 120 == 0:
+                if opp_skill_cnt % skill_duration == 0:
                     multi.opp_skill_flag = False
                     opp_skill_cnt = 0
 
