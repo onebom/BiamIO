@@ -1441,7 +1441,7 @@ def snake():
         start = False
         skill_cnt = 0
         opp_skill_cnt = 0
-        skill_duration = 68
+        skill_duration = 69
 
         if multi.user_number == 1:
             start_cx = 100
