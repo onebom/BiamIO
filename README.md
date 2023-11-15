@@ -1,5 +1,7 @@
 # BiamIO flask electron wrapped
 
+![figure](/assets/BiamIO_Poster.png)  
+
 ## In Root Folder
 ```
 npm install
